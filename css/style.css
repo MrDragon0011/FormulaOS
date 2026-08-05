@@ -1,9 +1,6 @@
 :root{
   --accent:#ff5f45;
   --accent-2:#ffa53e;
-  --bg-desktop-1:#241a35;
-  --bg-desktop-2:#241a35;
-  --bg-desktop-3:#1a1327;
   --bar-bg:rgba(28,22,40,.55);
   --bar-border:rgba(255,255,255,.08);
   --window-bg:rgba(34,28,48,.86);
@@ -19,9 +16,6 @@
   color-scheme: dark;
 }
 :root[data-theme="light"]{
-  --bg-desktop-1:#dbe6f5;
-  --bg-desktop-2:#dbe6f5;
-  --bg-desktop-3:#cfd9ea;
   --bar-bg:rgba(255,255,255,.55);
   --bar-border:rgba(0,0,0,.06);
   --window-bg:rgba(255,255,255,.82);
@@ -94,10 +88,14 @@ button{font-family:inherit;}
 /* ---------- Boot ---------- */
 #boot-screen{
   position:fixed;inset:0;z-index:9999;
-  background:radial-gradient(circle at 50% 30%, #3a1258, #150a24 75%);
+  background:#161027;background-size:cover;background-position:center;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
   color:#fff;transition:opacity .6s ease;
 }
+#boot-screen::before{
+  content:'';position:absolute;inset:0;background:radial-gradient(60% 60% at 50% 45%, rgba(10,7,20,.35), rgba(10,7,20,.75) 100%);
+}
+#boot-screen>*{position:relative;z-index:1;}
 .boot-logo{width:72px;height:72px;filter:drop-shadow(0 0 30px #ff6b4a);animation:pulse 1.6s ease-in-out infinite;}
 .boot-title{font-size:26px;letter-spacing:6px;font-weight:600;background:linear-gradient(90deg,#ff8a5c,#ffd36e);-webkit-background-clip:text;background-clip:text;color:transparent;}
 .boot-bar{width:240px;height:6px;border-radius:4px;background:rgba(255,255,255,.12);overflow:hidden;}
@@ -109,10 +107,14 @@ button{font-family:inherit;}
 /* ---------- Lock screen ---------- */
 #lock-screen{
   position:fixed;inset:0;z-index:9998;cursor:pointer;
-  background:radial-gradient(120% 100% at 50% 0%, var(--bg-desktop-1), var(--bg-desktop-3) 100%);
+  background:#161027;background-size:cover;background-position:center;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
   transition:opacity .4s ease, transform .4s ease;
 }
+#lock-screen::before{
+  content:'';position:absolute;inset:0;background:linear-gradient(180deg, rgba(8,6,16,.15), rgba(8,6,16,.55) 100%);
+}
+#lock-screen>*{position:relative;z-index:1;}
 .lock-clock{text-align:center;}
 #lock-time{font-size:96px;font-weight:200;letter-spacing:2px;}
 #lock-date{font-size:20px;color:var(--text-dim);}
@@ -125,8 +127,7 @@ button{font-family:inherit;}
 /* ---------- Desktop ---------- */
 #desktop{
   position:fixed;left:0;right:0;top:28px;bottom:0;
-  background:radial-gradient(120% 100% at 50% 0%, var(--bg-desktop-1), var(--bg-desktop-3) 100%);
-  background-size:cover;background-position:center;
+  background:#161027;background-size:cover;background-position:center;
   overflow:hidden;
 }
 #desktop.wallpaper-img{background-blend-mode:normal;}

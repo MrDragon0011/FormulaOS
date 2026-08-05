@@ -1,13 +1,11 @@
 /* DragonOS Core */
 const OS = (() => {
-  const wallpapers = [
-    'radial-gradient(120% 100% at 50% 0%, #241a35, #1a1327 100%)',
-    'radial-gradient(120% 100% at 50% 0%, #16232b, #0f171c 100%)',
-    'radial-gradient(120% 100% at 50% 0%, #2a1f3d, #241834 100%)',
-    'radial-gradient(120% 100% at 50% 0%, #123044, #0d2130 100%)',
-    'radial-gradient(120% 100% at 50% 0%, #1c2333, #151a26 100%)',
-    'radial-gradient(120% 100% at 50% 0%, #2e2140, #221933 100%)'
-  ];
+  const wallpapers = Array.from({ length: Wallpaper.count() }, (_, i) => Wallpaper.cssValue(i));
+  function applyBackground(cssValue) {
+    document.getElementById('desktop').style.background = cssValue;
+    document.getElementById('lock-screen').style.background = cssValue;
+    document.getElementById('boot-screen').style.background = cssValue;
+  }
 
   const appList = [
     { id: 'explorer', label: 'Finder', run: () => Apps.explorer() },
@@ -66,12 +64,12 @@ const OS = (() => {
   function setWallpaper(i) {
     prefs.wallpaper = i;
     prefs.customWallpaper = null;
-    document.getElementById('desktop').style.background = wallpapers[i];
+    applyBackground(wallpapers[i]);
     savePrefs(prefs);
   }
   function setCustomWallpaper(dataUrl) {
     prefs.customWallpaper = dataUrl;
-    document.getElementById('desktop').style.background = `center/cover no-repeat url(${dataUrl})`;
+    applyBackground(`center/cover no-repeat url(${dataUrl})`);
     savePrefs(prefs);
   }
   function setFontSize(size) {
@@ -116,8 +114,8 @@ const OS = (() => {
     document.documentElement.classList.toggle('reduce-motion', prefs.reduceMotion);
     document.documentElement.classList.toggle('high-contrast', prefs.highContrast);
     document.documentElement.style.setProperty('--accent', prefs.accent);
-    if (prefs.customWallpaper) document.getElementById('desktop').style.background = `center/cover no-repeat url(${prefs.customWallpaper})`;
-    else document.getElementById('desktop').style.background = wallpapers[prefs.wallpaper] || wallpapers[0];
+    if (prefs.customWallpaper) applyBackground(`center/cover no-repeat url(${prefs.customWallpaper})`);
+    else applyBackground(wallpapers[prefs.wallpaper] || wallpapers[0]);
     document.getElementById('desktop').style.filter = `brightness(${prefs.brightness}%)`;
     const lu = document.getElementById('lock-username'); if (lu) lu.textContent = prefs.username;
   }
