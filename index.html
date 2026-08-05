@@ -26,29 +26,66 @@
     <div id="lock-time">00:00</div>
     <div id="lock-date">Day, Month 0</div>
   </div>
+  <div class="lock-user">
+    <div class="lock-avatar">🐉</div>
+    <div class="lock-username" id="lock-username">Dragon</div>
+  </div>
   <div class="lock-hint">Click anywhere or press any key to unlock</div>
 </div>
+
+<!-- Menu Bar (top, macOS-style) -->
+<div id="menubar">
+  <div class="mb-left">
+    <div class="mb-item mb-logo" id="mb-logo-btn">🐉</div>
+    <div class="mb-item mb-appname" id="mb-appname">Finder</div>
+    <div class="mb-item mb-menu" data-menu="file">File</div>
+    <div class="mb-item mb-menu" data-menu="edit">Edit</div>
+    <div class="mb-item mb-menu" data-menu="view">View</div>
+    <div class="mb-item mb-menu" data-menu="window">Window</div>
+    <div class="mb-item mb-menu" data-menu="help">Help</div>
+  </div>
+  <div class="mb-right">
+    <div class="mb-item mb-icon" id="mb-search">🔍</div>
+    <div class="mb-item mb-icon" id="mb-wifi">📶</div>
+    <div class="mb-item mb-icon" id="mb-battery">🔋</div>
+    <div class="mb-item mb-icon" id="mb-control">🎛️</div>
+    <div class="mb-item mb-clock" id="mb-clock">
+      <span id="clock-date">--</span>&nbsp;<span id="clock-time">00:00</span>
+    </div>
+  </div>
+</div>
+<div id="mb-dropdown" class="hidden"></div>
 
 <!-- Desktop -->
 <div id="desktop">
   <div id="icons"></div>
   <div id="windows"></div>
   <div id="context-menu" class="hidden"></div>
+  <div id="snap-preview" class="hidden"></div>
 </div>
 
-<!-- Taskbar -->
-<div id="taskbar">
-  <button id="start-btn"><span class="dragon-emoji">🐉</span> DragonOS</button>
-  <div id="start-menu" class="hidden"></div>
-  <div id="taskbar-apps"></div>
-  <div id="tray">
-    <span id="tray-icons"></span>
-    <div id="clock">
-      <div id="clock-time">00:00</div>
-      <div id="clock-date">--/--/----</div>
-    </div>
+<!-- Spotlight Search -->
+<div id="spotlight" class="hidden">
+  <div class="spotlight-box">
+    <span class="spotlight-icon">🔍</span>
+    <input id="spotlight-input" placeholder="Spotlight Search" autocomplete="off" />
   </div>
+  <div id="spotlight-results"></div>
 </div>
+
+<!-- Launchpad -->
+<div id="launchpad" class="hidden">
+  <input id="launchpad-search" placeholder="Search" autocomplete="off" />
+  <div id="launchpad-grid"></div>
+</div>
+
+<!-- Dock (bottom, macOS-style) -->
+<div id="dock-wrap">
+  <div id="dock"></div>
+</div>
+
+<!-- Control Center popover -->
+<div id="control-center" class="hidden"></div>
 
 <script src="js/fs.js"></script>
 <script src="js/windows.js"></script>

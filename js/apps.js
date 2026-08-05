@@ -123,7 +123,7 @@ Apps.explorer = function (startPath) {
 /* ---------------- Text Editor ---------------- */
 Apps.textEditor = function (path) {
   WM.open({
-    title: path ? DragonFS.nameOf(path) : 'Untitled — Notepad', icon: '📝', width: 560, height: 440,
+    title: path ? DragonFS.nameOf(path) : 'Untitled — Notepad', icon: '📝', appId: 'notepad', width: 560, height: 440,
     onMount(body, winId) {
       body.innerHTML = `
         <div class="app-toolbar">
@@ -242,7 +242,7 @@ Apps.terminal = function () {
 /* ---------------- Browser ---------------- */
 Apps.browser = function () {
   WM.open({
-    title: 'Web Browser', icon: '🌐', width: 720, height: 500,
+    title: 'Web Browser', icon: '🌐', appId: 'browser', width: 720, height: 500,
     onMount(body) {
       body.innerHTML = `
         <div class="app-toolbar">

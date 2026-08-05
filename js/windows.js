@@ -10,12 +10,17 @@ function bindOpen(el, handler) {
     lastTap = now;
   });
 }
+
 const WM = (() => {
   const windowsEl = () => document.getElementById('windows');
-  const taskbarAppsEl = () => document.getElementById('taskbar-apps');
   let zTop = 10;
   let idCounter = 0;
   const registry = new Map(); // id -> {el, meta}
+  const listeners = { change: [], focus: [] };
+
+  function emit(kind, arg) { listeners[kind].forEach(fn => fn(arg)); }
+  function onChange(fn) { listeners.change.push(fn); }
+  function onFocus(fn) { listeners.focus.push(fn); }
 
   function nextId() { return 'win-' + (++idCounter); }
 
@@ -24,34 +29,8 @@ const WM = (() => {
       w.el.classList.toggle('focused', wid === id);
       if (wid === id) { zTop += 1; w.el.style.zIndex = zTop; }
     });
-    document.querySelectorAll('.taskbar-app').forEach(el => {
-      el.classList.toggle('active', el.dataset.win === id);
-    });
-  }
-
-  function renderTaskbar() {
-    const el = taskbarAppsEl();
-    el.innerHTML = '';
-    registry.forEach((w, id) => {
-      if (w.meta.minimized === undefined) w.meta.minimized = false;
-      const btn = document.createElement('div');
-      btn.className = 'taskbar-app';
-      btn.dataset.win = id;
-      btn.innerHTML = `<span>${w.meta.icon || '🗔'}</span><span>${w.meta.title}</span>`;
-      btn.onclick = () => {
-        if (w.meta.minimized) {
-          w.meta.minimized = false;
-          w.el.classList.remove('hidden');
-          focus(id);
-        } else if (w.el.classList.contains('focused')) {
-          w.meta.minimized = true;
-          w.el.classList.add('hidden');
-        } else {
-          focus(id);
-        }
-      };
-      el.appendChild(btn);
-    });
+    emit('focus', id);
+    emit('change');
   }
 
   function open({ title, icon, width = 560, height = 400, content, onMount, appId, single = false, resizable = true }) {
@@ -69,12 +48,13 @@ const WM = (() => {
     const el = document.createElement('div');
     el.className = 'window';
     el.id = id;
+    const barTop = 28, dockH = 88;
     const maxW = window.innerWidth - 40;
-    const maxH = window.innerHeight - 48 - 40;
+    const maxH = window.innerHeight - barTop - dockH;
     width = Math.min(width, maxW);
     height = Math.min(height, maxH);
     const left = Math.max(10, Math.round((window.innerWidth - width) / 2 + (registry.size % 6) * 24));
-    const top = Math.max(10, Math.round((window.innerHeight - 48 - height) / 2 + (registry.size % 6) * 20));
+    const top = Math.max(10, Math.round((window.innerHeight - barTop - dockH - height) / 2 + (registry.size % 6) * 20));
     el.style.left = left + 'px';
     el.style.top = top + 'px';
     el.style.width = width + 'px';
@@ -82,12 +62,12 @@ const WM = (() => {
 
     el.innerHTML = `
       <div class="window-header">
-        <div class="window-title"><span>${icon || '🗔'}</span><span>${title}</span></div>
         <div class="window-controls">
+          <button class="win-btn close" title="Close"></button>
           <button class="win-btn min" title="Minimize"></button>
           <button class="win-btn max" title="Maximize"></button>
-          <button class="win-btn close" title="Close"></button>
         </div>
+        <div class="window-title"><span>${icon || '🗔'}</span><span>${title}</span></div>
       </div>
       <div class="window-body"></div>
       ${resizable ? '<div class="resize-handle"></div>' : ''}
@@ -101,9 +81,11 @@ const WM = (() => {
     const meta = { title, icon, appId, minimized: false, maximized: false, prevRect: null };
     registry.set(id, { el, meta });
 
-    // Drag (mouse + touch)
+    // Drag (mouse + touch) with edge-snap
     const header = el.querySelector('.window-header');
-    let dragging = false, sx, sy, sl, st;
+    const snapPreview = document.getElementById('snap-preview');
+    const desktopEl = document.getElementById('desktop');
+    let dragging = false, sx, sy, sl, st, snapZone = null;
     function pt(e) { return e.touches ? e.touches[0] : e; }
     function dragStart(e) {
       if (e.target.closest('.win-btn')) return;
@@ -115,14 +97,39 @@ const WM = (() => {
       sl = el.offsetLeft; st = el.offsetTop;
       document.body.style.userSelect = 'none';
     }
+    function zoneFor(clientX, clientY) {
+      if (clientY < 32) return 'top';
+      if (clientX < 18) return 'left';
+      if (clientX > window.innerWidth - 18) return 'right';
+      return null;
+    }
+    function showPreview(zone) {
+      const r = desktopEl.getBoundingClientRect();
+      snapPreview.classList.remove('hidden');
+      if (zone === 'left') { snapPreview.style.left = '0px'; snapPreview.style.top = '0px'; snapPreview.style.width = (r.width / 2) + 'px'; snapPreview.style.height = r.height + 'px'; }
+      else if (zone === 'right') { snapPreview.style.left = (r.width / 2) + 'px'; snapPreview.style.top = '0px'; snapPreview.style.width = (r.width / 2) + 'px'; snapPreview.style.height = r.height + 'px'; }
+      else if (zone === 'top') { snapPreview.style.left = '0px'; snapPreview.style.top = '0px'; snapPreview.style.width = r.width + 'px'; snapPreview.style.height = r.height + 'px'; }
+    }
+    function hidePreview() { snapPreview.classList.add('hidden'); }
     function dragMove(e) {
       if (!dragging) return;
       if (e.cancelable) e.preventDefault();
       const p = pt(e);
       el.style.left = Math.max(0, sl + (p.clientX - sx)) + 'px';
       el.style.top = Math.max(0, st + (p.clientY - sy)) + 'px';
+      const zone = zoneFor(p.clientX, p.clientY);
+      if (zone !== snapZone) { snapZone = zone; if (zone) showPreview(zone); else hidePreview(); }
     }
-    function dragEnd() { dragging = false; document.body.style.userSelect = ''; }
+    function dragEnd() {
+      if (dragging && snapZone) {
+        const r = desktopEl.getBoundingClientRect();
+        if (snapZone === 'left') { el.style.left = '0px'; el.style.top = '0px'; el.style.width = (r.width / 2) + 'px'; el.style.height = r.height + 'px'; }
+        else if (snapZone === 'right') { el.style.left = (r.width / 2) + 'px'; el.style.top = '0px'; el.style.width = (r.width / 2) + 'px'; el.style.height = r.height + 'px'; }
+        else if (snapZone === 'top') { toggleMaximize(id); }
+      }
+      dragging = false; snapZone = null; hidePreview();
+      document.body.style.userSelect = '';
+    }
     header.addEventListener('mousedown', dragStart);
     window.addEventListener('mousemove', dragMove);
     window.addEventListener('mouseup', dragEnd);
@@ -164,6 +171,7 @@ const WM = (() => {
     el.querySelector('.win-btn.min').onclick = () => {
       meta.minimized = true;
       el.classList.add('hidden');
+      emit('change');
     };
     el.querySelector('.win-btn.max').onclick = () => toggleMaximize(id);
     header.addEventListener('dblclick', (e) => {
@@ -171,7 +179,7 @@ const WM = (() => {
       toggleMaximize(id);
     });
 
-    renderTaskbar();
+    emit('change');
     focus(id);
     if (onMount) onMount(body, id);
     return id;
@@ -193,6 +201,15 @@ const WM = (() => {
       el.classList.remove('maximized');
       w.meta.maximized = false;
     }
+    emit('change');
+  }
+
+  function restore(id) {
+    const w = registry.get(id);
+    if (!w) return;
+    w.meta.minimized = false;
+    w.el.classList.remove('hidden');
+    focus(id);
   }
 
   function close(id) {
@@ -200,7 +217,7 @@ const WM = (() => {
     if (!w) return;
     w.el.remove();
     registry.delete(id);
-    renderTaskbar();
+    emit('change');
   }
 
   function closeAll() { [...registry.keys()].forEach(close); }
@@ -210,8 +227,8 @@ const WM = (() => {
     if (!w) return;
     w.meta.title = title;
     w.el.querySelector('.window-title span:last-child').textContent = title;
-    renderTaskbar();
+    emit('change');
   }
 
-  return { open, close, closeAll, focus, toggleMaximize, setTitle, registry };
+  return { open, close, closeAll, focus, restore, toggleMaximize, setTitle, registry, onChange, onFocus };
 })();

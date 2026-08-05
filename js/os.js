@@ -10,7 +10,7 @@ const OS = (() => {
   ];
 
   const appList = [
-    { id: 'explorer', label: 'File Explorer', emoji: '📁', run: () => Apps.explorer() },
+    { id: 'explorer', label: 'Finder', emoji: '📁', run: () => Apps.explorer() },
     { id: 'trash', label: 'Recycle Bin', emoji: '🗑️', run: () => Apps.explorer('/Trash') },
     { id: 'notepad', label: 'Notepad', emoji: '📝', run: () => Apps.textEditor() },
     { id: 'terminal', label: 'Terminal', emoji: '⌨️', run: () => Apps.terminal() },
@@ -27,6 +27,7 @@ const OS = (() => {
     { id: 'settings', label: 'Settings', emoji: '⚙️', run: () => Apps.settings() },
     { id: 'about', label: 'About', emoji: '🐉', run: () => Apps.about() },
   ];
+  const DOCK_PINNED = ['explorer', 'notepad', 'terminal', 'browser', 'photos', 'settings'];
 
   function loadPrefs() {
     try { return JSON.parse(localStorage.getItem('dragonos_prefs_v1')) || {}; } catch (e) { return {}; }
@@ -35,7 +36,7 @@ const OS = (() => {
   let prefs = Object.assign({
     theme: 'dark', accent: '#ff5f45', accent2: '#ffa53e', wallpaper: 0, customWallpaper: null,
     fontSize: 'md', reduceMotion: false, highContrast: false, clock24h: false,
-    username: 'Dragon', iconSize: 'md'
+    username: 'Dragon', iconSize: 'md', brightness: 100
   }, loadPrefs());
 
   function setTheme(t) {
@@ -43,6 +44,7 @@ const OS = (() => {
     document.documentElement.dataset.theme = t;
     savePrefs(prefs);
   }
+  function toggleTheme() { setTheme(prefs.theme === 'dark' ? 'light' : 'dark'); }
   function setAccent(hex) {
     prefs.accent = hex;
     document.documentElement.style.setProperty('--accent', hex);
@@ -82,11 +84,16 @@ const OS = (() => {
   function setUsername(name) {
     prefs.username = name || 'Dragon';
     savePrefs(prefs);
-    renderStartMenu();
+    const lu = document.getElementById('lock-username'); if (lu) lu.textContent = prefs.username;
   }
   function setIconSize(size) {
     prefs.iconSize = size;
     document.getElementById('icons').dataset.size = size;
+    savePrefs(prefs);
+  }
+  function setBrightness(v) {
+    prefs.brightness = v;
+    document.getElementById('desktop').style.filter = `brightness(${v}%)`;
     savePrefs(prefs);
   }
 
@@ -98,6 +105,8 @@ const OS = (() => {
     document.documentElement.style.setProperty('--accent', prefs.accent);
     if (prefs.customWallpaper) document.getElementById('desktop').style.background = `center/cover no-repeat url(${prefs.customWallpaper})`;
     else document.getElementById('desktop').style.background = wallpapers[prefs.wallpaper] || wallpapers[0];
+    document.getElementById('desktop').style.filter = `brightness(${prefs.brightness}%)`;
+    const lu = document.getElementById('lock-username'); if (lu) lu.textContent = prefs.username;
   }
 
   function storageUsage() {
@@ -112,23 +121,17 @@ const OS = (() => {
     return { total, items };
   }
 
+  /* ---------------- Desktop icons ---------------- */
   function renderDesktopIcons() {
     const icons = document.getElementById('icons');
     icons.dataset.size = prefs.iconSize;
     icons.innerHTML = '';
-    const shortcuts = [
-      appList.find(a => a.id === 'explorer'),
-      appList.find(a => a.id === 'notepad'),
-      appList.find(a => a.id === 'terminal'),
-      appList.find(a => a.id === 'browser'),
-      appList.find(a => a.id === 'about'),
-      appList.find(a => a.id === 'trash'),
-    ];
+    const shortcuts = ['explorer', 'notepad', 'terminal', 'browser', 'about', 'trash'].map(id => appList.find(a => a.id === id));
     shortcuts.forEach(app => {
       const el = document.createElement('div');
       el.className = 'desktop-icon';
       el.innerHTML = `<div class="emoji">${app.emoji}</div><div class="label">${app.label}</div>`;
-      el.onclick = (e) => {
+      el.onclick = () => {
         document.querySelectorAll('.desktop-icon').forEach(x => x.classList.remove('selected'));
         el.classList.add('selected');
       };
@@ -137,33 +140,234 @@ const OS = (() => {
     });
   }
 
-  function renderStartMenu() {
-    const menu = document.getElementById('start-menu');
-    menu.innerHTML = `
-      <input class="start-search" placeholder="Search apps..." />
-      <div class="start-grid"></div>
-      <div class="start-footer">
-        <span>🐉 Hi, ${prefs.username}</span>
-        <button id="lock-btn">🔒 Lock</button>
-      </div>`;
-    const grid = menu.querySelector('.start-grid');
+  /* ---------------- Dock ---------------- */
+  function findWindowByAppId(appId) {
+    let found = null;
+    WM.registry.forEach((w, id) => { if (w.meta.appId === appId) found = id; });
+    return found;
+  }
+  function bounceDock(appId) {
+    const el = document.querySelector(`.dock-item[data-app="${appId}"]`);
+    if (!el) return;
+    el.classList.remove('bounce');
+    void el.offsetWidth;
+    el.classList.add('bounce');
+  }
+  function activateApp(app) {
+    const winId = findWindowByAppId(app.id);
+    if (winId) {
+      const w = WM.registry.get(winId);
+      if (w.meta.minimized) WM.restore(winId); else WM.focus(winId);
+    } else {
+      app.run();
+    }
+    bounceDock(app.id);
+  }
+  function makeDockItem(app, running) {
+    const el = document.createElement('div');
+    el.className = 'dock-item';
+    el.dataset.app = app.id;
+    el.innerHTML = `<span>${app.emoji}</span><span class="dock-label">${app.label}</span>${running ? '<span class="dot"></span>' : ''}`;
+    el.onclick = () => activateApp(app);
+    el.oncontextmenu = (e) => {
+      e.preventDefault();
+      const winId = findWindowByAppId(app.id);
+      const items = [{ label: `Open ${app.label}`, action: () => activateApp(app) }];
+      if (winId) items.push({ label: '✕ Quit', action: () => { WM.registry.forEach((w, id) => { if (w.meta.appId === app.id) WM.close(id); }); } });
+      showContextMenu(e.clientX, e.clientY, items);
+    };
+    return el;
+  }
+  function sepEl() { const d = document.createElement('div'); d.className = 'dock-sep'; return d; }
+  function renderDock() {
+    const dock = document.getElementById('dock');
+    if (!dock) return;
+    dock.innerHTML = '';
+    const launchpadBtn = document.createElement('div');
+    launchpadBtn.className = 'dock-item';
+    launchpadBtn.innerHTML = `<span>🚀</span><span class="dock-label">Launchpad</span>`;
+    launchpadBtn.onclick = openLaunchpad;
+    dock.appendChild(launchpadBtn);
+    dock.appendChild(sepEl());
+
+    const runningIds = new Set([...WM.registry.values()].map(w => w.meta.appId).filter(Boolean));
+    DOCK_PINNED.forEach(id => {
+      const app = appList.find(a => a.id === id);
+      if (app) dock.appendChild(makeDockItem(app, runningIds.has(id)));
+    });
+    const extra = [...runningIds].filter(id => !DOCK_PINNED.includes(id) && id !== 'trash');
+    if (extra.length) {
+      dock.appendChild(sepEl());
+      extra.forEach(id => { const app = appList.find(a => a.id === id); if (app) dock.appendChild(makeDockItem(app, true)); });
+    }
+    dock.appendChild(sepEl());
+    dock.appendChild(makeDockItem(appList.find(a => a.id === 'trash'), false));
+
+    updateActiveAppName();
+  }
+
+  function updateActiveAppName() {
+    const nameEl = document.getElementById('mb-appname');
+    if (!nameEl) return;
+    let focused = null;
+    WM.registry.forEach((w) => { if (w.el.classList.contains('focused') && !w.el.classList.contains('hidden')) focused = w; });
+    nameEl.textContent = focused ? focused.meta.title : 'Finder';
+  }
+
+  /* ---------------- Launchpad ---------------- */
+  function openLaunchpad() {
+    const lp = document.getElementById('launchpad');
+    const grid = document.getElementById('launchpad-grid');
+    const search = document.getElementById('launchpad-search');
     function renderGrid(filter) {
       grid.innerHTML = '';
-      appList.filter(a => !filter || a.label.toLowerCase().includes(filter.toLowerCase())).forEach(app => {
+      appList.filter(a => a.id !== 'trash').filter(a => !filter || a.label.toLowerCase().includes(filter.toLowerCase())).forEach(app => {
         const el = document.createElement('div');
-        el.className = 'start-app';
+        el.className = 'lp-app';
         el.innerHTML = `<div class="emoji">${app.emoji}</div><div>${app.label}</div>`;
-        el.onclick = () => { app.run(); closeStartMenu(); };
+        el.onclick = () => { app.run(); closeLaunchpad(); };
         grid.appendChild(el);
       });
     }
     renderGrid('');
-    menu.querySelector('.start-search').addEventListener('input', (e) => renderGrid(e.target.value));
-    menu.querySelector('#lock-btn').onclick = () => { closeStartMenu(); lock(); };
+    search.value = '';
+    lp.classList.remove('hidden');
+    setTimeout(() => search.focus(), 50);
+    search.oninput = () => renderGrid(search.value);
+  }
+  function closeLaunchpad() { document.getElementById('launchpad').classList.add('hidden'); }
+
+  /* ---------------- Spotlight ---------------- */
+  function openSpotlight() {
+    const sp = document.getElementById('spotlight');
+    const input = document.getElementById('spotlight-input');
+    const results = document.getElementById('spotlight-results');
+    let sel = 0, matches = [];
+    function renderResults(q) {
+      matches = !q ? [] : appList.filter(a => a.label.toLowerCase().includes(q.toLowerCase()));
+      sel = 0;
+      results.innerHTML = matches.map((a, i) => `<div class="sr-item${i === 0 ? ' sel' : ''}" data-i="${i}"><span class="emoji">${a.emoji}</span><span>${a.label}</span></div>`).join('');
+      results.querySelectorAll('.sr-item').forEach(el => {
+        el.onclick = () => { activateApp(matches[el.dataset.i]); closeSpotlight(); };
+      });
+    }
+    input.value = '';
+    results.innerHTML = '';
+    sp.classList.remove('hidden');
+    setTimeout(() => input.focus(), 50);
+    input.oninput = () => renderResults(input.value);
+    input.onkeydown = (e) => {
+      if (e.key === 'Escape') { closeSpotlight(); }
+      else if (e.key === 'ArrowDown') { e.preventDefault(); if (matches.length) { sel = (sel + 1) % matches.length; updateSel(); } }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); if (matches.length) { sel = (sel - 1 + matches.length) % matches.length; updateSel(); } }
+      else if (e.key === 'Enter') { if (matches[sel]) { activateApp(matches[sel]); closeSpotlight(); } }
+    };
+    function updateSel() {
+      results.querySelectorAll('.sr-item').forEach((el, i) => el.classList.toggle('sel', i === sel));
+    }
+  }
+  function closeSpotlight() { document.getElementById('spotlight').classList.add('hidden'); }
+
+  /* ---------------- Menu bar dropdowns ---------------- */
+  function buildMenu(kind) {
+    const focusedId = [...WM.registry.entries()].find(([id, w]) => w.el.classList.contains('focused') && !w.el.classList.contains('hidden'));
+    switch (kind) {
+      case 'logo':
+        return [
+          { label: `About This DragonOS`, action: () => Apps.about() },
+          { sep: true },
+          { label: 'System Settings…', action: () => Apps.settings() },
+          { sep: true },
+          { label: 'Lock Screen', action: () => lock() },
+          { label: 'Restart', action: () => { if (confirm('Restart DragonOS?')) location.reload(); } },
+        ];
+      case 'app':
+        return [
+          { label: `About ${document.getElementById('mb-appname').textContent}`, action: () => Apps.about() },
+          { sep: true },
+          { label: 'Quit', disabled: !focusedId, action: () => focusedId && WM.close(focusedId[0]) },
+        ];
+      case 'file':
+        return [
+          { label: 'New Finder Window', action: () => Apps.explorer() },
+          { label: 'New Folder', action: () => { const n = prompt('Folder name', 'New Folder'); if (n) DragonFS.mkdir('/' + n); } },
+          { sep: true },
+          { label: 'Close Window', disabled: !focusedId, action: () => focusedId && WM.close(focusedId[0]) },
+        ];
+      case 'edit':
+        return [
+          { label: 'Undo', disabled: true, action: () => {} },
+          { label: 'Redo', disabled: true, action: () => {} },
+          { sep: true },
+          { label: 'Cut', disabled: true, action: () => {} },
+          { label: 'Copy', disabled: true, action: () => {} },
+          { label: 'Paste', disabled: true, action: () => {} },
+        ];
+      case 'view':
+        return [
+          { label: prefs.theme === 'dark' ? '☀️ Switch to Light Mode' : '🌙 Switch to Dark Mode', action: () => toggleTheme() },
+          { label: 'Show Launchpad', action: () => openLaunchpad() },
+        ];
+      case 'window':
+        return [
+          { label: 'Minimize', disabled: !focusedId, action: () => { if (focusedId) { WM.registry.get(focusedId[0]).el.querySelector('.win-btn.min').click(); } } },
+          { label: 'Zoom', disabled: !focusedId, action: () => focusedId && WM.toggleMaximize(focusedId[0]) },
+          { sep: true },
+          ...[...WM.registry.entries()].map(([id, w]) => ({ label: (w.el.classList.contains('focused') ? '● ' : '') + w.meta.title, action: () => WM.restore(id) })),
+        ];
+      case 'help':
+        return [
+          { label: 'DragonOS Help', action: () => Apps.about() },
+          { label: 'Keyboard Shortcuts', action: () => alert('⌘/Ctrl+Space — Spotlight\nAlt+Tab — Switch windows\nDrag a window to a screen edge — Snap\nF4 or Launchpad icon — App grid') },
+        ];
+      default: return [];
+    }
   }
 
-  function openStartMenu() { document.getElementById('start-menu').classList.remove('hidden'); }
-  function closeStartMenu() { document.getElementById('start-menu').classList.add('hidden'); }
+  function showMenuDropdown(triggerEl, items) {
+    const dd = document.getElementById('mb-dropdown');
+    dd.innerHTML = items.map((it, i) => it.sep ? '<div class="dd-sep"></div>' : `<div class="dd-item${it.disabled ? ' disabled' : ''}" data-i="${i}">${it.label}</div>`).join('');
+    const rect = triggerEl.getBoundingClientRect();
+    dd.style.left = Math.min(rect.left, window.innerWidth - 240) + 'px';
+    dd.classList.remove('hidden');
+    dd.querySelectorAll('.dd-item:not(.disabled)').forEach(el => {
+      el.onclick = () => { items[el.dataset.i].action(); hideMenuDropdown(); };
+    });
+    document.querySelectorAll('.mb-item').forEach(x => x.classList.remove('open'));
+    triggerEl.classList.add('open');
+  }
+  function hideMenuDropdown() {
+    document.getElementById('mb-dropdown').classList.add('hidden');
+    document.querySelectorAll('.mb-item').forEach(x => x.classList.remove('open'));
+  }
+
+  /* ---------------- Control Center ---------------- */
+  function toggleControlCenter() {
+    const cc = document.getElementById('control-center');
+    if (!cc.classList.contains('hidden')) { cc.classList.add('hidden'); return; }
+    cc.innerHTML = `
+      <div class="cc-row">
+        <div class="cc-tile" data-t="theme">🌙<div>Dark Mode</div></div>
+        <div class="cc-tile" data-t="dnd">🌜<div>Do Not Disturb</div></div>
+      </div>
+      <div class="cc-row">
+        <div class="cc-tile" data-t="wifi">📶<div>Wi-Fi</div></div>
+        <div class="cc-tile" data-t="reduce">♿<div>Reduce Motion</div></div>
+      </div>
+      <div class="cc-slider">
+        <label>Display Brightness</label>
+        <input type="range" min="40" max="120" value="${prefs.brightness}" data-role="brightness" />
+      </div>`;
+    cc.querySelector('[data-t="theme"]').classList.toggle('on', prefs.theme === 'dark');
+    cc.querySelector('[data-t="reduce"]').classList.toggle('on', prefs.reduceMotion);
+    cc.querySelector('[data-t="wifi"]').classList.add('on');
+    cc.querySelector('[data-t="theme"]').onclick = () => { toggleTheme(); toggleControlCenter(); toggleControlCenter(); };
+    cc.querySelector('[data-t="reduce"]').onclick = () => { setReduceMotion(!prefs.reduceMotion); toggleControlCenter(); toggleControlCenter(); };
+    cc.querySelector('[data-t="wifi"]').onclick = (e) => e.currentTarget.classList.toggle('on');
+    cc.querySelector('[data-t="dnd"]').onclick = (e) => e.currentTarget.classList.toggle('on');
+    cc.querySelector('[data-role="brightness"]').oninput = (e) => setBrightness(parseInt(e.target.value));
+    cc.classList.remove('hidden');
+  }
 
   function showContextMenu(x, y, items) {
     const menu = document.getElementById('context-menu');
@@ -188,6 +392,8 @@ const OS = (() => {
   }
 
   function lock() {
+    hideMenuDropdown();
+    document.getElementById('control-center').classList.add('hidden');
     document.getElementById('lock-screen').classList.remove('hidden');
   }
   function unlock() {
@@ -197,18 +403,39 @@ const OS = (() => {
   function boot() {
     applyPrefs();
     renderDesktopIcons();
-    renderStartMenu();
+    renderDock();
     updateClock();
     setInterval(updateClock, 1000 * 15);
 
-    document.getElementById('start-btn').onclick = (e) => {
-      e.stopPropagation();
-      document.getElementById('start-menu').classList.toggle('hidden');
-    };
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('#start-menu') && !e.target.closest('#start-btn')) closeStartMenu();
-      if (!e.target.closest('#context-menu')) hideContextMenu();
+    WM.onChange(renderDock);
+    WM.onFocus(updateActiveAppName);
+
+    // Menu bar interactions
+    document.querySelectorAll('.mb-menu, .mb-logo, .mb-appname').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const kind = el.dataset.menu || (el.id === 'mb-logo-btn' ? 'logo' : el.id === 'mb-appname' ? 'app' : null);
+        if (!kind) return;
+        const dd = document.getElementById('mb-dropdown');
+        if (!dd.classList.contains('hidden') && el.classList.contains('open')) { hideMenuDropdown(); return; }
+        showMenuDropdown(el, buildMenu(kind));
+      });
     });
+    document.getElementById('mb-search').onclick = (e) => { e.stopPropagation(); openSpotlight(); };
+    document.getElementById('mb-control').onclick = (e) => { e.stopPropagation(); toggleControlCenter(); };
+    document.getElementById('mb-clock').onclick = (e) => { e.stopPropagation(); Apps.calendar(); };
+    document.getElementById('mb-wifi').onclick = (e) => e.stopPropagation();
+    document.getElementById('mb-battery').onclick = (e) => e.stopPropagation();
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#mb-dropdown') && !e.target.closest('.mb-menu') && !e.target.closest('.mb-logo') && !e.target.closest('.mb-appname')) hideMenuDropdown();
+      if (!e.target.closest('#context-menu')) hideContextMenu();
+      if (!e.target.closest('#control-center') && !e.target.closest('#mb-control')) document.getElementById('control-center').classList.add('hidden');
+    });
+
+    // Spotlight / Launchpad close on backdrop click
+    document.getElementById('spotlight').addEventListener('click', (e) => { if (e.target.id === 'spotlight') closeSpotlight(); });
+    document.getElementById('launchpad').addEventListener('click', (e) => { if (e.target.id === 'launchpad') closeLaunchpad(); });
 
     const desktop = document.getElementById('desktop');
     desktop.addEventListener('contextmenu', (e) => {
@@ -218,8 +445,8 @@ const OS = (() => {
         { label: '🔄 Refresh', action: () => renderDesktopIcons() },
         { label: '📁 New Folder', action: () => { const n = prompt('Folder name', 'New Folder'); if (n) DragonFS.mkdir('/' + n); } },
         { sep: true },
+        { label: '🖼️ Change Wallpaper', action: () => Apps.settings('appearance') },
         { label: '⚙️ Settings', action: () => Apps.settings() },
-        { label: '🖼️ Change Wallpaper', action: () => Apps.photos() },
       ]);
     });
     desktop.addEventListener('click', (e) => {
@@ -246,6 +473,9 @@ const OS = (() => {
 
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.code === 'Space') { e.preventDefault(); openSpotlight(); return; }
+      if (e.key === 'Escape') { closeSpotlight(); closeLaunchpad(); hideMenuDropdown(); }
+      if (e.key === 'F4') { e.preventDefault(); openLaunchpad(); }
       if (e.altKey && e.key === 'Tab') {
         e.preventDefault();
         const ids = [...WM.registry.keys()];
@@ -253,10 +483,7 @@ const OS = (() => {
         const focused = ids.find(id => WM.registry.get(id).el.classList.contains('focused'));
         const idx = focused ? ids.indexOf(focused) : -1;
         const next = ids[(idx + 1) % ids.length];
-        const w = WM.registry.get(next);
-        w.meta.minimized = false;
-        w.el.classList.remove('hidden');
-        WM.focus(next);
+        WM.restore(next);
       }
     });
   }
@@ -265,8 +492,8 @@ const OS = (() => {
 
   return {
     wallpapers, appList, prefs,
-    setTheme, setAccent, setWallpaper, setCustomWallpaper, setFontSize, setReduceMotion,
-    setHighContrast, setClock24h, setUsername, setIconSize,
-    showContextMenu, hideContextMenu, lock, unlock, storageUsage
+    setTheme, toggleTheme, setAccent, setWallpaper, setCustomWallpaper, setFontSize, setReduceMotion,
+    setHighContrast, setClock24h, setUsername, setIconSize, setBrightness,
+    showContextMenu, hideContextMenu, lock, unlock, storageUsage, openLaunchpad, openSpotlight
   };
 })();
