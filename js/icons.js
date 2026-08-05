@@ -146,5 +146,27 @@ const Icons = (() => {
   function inline(id, cls) {
     return `<span class="icon-inline${cls ? ' ' + cls : ''}">${inlineSvg(id)}</span>`;
   }
-  return { svg, html, monoSvg, inlineSvg, inline };
+
+  /* Stylized side-view F1 car — standalone graphic (not a 24x24 tile icon), used by the race widget */
+  function carSvg(body1, body2) {
+    body1 = body1 || '#ff6b5e'; body2 = body2 || '#c81e1e';
+    return `<svg viewBox="0 0 200 70" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="rw-car-g" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="${body1}"/><stop offset="1" stop-color="${body2}"/>
+      </linearGradient></defs>
+      <ellipse cx="100" cy="62" rx="88" ry="4.5" fill="#000" opacity=".28"/>
+      <rect x="160" y="14" width="3" height="15" fill="#17181c"/>
+      <rect x="185" y="14" width="3" height="15" fill="#17181c"/>
+      <rect x="158" y="17" width="30" height="4" rx="1" fill="#17181c"/>
+      <rect x="172" y="21" width="3" height="10" fill="#17181c"/>
+      <path d="M4 42 20 35 58 27 100 25 140 29 176 38 176 46 150 46 150 50 40 50 40 46 4 46Z" fill="url(#rw-car-g)"/>
+      <path d="M74 27 Q86 12 101 25Z" fill="#17181c"/>
+      <rect x="0" y="43" width="24" height="4" rx="1" fill="#17181c"/>
+      <circle cx="33" cy="50" r="13" fill="#17181c"/>
+      <circle cx="33" cy="50" r="6.5" fill="#3a3d44"/>
+      <circle cx="159" cy="50" r="15.5" fill="#17181c"/>
+      <circle cx="159" cy="50" r="7.5" fill="#3a3d44"/>
+    </svg>`;
+  }
+  return { svg, html, monoSvg, inlineSvg, inline, carSvg };
 })();

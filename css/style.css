@@ -286,6 +286,25 @@ button{font-family:inherit;}
 .lp-app .app-icon{width:56px;height:56px;}
 .lp-app .lp-app{font-size:12px;}
 
+/* ---------- Next Race widget ---------- */
+#race-widget{
+  position:fixed;left:14px;bottom:104px;z-index:480;width:252px;
+  background:var(--window-bg);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow);
+  backdrop-filter:blur(24px);padding:13px 14px;
+  display:flex;flex-direction:column;gap:9px;cursor:default;
+}
+.rw-head{display:flex;align-items:center;justify-content:space-between;}
+.rw-label{font-size:10.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-dim);}
+.rw-flag{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-dim);}
+.rw-flag .icon-inline{margin-right:0;width:12px;height:12px;}
+.rw-race{font-size:14.5px;font-weight:700;line-height:1.25;}
+.rw-circuit{font-size:11.5px;color:var(--text-dim);margin-top:1px;}
+.rw-countdown{display:flex;gap:6px;margin-top:2px;}
+.rw-unit{flex:1;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:8px;padding:6px 2px;text-align:center;}
+.rw-unit b{display:block;font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1;}
+.rw-unit span{display:block;font-size:9px;color:var(--text-dim);letter-spacing:.5px;text-transform:uppercase;margin-top:2px;}
+.rw-car{align-self:flex-end;width:100%;height:auto;margin-top:-4px;opacity:.95;filter:drop-shadow(0 3px 6px rgba(0,0,0,.35));}
+
 /* ---------- Control Center ---------- */
 #control-center{
   position:fixed;top:32px;right:10px;z-index:601;width:280px;

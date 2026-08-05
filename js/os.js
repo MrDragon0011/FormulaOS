@@ -454,6 +454,77 @@ const OS = (() => {
     const ld = document.getElementById('lock-date'); if (ld) ld.textContent = date;
   }
 
+  /* ---------------- Next Race widget ---------------- */
+  const RACE_CALENDAR = [
+    { name: 'Bahrain Grand Prix', circuit: 'Bahrain International Circuit', month: 3, day: 2 },
+    { name: 'Saudi Arabian Grand Prix', circuit: 'Jeddah Corniche Circuit', month: 3, day: 16 },
+    { name: 'Australian Grand Prix', circuit: 'Albert Park Circuit', month: 3, day: 30 },
+    { name: 'Japanese Grand Prix', circuit: 'Suzuka Circuit', month: 4, day: 13 },
+    { name: 'Chinese Grand Prix', circuit: 'Shanghai International Circuit', month: 4, day: 27 },
+    { name: 'Miami Grand Prix', circuit: 'Miami International Autodrome', month: 5, day: 4 },
+    { name: 'Emilia Romagna Grand Prix', circuit: 'Imola', month: 5, day: 18 },
+    { name: 'Monaco Grand Prix', circuit: 'Circuit de Monaco', month: 5, day: 25 },
+    { name: 'Canadian Grand Prix', circuit: 'Circuit Gilles Villeneuve', month: 6, day: 8 },
+    { name: 'Spanish Grand Prix', circuit: 'Circuit de Barcelona-Catalunya', month: 6, day: 22 },
+    { name: 'Austrian Grand Prix', circuit: 'Red Bull Ring', month: 6, day: 29 },
+    { name: 'British Grand Prix', circuit: 'Silverstone Circuit', month: 7, day: 6 },
+    { name: 'Belgian Grand Prix', circuit: 'Circuit de Spa-Francorchamps', month: 7, day: 27 },
+    { name: 'Hungarian Grand Prix', circuit: 'Hungaroring', month: 8, day: 3 },
+    { name: 'Dutch Grand Prix', circuit: 'Circuit Zandvoort', month: 8, day: 31 },
+    { name: 'Italian Grand Prix', circuit: 'Autodromo Nazionale Monza', month: 9, day: 7 },
+    { name: 'Azerbaijan Grand Prix', circuit: 'Baku City Circuit', month: 9, day: 21 },
+    { name: 'Singapore Grand Prix', circuit: 'Marina Bay Street Circuit', month: 10, day: 5 },
+    { name: 'United States Grand Prix', circuit: 'Circuit of the Americas', month: 10, day: 19 },
+    { name: 'Mexico City Grand Prix', circuit: 'Autódromo Hermanos Rodríguez', month: 10, day: 26 },
+    { name: 'São Paulo Grand Prix', circuit: 'Interlagos', month: 11, day: 9 },
+    { name: 'Las Vegas Grand Prix', circuit: 'Las Vegas Strip Circuit', month: 11, day: 22 },
+    { name: 'Qatar Grand Prix', circuit: 'Lusail International Circuit', month: 11, day: 30 },
+    { name: 'Abu Dhabi Grand Prix', circuit: 'Yas Marina Circuit', month: 12, day: 7 }
+  ];
+  function nextRace() {
+    const now = new Date();
+    const withDates = RACE_CALENDAR.map((r, i) => {
+      let d = new Date(now.getFullYear(), r.month - 1, r.day, 14, 0, 0);
+      if (d < now) d = new Date(now.getFullYear() + 1, r.month - 1, r.day, 14, 0, 0);
+      return { ...r, date: d, round: i + 1 };
+    });
+    withDates.sort((a, b) => a.date - b.date);
+    return withDates[0];
+  }
+  function renderRaceWidget() {
+    const el = document.getElementById('race-widget');
+    if (!el) return;
+    const race = nextRace();
+    el.dataset.race = race.name;
+    el.innerHTML = `
+      <div class="rw-head">
+        <div class="rw-label">Next Race</div>
+        <div class="rw-flag">${Icons.inline('flag')}<span>Round ${race.round}</span></div>
+      </div>
+      <div>
+        <div class="rw-race">${race.name}</div>
+        <div class="rw-circuit">${race.circuit}</div>
+      </div>
+      <div class="rw-countdown" data-role="rw-countdown"></div>
+      <div class="rw-car">${Icons.carSvg()}</div>
+    `;
+    updateRaceCountdown();
+  }
+  function updateRaceCountdown() {
+    const el = document.getElementById('race-widget');
+    const box = el && el.querySelector('[data-role="rw-countdown"]');
+    if (!box) return;
+    const race = nextRace();
+    if (el.dataset.race !== race.name) { renderRaceWidget(); return; }
+    let diff = Math.max(0, race.date - new Date());
+    const d = Math.floor(diff / 86400000); diff -= d * 86400000;
+    const h = Math.floor(diff / 3600000); diff -= h * 3600000;
+    const m = Math.floor(diff / 60000); diff -= m * 60000;
+    const s = Math.floor(diff / 1000);
+    box.innerHTML = [[d, 'Days'], [h, 'Hrs'], [m, 'Min'], [s, 'Sec']]
+      .map(([v, label]) => `<div class="rw-unit"><b>${String(v).padStart(2, '0')}</b><span>${label}</span></div>`).join('');
+  }
+
   function lock() {
     hideMenuDropdown();
     document.getElementById('control-center').classList.add('hidden');
@@ -477,6 +548,8 @@ const OS = (() => {
     renderDock();
     updateClock();
     setInterval(updateClock, 1000 * 15);
+    renderRaceWidget();
+    setInterval(updateRaceCountdown, 1000);
 
     WM.onChange(renderDock);
     WM.onFocus(updateActiveAppName);
