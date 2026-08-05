@@ -14,12 +14,14 @@ Apps.explorer = function (startPath) {
             <div class="item" data-p="/Documents">📄 Documents</div>
             <div class="item" data-p="/Pictures">🖼️ Pictures</div>
             <div class="item" data-p="/Desktop">🖥️ Desktop</div>
+            <div class="item" data-p="/Trash">🗑️ Recycle Bin</div>
           </div>
           <div class="explorer-main">
             <div class="app-toolbar">
               <button data-act="up">⬆ Up</button>
               <button data-act="new-folder">📁+ Folder</button>
               <button data-act="new-file">📄+ File</button>
+              <button data-act="empty-trash" style="display:none;">🗑️ Empty Recycle Bin</button>
             </div>
             <div class="explorer-path"></div>
             <div class="explorer-grid"></div>
@@ -27,18 +29,44 @@ Apps.explorer = function (startPath) {
         </div>`;
       const grid = body.querySelector('.explorer-grid');
       const pathEl = body.querySelector('.explorer-path');
+      const emptyTrashBtn = body.querySelector('[data-act="empty-trash"]');
 
       function iconFor(name, isDir) {
-        if (isDir) return '📁';
+        if (isDir) return name === 'Trash' ? '🗑️' : '📁';
         if (/\.(txt|md)$/i.test(name)) return '📄';
         if (/\.(png|jpg|jpeg|gif|svg)$/i.test(name)) return '🖼️';
         return '📦';
       }
 
       function render() {
-        pathEl.textContent = path;
+        const inTrash = path === '/Trash';
+        pathEl.textContent = inTrash ? '🗑️ Recycle Bin' : path;
+        emptyTrashBtn.style.display = inTrash ? '' : 'none';
+        body.querySelector('[data-act="new-folder"]').style.display = inTrash ? 'none' : '';
+        body.querySelector('[data-act="new-file"]').style.display = inTrash ? 'none' : '';
         body.querySelectorAll('.explorer-sidebar .item').forEach(it => it.classList.toggle('active', it.dataset.p === path));
         grid.innerHTML = '';
+        if (inTrash) {
+          const items = DragonFS.listTrash();
+          if (!items.length) { grid.innerHTML = '<div style="grid-column:1/-1;color:var(--text-dim);font-size:13px;padding:20px;">Recycle Bin is empty.</div>'; return; }
+          items.forEach(({ name, path: full, origin }) => {
+            const dir = DragonFS.isDir(full);
+            const el = document.createElement('div');
+            el.className = 'explorer-item';
+            el.innerHTML = `<div class="emoji">${iconFor(name, dir)}</div><div class="label">${name}</div>`;
+            el.title = origin ? `Originally: ${origin}` : '';
+            el.oncontextmenu = (e) => {
+              e.preventDefault();
+              OS.showContextMenu(e.clientX, e.clientY, [
+                { label: '↩️ Restore', action: () => { DragonFS.restore(name); render(); } },
+                { label: '🗑 Delete Permanently', action: () => { if (confirm(`Permanently delete "${name}"?`)) { DragonFS.remove(full); render(); } } }
+              ]);
+            };
+            bindOpen(el, () => { if (confirm(`Restore "${name}" to its original location?`)) { DragonFS.restore(name); render(); } });
+            grid.appendChild(el);
+          });
+          return;
+        }
         DragonFS.list(path).forEach(name => {
           const full = (path === '/' ? '' : path) + '/' + name;
           const dir = DragonFS.isDir(full);
@@ -52,10 +80,11 @@ Apps.explorer = function (startPath) {
           });
           el.oncontextmenu = (e) => {
             e.preventDefault();
-            OS.showContextMenu(e.clientX, e.clientY, [
-              { label: '🗑 Delete', action: () => { DragonFS.remove(full); render(); } },
+            const items = [
+              { label: '🗑 Move to Recycle Bin', action: () => { DragonFS.trash(full); render(); } },
               { label: '✏️ Rename', action: () => { const n = prompt('New name', name); if (n) { DragonFS.rename(full, n); render(); } } }
-            ]);
+            ];
+            OS.showContextMenu(e.clientX, e.clientY, items);
           };
           grid.appendChild(el);
         });
@@ -68,6 +97,7 @@ Apps.explorer = function (startPath) {
       body.querySelector('[data-act="new-file"]').onclick = () => {
         const n = prompt('File name', 'untitled.txt'); if (n) { DragonFS.touch((path === '/' ? '' : path) + '/' + n); render(); }
       };
+      emptyTrashBtn.onclick = () => { if (confirm('Permanently delete everything in the Recycle Bin?')) { DragonFS.emptyTrash(); render(); } };
 
       // Drag & drop upload from the OS file system
       ['dragover', 'dragenter'].forEach(ev => grid.addEventListener(ev, (e) => { e.preventDefault(); grid.style.background = 'rgba(255,95,69,.08)'; }));

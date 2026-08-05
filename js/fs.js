@@ -2,12 +2,15 @@
 const DragonFS = (() => {
   const KEY = 'dragonos_fs_v1';
 
+  const TRASH_META_KEY = 'dragonos_trash_meta_v1';
+
   function defaultFS() {
     return {
-      '/': { type: 'dir', children: ['Documents', 'Pictures', 'Desktop'] },
+      '/': { type: 'dir', children: ['Documents', 'Pictures', 'Desktop', 'Trash'] },
       '/Documents': { type: 'dir', children: ['welcome.txt', 'todo.txt'] },
       '/Pictures': { type: 'dir', children: [] },
       '/Desktop': { type: 'dir', children: [] },
+      '/Trash': { type: 'dir', children: [] },
       '/Documents/welcome.txt': {
         type: 'file',
         content: 'Welcome to DragonOS 🐉\n\nThis is a fully in-browser operating system.\n\n- Double-click icons to open apps\n- Right-click the desktop for options\n- Open Settings to change your wallpaper and theme\n- Everything you save here persists in this browser via localStorage\n\nEnjoy!'
@@ -21,12 +24,26 @@ const DragonFS = (() => {
   function load() {
     try {
       const raw = localStorage.getItem(KEY);
-      if (raw) return JSON.parse(raw);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        // migration: ensure /Trash exists for filesystems created before Recycle Bin was added
+        if (!parsed['/Trash']) {
+          parsed['/Trash'] = { type: 'dir', children: [] };
+          if (parsed['/'] && !parsed['/'].children.includes('Trash')) parsed['/'].children.push('Trash');
+        }
+        return parsed;
+      }
     } catch (e) {}
     const d = defaultFS();
     localStorage.setItem(KEY, JSON.stringify(d));
     return d;
   }
+
+  function loadTrashMeta() {
+    try { return JSON.parse(localStorage.getItem(TRASH_META_KEY)) || {}; } catch (e) { return {}; }
+  }
+  function saveTrashMeta(m) { localStorage.setItem(TRASH_META_KEY, JSON.stringify(m)); }
+  let trashMeta = loadTrashMeta();
 
   function save() {
     localStorage.setItem(KEY, JSON.stringify(fs));
@@ -137,8 +154,88 @@ const DragonFS = (() => {
 
   function reset() {
     fs = defaultFS();
+    trashMeta = {};
+    saveTrashMeta(trashMeta);
     save();
   }
 
-  return { list, read, write, mkdir, touch, remove, rename, exists, isDir, normalize, parentOf, nameOf, reset };
+  // Move a node (and its subtree) to a new parent directory, keeping/renaming its own name.
+  function move(path, destParent, forcedName) {
+    path = normalize(path);
+    destParent = normalize(destParent);
+    if (!fs[path] || !fs[destParent] || fs[destParent].type !== 'dir') return null;
+    const parent = parentOf(path);
+    let name = forcedName || nameOf(path);
+    let destPath = destParent === '/' ? '/' + name : destParent + '/' + name;
+    // avoid collisions in the destination
+    let i = 1;
+    const base = name.replace(/(\.[^.]*)?$/, '');
+    const ext = name.slice(base.length);
+    while (fs[destPath]) {
+      name = `${base} (${i})${ext}`;
+      destPath = destParent === '/' ? '/' + name : destParent + '/' + name;
+      i++;
+    }
+    fs[destPath] = fs[path];
+    delete fs[path];
+    if (fs[parent]) fs[parent].children = fs[parent].children.filter(c => c !== nameOf(path));
+    fs[destParent].children.push(name);
+    if (fs[destPath].type === 'dir') {
+      const fixChildren = (oldBase, newBase) => {
+        Object.keys(fs).forEach(k => {
+          if (k.startsWith(oldBase + '/')) {
+            const suffix = k.slice(oldBase.length);
+            const nk = newBase + suffix;
+            fs[nk] = fs[k];
+            delete fs[k];
+          }
+        });
+      };
+      fixChildren(path, destPath);
+    }
+    save();
+    return destPath;
+  }
+
+  // Recycle Bin
+  function trash(path) {
+    path = normalize(path);
+    if (path === '/' || path === '/Trash' || !fs[path]) return false;
+    const origin = path;
+    const destPath = move(path, '/Trash');
+    if (!destPath) return false;
+    trashMeta[nameOf(destPath)] = origin;
+    saveTrashMeta(trashMeta);
+    return true;
+  }
+
+  function listTrash() {
+    return list('/Trash').map(name => ({ name, path: '/Trash/' + name, origin: trashMeta[name] || null }));
+  }
+
+  function restore(trashName) {
+    const trashPath = '/Trash/' + trashName;
+    if (!fs[trashPath]) return false;
+    const origin = trashMeta[trashName];
+    const destParent = origin ? (parentOf(origin) || '/') : '/';
+    const destName = origin ? nameOf(origin) : trashName;
+    if (!fs[destParent]) {
+      const restored = move(trashPath, '/');
+      delete trashMeta[trashName];
+      saveTrashMeta(trashMeta);
+      return restored;
+    }
+    const restored = move(trashPath, destParent, destName);
+    delete trashMeta[trashName];
+    saveTrashMeta(trashMeta);
+    return restored;
+  }
+
+  function emptyTrash() {
+    listTrash().forEach(item => remove(item.path));
+    trashMeta = {};
+    saveTrashMeta(trashMeta);
+  }
+
+  return { list, read, write, mkdir, touch, remove, rename, move, exists, isDir, normalize, parentOf, nameOf, reset, trash, listTrash, restore, emptyTrash };
 })();

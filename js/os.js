@@ -11,6 +11,7 @@ const OS = (() => {
 
   const appList = [
     { id: 'explorer', label: 'File Explorer', emoji: '📁', run: () => Apps.explorer() },
+    { id: 'trash', label: 'Recycle Bin', emoji: '🗑️', run: () => Apps.explorer('/Trash') },
     { id: 'notepad', label: 'Notepad', emoji: '📝', run: () => Apps.textEditor() },
     { id: 'terminal', label: 'Terminal', emoji: '⌨️', run: () => Apps.terminal() },
     { id: 'browser', label: 'Browser', emoji: '🌐', run: () => Apps.browser() },
@@ -64,6 +65,7 @@ const OS = (() => {
       appList.find(a => a.id === 'terminal'),
       appList.find(a => a.id === 'browser'),
       appList.find(a => a.id === 'about'),
+      appList.find(a => a.id === 'trash'),
     ];
     shortcuts.forEach(app => {
       const el = document.createElement('div');
