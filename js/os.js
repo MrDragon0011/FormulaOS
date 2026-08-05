@@ -1,6 +1,7 @@
 /* FormulaOS Core */
 const OS = (() => {
-  const wallpapers = Array.from({ length: Wallpaper.count() }, (_, i) => Wallpaper.cssValue(i));
+  function wallpaperCss(i) { return Wallpaper.cssValue(i, nextRace().track); }
+  const wallpapers = Array.from({ length: Wallpaper.count() }, (_, i) => i);
   function applyBackground(cssValue) {
     document.getElementById('desktop').style.background = cssValue;
     document.getElementById('lock-screen').style.background = cssValue;
@@ -64,7 +65,7 @@ const OS = (() => {
   function setWallpaper(i) {
     prefs.wallpaper = i;
     prefs.customWallpaper = null;
-    applyBackground(wallpapers[i]);
+    applyBackground(wallpaperCss(i));
     savePrefs(prefs);
   }
   function setCustomWallpaper(dataUrl) {
@@ -115,7 +116,7 @@ const OS = (() => {
     document.documentElement.classList.toggle('high-contrast', prefs.highContrast);
     document.documentElement.style.setProperty('--accent', prefs.accent);
     if (prefs.customWallpaper) applyBackground(`center/cover no-repeat url(${prefs.customWallpaper})`);
-    else applyBackground(wallpapers[prefs.wallpaper] || wallpapers[0]);
+    else applyBackground(wallpaperCss(prefs.wallpaper || 0));
     document.getElementById('desktop').style.filter = `brightness(${prefs.brightness}%)`;
     const lu = document.getElementById('lock-username'); if (lu) lu.textContent = prefs.username;
   }
@@ -456,30 +457,30 @@ const OS = (() => {
 
   /* ---------------- Next Race widget ---------------- */
   const RACE_CALENDAR = [
-    { name: 'Bahrain Grand Prix', circuit: 'Bahrain International Circuit', month: 3, day: 2 },
-    { name: 'Saudi Arabian Grand Prix', circuit: 'Jeddah Corniche Circuit', month: 3, day: 16 },
-    { name: 'Australian Grand Prix', circuit: 'Albert Park Circuit', month: 3, day: 30 },
-    { name: 'Japanese Grand Prix', circuit: 'Suzuka Circuit', month: 4, day: 13 },
-    { name: 'Chinese Grand Prix', circuit: 'Shanghai International Circuit', month: 4, day: 27 },
-    { name: 'Miami Grand Prix', circuit: 'Miami International Autodrome', month: 5, day: 4 },
-    { name: 'Emilia Romagna Grand Prix', circuit: 'Imola', month: 5, day: 18 },
-    { name: 'Monaco Grand Prix', circuit: 'Circuit de Monaco', month: 5, day: 25 },
-    { name: 'Canadian Grand Prix', circuit: 'Circuit Gilles Villeneuve', month: 6, day: 8 },
-    { name: 'Spanish Grand Prix', circuit: 'Circuit de Barcelona-Catalunya', month: 6, day: 22 },
-    { name: 'Austrian Grand Prix', circuit: 'Red Bull Ring', month: 6, day: 29 },
-    { name: 'British Grand Prix', circuit: 'Silverstone Circuit', month: 7, day: 6 },
-    { name: 'Belgian Grand Prix', circuit: 'Circuit de Spa-Francorchamps', month: 7, day: 27 },
-    { name: 'Hungarian Grand Prix', circuit: 'Hungaroring', month: 8, day: 3 },
-    { name: 'Dutch Grand Prix', circuit: 'Circuit Zandvoort', month: 8, day: 31 },
-    { name: 'Italian Grand Prix', circuit: 'Autodromo Nazionale Monza', month: 9, day: 7 },
-    { name: 'Azerbaijan Grand Prix', circuit: 'Baku City Circuit', month: 9, day: 21 },
-    { name: 'Singapore Grand Prix', circuit: 'Marina Bay Street Circuit', month: 10, day: 5 },
-    { name: 'United States Grand Prix', circuit: 'Circuit of the Americas', month: 10, day: 19 },
-    { name: 'Mexico City Grand Prix', circuit: 'Autódromo Hermanos Rodríguez', month: 10, day: 26 },
-    { name: 'São Paulo Grand Prix', circuit: 'Interlagos', month: 11, day: 9 },
-    { name: 'Las Vegas Grand Prix', circuit: 'Las Vegas Strip Circuit', month: 11, day: 22 },
-    { name: 'Qatar Grand Prix', circuit: 'Lusail International Circuit', month: 11, day: 30 },
-    { name: 'Abu Dhabi Grand Prix', circuit: 'Yas Marina Circuit', month: 12, day: 7 }
+    { name: 'Bahrain Grand Prix', circuit: 'Bahrain International Circuit', track: 'bahrain', month: 3, day: 2 },
+    { name: 'Saudi Arabian Grand Prix', circuit: 'Jeddah Corniche Circuit', track: 'jeddah', month: 3, day: 16 },
+    { name: 'Australian Grand Prix', circuit: 'Albert Park Circuit', track: 'albertpark', month: 3, day: 30 },
+    { name: 'Japanese Grand Prix', circuit: 'Suzuka Circuit', track: 'suzuka', month: 4, day: 13 },
+    { name: 'Chinese Grand Prix', circuit: 'Shanghai International Circuit', track: 'shanghai', month: 4, day: 27 },
+    { name: 'Miami Grand Prix', circuit: 'Miami International Autodrome', track: 'miami', month: 5, day: 4 },
+    { name: 'Emilia Romagna Grand Prix', circuit: 'Imola', track: 'imola', month: 5, day: 18 },
+    { name: 'Monaco Grand Prix', circuit: 'Circuit de Monaco', track: 'monaco', month: 5, day: 25 },
+    { name: 'Canadian Grand Prix', circuit: 'Circuit Gilles Villeneuve', track: 'montreal', month: 6, day: 8 },
+    { name: 'Spanish Grand Prix', circuit: 'Circuit de Barcelona-Catalunya', track: 'barcelona', month: 6, day: 22 },
+    { name: 'Austrian Grand Prix', circuit: 'Red Bull Ring', track: 'redbullring', month: 6, day: 29 },
+    { name: 'British Grand Prix', circuit: 'Silverstone Circuit', track: 'silverstone', month: 7, day: 6 },
+    { name: 'Belgian Grand Prix', circuit: 'Circuit de Spa-Francorchamps', track: 'spa', month: 7, day: 27 },
+    { name: 'Hungarian Grand Prix', circuit: 'Hungaroring', track: 'hungaroring', month: 8, day: 3 },
+    { name: 'Dutch Grand Prix', circuit: 'Circuit Zandvoort', track: 'zandvoort', month: 8, day: 31 },
+    { name: 'Italian Grand Prix', circuit: 'Autodromo Nazionale Monza', track: 'monza', month: 9, day: 7 },
+    { name: 'Azerbaijan Grand Prix', circuit: 'Baku City Circuit', track: 'baku', month: 9, day: 21 },
+    { name: 'Singapore Grand Prix', circuit: 'Marina Bay Street Circuit', track: 'singapore', month: 10, day: 5 },
+    { name: 'United States Grand Prix', circuit: 'Circuit of the Americas', track: 'cota', month: 10, day: 19 },
+    { name: 'Mexico City Grand Prix', circuit: 'Autódromo Hermanos Rodríguez', track: 'mexico', month: 10, day: 26 },
+    { name: 'São Paulo Grand Prix', circuit: 'Interlagos', track: 'interlagos', month: 11, day: 9 },
+    { name: 'Las Vegas Grand Prix', circuit: 'Las Vegas Strip Circuit', track: 'vegas', month: 11, day: 22 },
+    { name: 'Qatar Grand Prix', circuit: 'Lusail International Circuit', track: 'lusail', month: 11, day: 30 },
+    { name: 'Abu Dhabi Grand Prix', circuit: 'Yas Marina Circuit', track: 'yasmarina', month: 12, day: 7 }
   ];
   function nextRace() {
     const now = new Date();
@@ -648,7 +649,7 @@ const OS = (() => {
   document.addEventListener('DOMContentLoaded', boot);
 
   return {
-    wallpapers, appList, prefs,
+    wallpapers, wallpaperCss, appList, prefs, nextRace,
     setTheme, toggleTheme, setAccent, setWallpaper, setCustomWallpaper, setFontSize, setReduceMotion,
     setHighContrast, setClock24h, setUsername, setIconSize, setBrightness,
     showContextMenu, hideContextMenu, lock, unlock, storageUsage, openLaunchpad, openSpotlight,

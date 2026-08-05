@@ -330,7 +330,7 @@ Apps.settings = function (openSection) {
             <div class="settings-card">
               <div class="label-title" style="margin-bottom:10px;">Wallpaper</div>
               <div class="wallpaper-row" data-role="wp-row">
-                ${OS.wallpapers.map((w, i) => `<div class="wallpaper-thumb" style="background:${w}" data-wp="${i}"></div>`).join('')}
+                ${OS.wallpapers.map((_, i) => `<div class="wallpaper-thumb" style="background:${OS.wallpaperCss(i)}" data-wp="${i}"></div>`).join('')}
               </div>
               <div style="margin-top:10px;display:flex;gap:8px;align-items:center;">
                 <button data-act="upload-wp">${Icons.inline('upload')}<span>Upload custom image…</span></button>
@@ -545,7 +545,7 @@ Apps.photos = function () {
     title: 'Photos', icon: 'photos', appId: 'photos', single: true, width: 520, height: 400,
     onMount(body) {
       const wallpapers = OS.wallpapers;
-      body.innerHTML = `<div class="gallery">${wallpapers.map((w, i) => `<div class="card" style="background:${w}"><span>Wallpaper ${i + 1}</span></div>`).join('')}</div>`;
+      body.innerHTML = `<div class="gallery">${wallpapers.map((_, i) => `<div class="card" style="background:${OS.wallpaperCss(i)}"><span>Wallpaper ${i + 1}</span></div>`).join('')}</div>`;
       body.querySelectorAll('.card').forEach((c, i) => c.onclick = () => OS.setWallpaper(i));
     }
   });

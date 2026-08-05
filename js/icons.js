@@ -150,22 +150,58 @@ const Icons = (() => {
   /* Stylized side-view F1 car — standalone graphic (not a 24x24 tile icon), used by the race widget */
   function carSvg(body1, body2) {
     body1 = body1 || '#ff6b5e'; body2 = body2 || '#c81e1e';
-    return `<svg viewBox="0 0 200 70" xmlns="http://www.w3.org/2000/svg">
-      <defs><linearGradient id="rw-car-g" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="${body1}"/><stop offset="1" stop-color="${body2}"/>
-      </linearGradient></defs>
-      <ellipse cx="100" cy="62" rx="88" ry="4.5" fill="#000" opacity=".28"/>
-      <rect x="160" y="14" width="3" height="15" fill="#17181c"/>
-      <rect x="185" y="14" width="3" height="15" fill="#17181c"/>
-      <rect x="158" y="17" width="30" height="4" rx="1" fill="#17181c"/>
-      <rect x="172" y="21" width="3" height="10" fill="#17181c"/>
-      <path d="M4 42 20 35 58 27 100 25 140 29 176 38 176 46 150 46 150 50 40 50 40 46 4 46Z" fill="url(#rw-car-g)"/>
-      <path d="M74 27 Q86 12 101 25Z" fill="#17181c"/>
-      <rect x="0" y="43" width="24" height="4" rx="1" fill="#17181c"/>
-      <circle cx="33" cy="50" r="13" fill="#17181c"/>
-      <circle cx="33" cy="50" r="6.5" fill="#3a3d44"/>
-      <circle cx="159" cy="50" r="15.5" fill="#17181c"/>
-      <circle cx="159" cy="50" r="7.5" fill="#3a3d44"/>
+    const dark = '#0e0f12', rim = '#4a4e57', tire = '#17181c';
+    return `<svg viewBox="0 0 240 84" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="rw-car-g" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="${body1}"/><stop offset="1" stop-color="${body2}"/>
+        </linearGradient>
+        <linearGradient id="rw-car-rim" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="${rim}"/><stop offset="1" stop-color="#22242a"/>
+        </linearGradient>
+      </defs>
+      <ellipse cx="122" cy="75" rx="108" ry="4.5" fill="#000" opacity=".3"/>
+
+      <!-- rear wing -->
+      <rect x="205" y="16" width="3.4" height="20" fill="${dark}"/>
+      <rect x="230" y="16" width="3.4" height="20" fill="${dark}"/>
+      <rect x="203" y="19" width="32" height="4.2" rx="1" fill="${dark}"/>
+      <rect x="203" y="27" width="32" height="3" rx="1" fill="${dark}" opacity=".7"/>
+      <rect x="217" y="36" width="3" height="12" fill="${dark}"/>
+
+      <!-- rear wheel -->
+      <circle cx="196" cy="60" r="18.5" fill="${tire}"/>
+      <circle cx="196" cy="60" r="10.5" fill="url(#rw-car-rim)"/>
+      <path d="M196 51v18M187 60h18M189.5 53.5l13 13M202.5 53.5l-13 13" stroke="#5b5f68" stroke-width="1.1"/>
+
+      <!-- floor / diffuser -->
+      <path d="M150 66 210 66 216 72 140 72Z" fill="${dark}"/>
+
+      <!-- body -->
+      <path d="M4 52 22 44 55 36 88 33 108 32 132 33 165 38 196 48 196 55 172 55 172 60 55 60 55 55 22 55 4 55Z" fill="url(#rw-car-g)"/>
+      <path d="M60 55 200 55 200 58 60 58Z" fill="${dark}" opacity=".35"/>
+
+      <!-- sidepod intake -->
+      <path d="M138 38 165 40 165 52 142 52Z" fill="${dark}" opacity=".55"/>
+
+      <!-- halo + cockpit -->
+      <path d="M96 33 Q108 12 128 32" fill="none" stroke="${dark}" stroke-width="4.2" stroke-linecap="round"/>
+      <path d="M100 33 Q109 22 124 32Z" fill="#1c1e24"/>
+      <circle cx="112" cy="27" r="4.6" fill="#c7cbd2"/>
+
+      <!-- livery accent stripe -->
+      <path d="M60 36 100 33 96 46 55 49Z" fill="#ffffff" opacity=".85"/>
+
+      <!-- front wing -->
+      <rect x="0" y="49" width="26" height="3.2" rx="1" fill="${dark}"/>
+      <rect x="0" y="53.5" width="26" height="2.4" rx="1" fill="${dark}" opacity=".7"/>
+      <rect x="0" y="45" width="3" height="14" fill="${dark}"/>
+      <rect x="23" y="45" width="3" height="14" fill="${dark}"/>
+
+      <!-- front wheel -->
+      <circle cx="36" cy="58" r="14" fill="${tire}"/>
+      <circle cx="36" cy="58" r="7.8" fill="url(#rw-car-rim)"/>
+      <path d="M36 51.5v13M29.5 58h13M31.5 53.5l9 9M40.5 53.5l-9 9" stroke="#5b5f68" stroke-width=".9"/>
     </svg>`;
   }
   return { svg, html, monoSvg, inlineSvg, inline, carSvg };
