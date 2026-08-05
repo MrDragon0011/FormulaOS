@@ -46,23 +46,44 @@ const Icons = (() => {
     chevronDown: '<path d="M6 9l6 6 6-6"/>',
     fileGeneric: '<path d="M7 3.5h7l4 4V20a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1z"/>'
   };
+  /* Restrained DragonOS palette — six families, each a soft-to-deep pair.
+     Every icon is assigned one family; glyph shape (not hue) carries identity. */
+  const family = {
+    blue: ['#8fc7ff', '#3f7fd9'],
+    violet: ['#b9a3f5', '#6c4fd4'],
+    slate: ['#c3cad6', '#6b7686'],
+    slateDeep: ['#7c8698', '#3d4552'],
+    orange: ['#ffbe86', '#e8813a'],
+    emerald: ['#8fe0b8', '#2a9d63'],
+    cyan: ['#8fe3ea', '#2a9bab']
+  };
   const colors = {
-    explorer: ['#5ec8ff', '#1d7fd6'], trash: ['#9aa3ad', '#5b6572'], 'trash-full': ['#ffab5e', '#d6650c'], notepad: ['#ffd166', '#e8960c'],
-    terminal: ['#4b5563', '#161b22'], browser: ['#6fc3ff', '#3457d5'], calculator: ['#9ca7b3', '#4a5560'],
-    notes: ['#ffe073', '#f0a500'], photos: ['#ff9d9d', '#e0457b'], paint: ['#ff9ed8', '#8b5cf6'],
-    media: ['#a78bfa', '#6d28d9'], calendar: ['#ff8a8a', '#dc2626'], weather: ['#8ecdff', '#2b83d6'],
-    taskmgr: ['#7ee08a', '#209b4b'], snake: ['#7bdd8a', '#1f8f45'], settings: ['#a7b0ba', '#4a5560'],
-    about: ['#ffab5e', '#e0611a'], dragon: ['#ffab5e', '#e0611a'], launchpad: ['#c4c9ff', '#5865e0'],
-    search: ['#9aa3ad', '#4a5560'], file: ['#c3cad4', '#6b7686'], music: ['#a78bfa', '#6d28d9'],
-    sun: ['#ffd166', '#f59f00'], 'cloud-rain': ['#8ecdff', '#2b83d6'], snowflake: ['#bfe9ff', '#5fb3e0']
+    explorer: family.blue, trash: family.slate, 'trash-full': family.orange, notepad: family.orange,
+    terminal: family.slateDeep, browser: family.cyan, calculator: family.slate,
+    notes: family.orange, photos: family.violet, paint: family.violet,
+    media: family.violet, calendar: family.orange, weather: family.cyan,
+    taskmgr: family.emerald, snake: family.emerald, settings: family.slate,
+    about: family.orange, dragon: family.orange, launchpad: family.violet,
+    search: family.slate, file: family.slate, music: family.violet,
+    sun: family.orange, 'cloud-rain': family.cyan, snowflake: family.cyan
   };
   function svg(id) {
     const g = glyphs[id] || glyphs.about;
-    const [c1, c2] = colors[id] || ['#999', '#555'];
-    const gid = 'ic-g-' + id;
-    return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">` +
-      `<defs><linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs>` +
-      `<rect x="1" y="1" width="22" height="22" rx="5.5" fill="url(#${gid})" stroke="none"/>` +
+    const [c1, c2] = colors[id] || family.slate;
+    const gid = 'ic-g-' + id, hid = 'ic-h-' + id, sid = 'ic-s-' + id, cid = 'ic-c-' + id;
+    return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="rgba(255,255,255,.96)" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round">` +
+      `<defs>` +
+        `<linearGradient id="${gid}" x1="0" y1="0" x2="0.85" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient>` +
+        `<linearGradient id="${hid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/></linearGradient>` +
+        `<linearGradient id="${sid}" x1="0" y1="0" x2="0" y2="1"><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".16"/></linearGradient>` +
+        `<clipPath id="${cid}"><rect x="1" y="1" width="22" height="22" rx="5.3"/></clipPath>` +
+      `</defs>` +
+      `<g clip-path="url(#${cid})">` +
+        `<rect x="1" y="1" width="22" height="22" fill="url(#${gid})"/>` +
+        `<rect x="1" y="1" width="22" height="22" fill="url(#${sid})"/>` +
+        `<rect x="1" y="1" width="22" height="11" fill="url(#${hid})"/>` +
+      `</g>` +
+      `<rect x="1.4" y="1.4" width="21.2" height="21.2" rx="5" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width=".7"/>` +
       g + `</svg>`;
   }
   function html(id, cls) {
