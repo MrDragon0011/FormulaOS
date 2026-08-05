@@ -1,12 +1,12 @@
 /* DragonOS Core */
 const OS = (() => {
   const wallpapers = [
-    'linear-gradient(160deg,#1b0f2e,#3a1258 55%,#7a1f3d)',
-    'linear-gradient(160deg,#0f2027,#203a43 55%,#2c5364)',
-    'linear-gradient(160deg,#3a1c71,#d76d77 55%,#ffaf7b)',
-    'linear-gradient(160deg,#0b486b,#f56217)',
-    'linear-gradient(160deg,#141e30,#243b55)',
-    'linear-gradient(160deg,#654ea3,#eaafc8)'
+    'radial-gradient(120% 100% at 50% 0%, #241a35, #1a1327 100%)',
+    'radial-gradient(120% 100% at 50% 0%, #16232b, #0f171c 100%)',
+    'radial-gradient(120% 100% at 50% 0%, #2a1f3d, #241834 100%)',
+    'radial-gradient(120% 100% at 50% 0%, #123044, #0d2130 100%)',
+    'radial-gradient(120% 100% at 50% 0%, #1c2333, #151a26 100%)',
+    'radial-gradient(120% 100% at 50% 0%, #2e2140, #221933 100%)'
   ];
 
   const appList = [
@@ -126,11 +126,11 @@ const OS = (() => {
     const icons = document.getElementById('icons');
     icons.dataset.size = prefs.iconSize;
     icons.innerHTML = '';
-    const shortcuts = ['explorer', 'notepad', 'terminal', 'browser', 'about', 'trash'].map(id => appList.find(a => a.id === id));
+    const shortcuts = ['trash', 'calculator', 'notes', 'about'].map(id => appList.find(a => a.id === id));
     shortcuts.forEach(app => {
       const el = document.createElement('div');
       el.className = 'desktop-icon';
-      el.innerHTML = `<div class="emoji">${app.emoji}</div><div class="label">${app.label}</div>`;
+      el.innerHTML = `${Icons.html(app.id)}<div class="label">${app.label}</div>`;
       el.onclick = () => {
         document.querySelectorAll('.desktop-icon').forEach(x => x.classList.remove('selected'));
         el.classList.add('selected');
@@ -167,7 +167,7 @@ const OS = (() => {
     const el = document.createElement('div');
     el.className = 'dock-item';
     el.dataset.app = app.id;
-    el.innerHTML = `<span>${app.emoji}</span><span class="dock-label">${app.label}</span>${running ? '<span class="dot"></span>' : ''}`;
+    el.innerHTML = `${Icons.html(app.id)}<span class="dock-label">${app.label}</span>${running ? '<span class="dot"></span>' : ''}`;
     el.onclick = () => activateApp(app);
     el.oncontextmenu = (e) => {
       e.preventDefault();
@@ -185,7 +185,7 @@ const OS = (() => {
     dock.innerHTML = '';
     const launchpadBtn = document.createElement('div');
     launchpadBtn.className = 'dock-item';
-    launchpadBtn.innerHTML = `<span>🚀</span><span class="dock-label">Launchpad</span>`;
+    launchpadBtn.innerHTML = `<span class="app-icon mono-tile">${Icons.monoSvg('rocket')}</span><span class="dock-label">Launchpad</span>`;
     launchpadBtn.onclick = openLaunchpad;
     dock.appendChild(launchpadBtn);
     dock.appendChild(sepEl());
@@ -224,7 +224,7 @@ const OS = (() => {
       appList.filter(a => a.id !== 'trash').filter(a => !filter || a.label.toLowerCase().includes(filter.toLowerCase())).forEach(app => {
         const el = document.createElement('div');
         el.className = 'lp-app';
-        el.innerHTML = `<div class="emoji">${app.emoji}</div><div>${app.label}</div>`;
+        el.innerHTML = `${Icons.html(app.id)}<div>${app.label}</div>`;
         el.onclick = () => { app.run(); closeLaunchpad(); };
         grid.appendChild(el);
       });
@@ -246,7 +246,7 @@ const OS = (() => {
     function renderResults(q) {
       matches = !q ? [] : appList.filter(a => a.label.toLowerCase().includes(q.toLowerCase()));
       sel = 0;
-      results.innerHTML = matches.map((a, i) => `<div class="sr-item${i === 0 ? ' sel' : ''}" data-i="${i}"><span class="emoji">${a.emoji}</span><span>${a.label}</span></div>`).join('');
+      results.innerHTML = matches.map((a, i) => `<div class="sr-item${i === 0 ? ' sel' : ''}" data-i="${i}">${Icons.html(a.id)}<span>${a.label}</span></div>`).join('');
       results.querySelectorAll('.sr-item').forEach(el => {
         el.onclick = () => { activateApp(matches[el.dataset.i]); closeSpotlight(); };
       });
@@ -401,6 +401,14 @@ const OS = (() => {
   }
 
   function boot() {
+    document.getElementById('boot-logo-icon').innerHTML = Icons.svg('dragon');
+    document.getElementById('lock-avatar-icon').innerHTML = Icons.svg('dragon');
+    document.getElementById('mb-logo-btn').innerHTML = Icons.svg('dragon');
+    document.getElementById('mb-search').innerHTML = Icons.monoSvg('search');
+    document.getElementById('mb-wifi').innerHTML = Icons.monoSvg('wifi');
+    document.getElementById('mb-battery').innerHTML = Icons.monoSvg('battery');
+    document.getElementById('mb-control').innerHTML = Icons.monoSvg('control');
+    document.getElementById('spotlight-icon').innerHTML = Icons.monoSvg('search');
     applyPrefs();
     renderDesktopIcons();
     renderDock();

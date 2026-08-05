@@ -1,9 +1,9 @@
 :root{
   --accent:#ff5f45;
   --accent-2:#ffa53e;
-  --bg-desktop-1:#1b0f2e;
-  --bg-desktop-2:#3a1258;
-  --bg-desktop-3:#7a1f3d;
+  --bg-desktop-1:#241a35;
+  --bg-desktop-2:#241a35;
+  --bg-desktop-3:#1a1327;
   --bar-bg:rgba(28,22,40,.55);
   --bar-border:rgba(255,255,255,.08);
   --window-bg:rgba(34,28,48,.86);
@@ -12,14 +12,16 @@
   --text-dim:#a89fc4;
   --border:rgba(255,255,255,.11);
   --radius:11px;
+  --radius-sm:7px;
+  --radius-lg:16px;
   --shadow:0 24px 60px rgba(0,0,0,.5), 0 2px 8px rgba(0,0,0,.3);
   --dock-bg:rgba(40,32,56,.55);
   color-scheme: dark;
 }
 :root[data-theme="light"]{
-  --bg-desktop-1:#bcd6ff;
-  --bg-desktop-2:#e9c9ff;
-  --bg-desktop-3:#ffd7c2;
+  --bg-desktop-1:#dbe6f5;
+  --bg-desktop-2:#dbe6f5;
+  --bg-desktop-3:#cfd9ea;
   --bar-bg:rgba(255,255,255,.55);
   --bar-border:rgba(0,0,0,.06);
   --window-bg:rgba(255,255,255,.82);
@@ -54,9 +56,22 @@
 
 /* Desktop icon sizes */
 #icons[data-size="sm"] .desktop-icon{width:66px;height:70px;}
-#icons[data-size="sm"] .desktop-icon .emoji{font-size:24px;}
+#icons[data-size="sm"] .desktop-icon .app-icon{width:26px;height:26px;}
 #icons[data-size="lg"] .desktop-icon{width:104px;height:106px;}
-#icons[data-size="lg"] .desktop-icon .emoji{font-size:44px;}
+#icons[data-size="lg"] .desktop-icon .app-icon{width:46px;height:46px;}
+
+/* ---------- Custom app icons (SVG, replaces emoji) ---------- */
+.app-icon{display:inline-flex;flex:none;filter:drop-shadow(0 3px 6px rgba(0,0,0,.3));}
+.app-icon svg{width:100%;height:100%;display:block;}
+.mono-tile{background:rgba(255,255,255,.1);border-radius:22%;padding:9px;box-sizing:border-box;}
+.mono-tile svg{color:var(--text);}
+.mb-icon svg{width:15px;height:15px;color:var(--text);}
+#spotlight-icon svg{width:20px;height:20px;color:var(--text-dim);}
+.boot-logo .app-icon, .boot-logo svg{width:72px;height:72px;}
+.lock-avatar .app-icon, .lock-avatar svg{width:76px;height:76px;}
+.mb-logo .app-icon, .mb-logo svg{width:18px;height:18px;}
+.adi-icon{width:20px;height:20px;vertical-align:middle;margin-right:2px;}
+.about-icon{width:60px;height:60px;}
 
 *{box-sizing:border-box;}
 html,body{height:100%;margin:0;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;}
@@ -76,7 +91,7 @@ button{font-family:inherit;}
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
   color:#fff;transition:opacity .6s ease;
 }
-.boot-logo{font-size:72px;filter:drop-shadow(0 0 30px #ff6b4a);animation:pulse 1.6s ease-in-out infinite;}
+.boot-logo{width:72px;height:72px;filter:drop-shadow(0 0 30px #ff6b4a);animation:pulse 1.6s ease-in-out infinite;}
 .boot-title{font-size:26px;letter-spacing:6px;font-weight:600;background:linear-gradient(90deg,#ff8a5c,#ffd36e);-webkit-background-clip:text;background-clip:text;color:transparent;}
 .boot-bar{width:240px;height:6px;border-radius:4px;background:rgba(255,255,255,.12);overflow:hidden;}
 .boot-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent-2));animation:load 1.8s ease forwards;}
@@ -87,7 +102,7 @@ button{font-family:inherit;}
 /* ---------- Lock screen ---------- */
 #lock-screen{
   position:fixed;inset:0;z-index:9998;cursor:pointer;
-  background:linear-gradient(160deg,var(--bg-desktop-1),var(--bg-desktop-2) 55%,var(--bg-desktop-3));
+  background:radial-gradient(120% 100% at 50% 0%, var(--bg-desktop-1), var(--bg-desktop-3) 100%);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
   transition:opacity .4s ease, transform .4s ease;
 }
@@ -95,7 +110,7 @@ button{font-family:inherit;}
 #lock-time{font-size:96px;font-weight:200;letter-spacing:2px;}
 #lock-date{font-size:20px;color:var(--text-dim);}
 .lock-user{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:26px;}
-.lock-avatar{width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-size:36px;box-shadow:0 10px 30px rgba(0,0,0,.35);}
+.lock-avatar{width:76px;height:76px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(0,0,0,.35);}
 .lock-username{font-size:15px;font-weight:600;}
 .lock-hint{position:absolute;bottom:60px;font-size:13px;color:var(--text-dim);animation:blink 2s infinite;}
 @keyframes blink{0%,100%{opacity:.4}50%{opacity:1}}
@@ -103,7 +118,7 @@ button{font-family:inherit;}
 /* ---------- Desktop ---------- */
 #desktop{
   position:fixed;left:0;right:0;top:28px;bottom:0;
-  background:linear-gradient(160deg,var(--bg-desktop-1),var(--bg-desktop-2) 55%,var(--bg-desktop-3));
+  background:radial-gradient(120% 100% at 50% 0%, var(--bg-desktop-1), var(--bg-desktop-3) 100%);
   background-size:cover;background-position:center;
   overflow:hidden;
 }
@@ -118,12 +133,12 @@ button{font-family:inherit;}
   padding:8px 4px;border-radius:10px;cursor:pointer;text-align:center;
 }
 .desktop-icon:hover, .desktop-icon.selected{background:rgba(255,255,255,.14);}
-.desktop-icon .emoji{font-size:34px;filter:drop-shadow(0 4px 6px rgba(0,0,0,.35));}
+.desktop-icon .app-icon{width:36px;height:36px;}
 .desktop-icon .label{font-size:11.5px;line-height:1.2;color:var(--text);text-shadow:0 1px 3px rgba(0,0,0,.5);word-break:break-word;}
 
 #context-menu{
   position:fixed;z-index:500;min-width:200px;background:var(--window-bg);border:1px solid var(--border);
-  border-radius:10px;box-shadow:var(--shadow);padding:6px;backdrop-filter:blur(20px);
+  border-radius:var(--radius);box-shadow:var(--shadow);padding:6px;backdrop-filter:blur(20px);
 }
 .ctx-item{padding:8px 12px;border-radius:6px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px;}
 .ctx-item:hover{background:var(--accent);color:#fff;}
@@ -187,7 +202,7 @@ button{font-family:inherit;}
 
 #mb-dropdown{
   position:fixed;z-index:601;min-width:220px;background:var(--window-bg);border:1px solid var(--border);
-  border-radius:9px;box-shadow:var(--shadow);padding:5px;backdrop-filter:blur(24px);top:30px;
+  border-radius:var(--radius);box-shadow:var(--shadow);padding:5px;backdrop-filter:blur(24px);top:30px;
   animation:winOpen .12s ease;
 }
 #mb-dropdown .dd-item{padding:7px 12px;border-radius:6px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;color:var(--text);}
@@ -203,12 +218,13 @@ button{font-family:inherit;}
 #dock{
   pointer-events:auto;display:flex;align-items:flex-end;gap:6px;padding:8px 10px;
   background:var(--dock-bg);backdrop-filter:blur(28px) saturate(1.8);border:1px solid var(--bar-border);
-  border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,.35);max-width:92vw;overflow-x:auto;
+  border-radius:var(--radius-lg);box-shadow:0 12px 40px rgba(0,0,0,.35);max-width:92vw;overflow-x:auto;
 }
 .dock-item{
   position:relative;width:48px;height:48px;flex:none;display:flex;align-items:center;justify-content:center;
-  font-size:28px;border-radius:12px;cursor:pointer;transition:transform .12s ease, width .12s ease;
+  border-radius:12px;cursor:pointer;transition:transform .12s ease, width .12s ease;
 }
+.dock-item .app-icon{width:44px;height:44px;}
 .dock-item:hover{transform:translateY(-8px) scale(1.15);}
 .dock-item .dot{position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--text);}
 .dock-item .dock-label{
@@ -237,7 +253,7 @@ button{font-family:inherit;}
 }
 .sr-item{display:flex;align-items:center;gap:10px;padding:9px 16px;font-size:13px;cursor:pointer;color:var(--text);}
 .sr-item:hover, .sr-item.sel{background:var(--accent);color:#fff;}
-.sr-item .emoji{font-size:18px;}
+.sr-item .app-icon{width:20px;height:20px;}
 
 /* ---------- Launchpad ---------- */
 #launchpad{
@@ -254,13 +270,13 @@ button{font-family:inherit;}
 }
 .lp-app{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;padding:8px;border-radius:12px;}
 .lp-app:hover{background:rgba(255,255,255,.08);}
-.lp-app .emoji{font-size:44px;filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));}
+.lp-app .app-icon{width:56px;height:56px;}
 .lp-app .lp-app{font-size:12px;}
 
 /* ---------- Control Center ---------- */
 #control-center{
   position:fixed;top:32px;right:10px;z-index:601;width:280px;
-  background:var(--window-bg);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);
+  background:var(--window-bg);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow);
   backdrop-filter:blur(28px);padding:12px;animation:winOpen .12s ease;
 }
 .cc-row{display:flex;gap:8px;margin-bottom:8px;}

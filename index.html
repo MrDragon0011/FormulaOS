@@ -14,7 +14,7 @@
 
 <!-- Boot Screen -->
 <div id="boot-screen">
-  <div class="boot-logo">🐉</div>
+  <div class="boot-logo" id="boot-logo-icon"></div>
   <div class="boot-title">DragonOS</div>
   <div class="boot-bar"><div class="boot-bar-fill"></div></div>
   <div class="boot-status">Starting up…</div>
@@ -27,7 +27,7 @@
     <div id="lock-date">Day, Month 0</div>
   </div>
   <div class="lock-user">
-    <div class="lock-avatar">🐉</div>
+    <div class="lock-avatar" id="lock-avatar-icon"></div>
     <div class="lock-username" id="lock-username">Dragon</div>
   </div>
   <div class="lock-hint">Click anywhere or press any key to unlock</div>
@@ -36,7 +36,7 @@
 <!-- Menu Bar (top, macOS-style) -->
 <div id="menubar">
   <div class="mb-left">
-    <div class="mb-item mb-logo" id="mb-logo-btn">🐉</div>
+    <div class="mb-item mb-logo" id="mb-logo-btn"></div>
     <div class="mb-item mb-appname" id="mb-appname">Finder</div>
     <div class="mb-item mb-menu" data-menu="file">File</div>
     <div class="mb-item mb-menu" data-menu="edit">Edit</div>
@@ -45,10 +45,10 @@
     <div class="mb-item mb-menu" data-menu="help">Help</div>
   </div>
   <div class="mb-right">
-    <div class="mb-item mb-icon" id="mb-search">🔍</div>
-    <div class="mb-item mb-icon" id="mb-wifi">📶</div>
-    <div class="mb-item mb-icon" id="mb-battery">🔋</div>
-    <div class="mb-item mb-icon" id="mb-control">🎛️</div>
+    <div class="mb-item mb-icon" id="mb-search"></div>
+    <div class="mb-item mb-icon" id="mb-wifi"></div>
+    <div class="mb-item mb-icon" id="mb-battery"></div>
+    <div class="mb-item mb-icon" id="mb-control"></div>
     <div class="mb-item mb-clock" id="mb-clock">
       <span id="clock-date">--</span>&nbsp;<span id="clock-time">00:00</span>
     </div>
@@ -67,7 +67,7 @@
 <!-- Spotlight Search -->
 <div id="spotlight" class="hidden">
   <div class="spotlight-box">
-    <span class="spotlight-icon">🔍</span>
+    <span class="spotlight-icon" id="spotlight-icon"></span>
     <input id="spotlight-input" placeholder="Spotlight Search" autocomplete="off" />
   </div>
   <div id="spotlight-results"></div>
@@ -87,6 +87,7 @@
 <!-- Control Center popover -->
 <div id="control-center" class="hidden"></div>
 
+<script src="js/icons.js"></script>
 <script src="js/fs.js"></script>
 <script src="js/windows.js"></script>
 <script src="js/apps.js"></script>

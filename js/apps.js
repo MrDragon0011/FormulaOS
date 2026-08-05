@@ -429,7 +429,7 @@ Apps.settings = function (openSection) {
             <div class="settings-section-title">Apps</div>
             <div class="settings-section-desc">${OS.appList.length} apps installed on DragonOS.</div>
             <div class="app-directory">
-              ${OS.appList.map(a => `<div class="adi" data-app="${a.id}">${a.emoji} ${a.label}</div>`).join('')}
+              ${OS.appList.map(a => `<div class="adi" data-app="${a.id}">${Icons.html(a.id, 'adi-icon')} ${a.label}</div>`).join('')}
             </div>`;
           content.querySelectorAll('[data-app]').forEach(el => {
             el.onclick = () => { const app = OS.appList.find(a => a.id === el.dataset.app); if (app) app.run(); };
@@ -520,7 +520,7 @@ Apps.about = function () {
     onMount(body) {
       body.innerHTML = `
         <div class="about-hero">
-          <div class="emoji">🐉</div>
+          ${Icons.html('dragon', 'about-icon')}
           <h2 style="margin:0">DragonOS</h2>
           <div style="color:var(--text-dim);font-size:13px">Version 1.0 — a web-based operating system</div>
         </div>
