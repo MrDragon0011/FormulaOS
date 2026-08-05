@@ -267,52 +267,209 @@ Apps.browser = function () {
 };
 
 /* ---------------- Settings ---------------- */
-Apps.settings = function () {
+Apps.settings = function (openSection) {
   WM.open({
-    title: 'Settings', icon: '⚙️', appId: 'settings', single: true, width: 480, height: 420,
+    title: 'Settings', icon: '⚙️', appId: 'settings', single: true, width: 620, height: 500,
     onMount(body) {
+      const SECTIONS = [
+        { id: 'appearance', label: 'Appearance', icon: '🎨' },
+        { id: 'desktop', label: 'Desktop & Icons', icon: '🖥️' },
+        { id: 'accessibility', label: 'Accessibility', icon: '♿' },
+        { id: 'datetime', label: 'Date & Time', icon: '🕐' },
+        { id: 'account', label: 'Account', icon: '👤' },
+        { id: 'apps', label: 'Apps', icon: '🧩' },
+        { id: 'storage', label: 'Storage', icon: '💾' },
+        { id: 'about', label: 'About', icon: 'ℹ️' },
+      ];
       body.innerHTML = `
-        <div class="settings-nav">
-          <button class="active" data-tab="appearance">🎨 Appearance</button>
-          <button data-tab="system">🖥️ System</button>
-        </div>
-        <div class="app-pad" id="settings-content"></div>`;
+        <div class="settings-shell">
+          <div class="settings-sidebar">
+            ${SECTIONS.map(s => `<div class="item" data-s="${s.id}">${s.icon} ${s.label}</div>`).join('')}
+          </div>
+          <div class="settings-main app-pad" id="settings-content"></div>
+        </div>`;
       const content = body.querySelector('#settings-content');
-      const tabs = body.querySelectorAll('.settings-nav button');
-      tabs.forEach(t => t.onclick = () => { tabs.forEach(x => x.classList.remove('active')); t.classList.add('active'); render(t.dataset.tab); });
+      const navItems = body.querySelectorAll('.settings-sidebar .item');
 
-      function render(tab) {
-        if (tab === 'appearance') {
+      function activate(section) {
+        navItems.forEach(it => it.classList.toggle('active', it.dataset.s === section));
+        render(section);
+      }
+      navItems.forEach(it => it.onclick = () => activate(it.dataset.s));
+
+      function toggleEl(on, onChange) {
+        const t = document.createElement('div');
+        t.className = 'toggle' + (on ? ' on' : '');
+        t.onclick = () => { const next = !t.classList.contains('on'); t.classList.toggle('on', next); onChange(next); };
+        return t;
+      }
+
+      function render(section) {
+        content.innerHTML = '';
+        if (section === 'appearance') {
           content.innerHTML = `
-            <h3 style="margin-top:0">Theme</h3>
-            <div class="app-toolbar" style="border:none;padding:0;margin-bottom:14px;">
-              <button data-theme="dark">🌙 Dark</button>
-              <button data-theme="light">☀️ Light</button>
+            <div class="settings-section-title">Appearance</div>
+            <div class="settings-section-desc">Customize how DragonOS looks.</div>
+            <div class="settings-card">
+              <div class="settings-row">
+                <div class="label-group"><div class="label-title">Theme</div><div class="label-sub">Light or dark interface</div></div>
+                <div class="seg" data-role="theme-seg">
+                  <button data-v="dark">🌙 Dark</button><button data-v="light">☀️ Light</button>
+                </div>
+              </div>
             </div>
-            <h3>Accent Color</h3>
-            <div class="swatch-row">
-              ${['#ff5f45', '#3e8bff', '#33c17a', '#c14fff', '#ff2e7e', '#ffb000'].map(c => `<div class="swatch" style="background:${c}" data-accent="${c}"></div>`).join('')}
+            <div class="settings-card">
+              <div class="label-title" style="margin-bottom:10px;">Accent Color</div>
+              <div class="swatch-row" data-role="accent-row">
+                ${['#ff5f45', '#3e8bff', '#33c17a', '#c14fff', '#ff2e7e', '#ffb000'].map(c => `<div class="swatch" style="background:${c}" data-accent="${c}"></div>`).join('')}
+              </div>
             </div>
-            <h3>Wallpaper</h3>
-            <div class="wallpaper-row">
-              ${OS.wallpapers.map((w, i) => `<div class="wallpaper-thumb" style="background:${w}" data-wp="${i}"></div>`).join('')}
+            <div class="settings-card">
+              <div class="label-title" style="margin-bottom:10px;">Wallpaper</div>
+              <div class="wallpaper-row" data-role="wp-row">
+                ${OS.wallpapers.map((w, i) => `<div class="wallpaper-thumb" style="background:${w}" data-wp="${i}"></div>`).join('')}
+              </div>
+              <div style="margin-top:10px;display:flex;gap:8px;align-items:center;">
+                <button data-act="upload-wp">📁 Upload custom image…</button>
+                <input type="file" accept="image/*" data-role="wp-file" style="display:none" />
+              </div>
             </div>`;
-          content.querySelectorAll('[data-theme]').forEach(b => b.onclick = () => OS.setTheme(b.dataset.theme));
-          content.querySelectorAll('[data-accent]').forEach(b => b.onclick = () => OS.setAccent(b.dataset.accent));
-          content.querySelectorAll('[data-wp]').forEach(b => b.onclick = () => OS.setWallpaper(parseInt(b.dataset.wp)));
-        } else {
+          const themeSeg = content.querySelector('[data-role="theme-seg"]');
+          [...themeSeg.children].forEach(b => { b.classList.toggle('active', b.dataset.v === OS.prefs.theme); b.onclick = () => { OS.setTheme(b.dataset.v); render('appearance'); }; });
+          content.querySelectorAll('[data-accent]').forEach(b => {
+            b.classList.toggle('active', b.dataset.accent === OS.prefs.accent);
+            b.onclick = () => { OS.setAccent(b.dataset.accent); render('appearance'); };
+          });
+          content.querySelectorAll('[data-wp]').forEach(b => {
+            b.classList.toggle('active', !OS.prefs.customWallpaper && parseInt(b.dataset.wp) === OS.prefs.wallpaper);
+            b.onclick = () => { OS.setWallpaper(parseInt(b.dataset.wp)); render('appearance'); };
+          });
+          const wpFile = content.querySelector('[data-role="wp-file"]');
+          content.querySelector('[data-act="upload-wp"]').onclick = () => wpFile.click();
+          wpFile.addEventListener('change', () => {
+            const f = wpFile.files[0]; if (!f) return;
+            const reader = new FileReader();
+            reader.onload = () => OS.setCustomWallpaper(reader.result);
+            reader.readAsDataURL(f);
+          });
+        } else if (section === 'desktop') {
           content.innerHTML = `
-            <h3 style="margin-top:0">System</h3>
-            <p style="font-size:13px;color:var(--text-dim)">DragonOS Web v1.0 — all data stored locally in your browser via localStorage.</p>
-            <div class="app-toolbar" style="border:none;padding:0;gap:10px;">
-              <button data-act="reset-fs">🗑️ Reset File System</button>
-              <button data-act="reset-all">♻️ Reset All Settings</button>
+            <div class="settings-section-title">Desktop & Icons</div>
+            <div class="settings-section-desc">Control icon size and desktop behavior.</div>
+            <div class="settings-card">
+              <div class="settings-row">
+                <div class="label-group"><div class="label-title">Icon Size</div><div class="label-sub">Size of desktop shortcuts</div></div>
+                <div class="seg" data-role="icon-seg">
+                  <button data-v="sm">Small</button><button data-v="md">Medium</button><button data-v="lg">Large</button>
+                </div>
+              </div>
+            </div>
+            <div class="settings-card">
+              <div class="settings-row">
+                <div class="label-group"><div class="label-title">Refresh Desktop</div><div class="label-sub">Re-render desktop icons</div></div>
+                <button data-act="refresh">🔄 Refresh</button>
+              </div>
             </div>`;
-          content.querySelector('[data-act="reset-fs"]').onclick = () => { if (confirm('Reset all files?')) DragonFS.reset(); };
+          const iconSeg = content.querySelector('[data-role="icon-seg"]');
+          [...iconSeg.children].forEach(b => { b.classList.toggle('active', b.dataset.v === OS.prefs.iconSize); b.onclick = () => { OS.setIconSize(b.dataset.v); render('desktop'); }; });
+          content.querySelector('[data-act="refresh"]').onclick = () => location.reload();
+        } else if (section === 'accessibility') {
+          content.innerHTML = `
+            <div class="settings-section-title">Accessibility</div>
+            <div class="settings-section-desc">Make DragonOS easier to see and use.</div>
+            <div class="settings-card">
+              <div class="settings-row">
+                <div class="label-group"><div class="label-title">Text Size</div><div class="label-sub">UI font scale</div></div>
+                <div class="seg" data-role="font-seg">
+                  <button data-v="sm">A</button><button data-v="md" style="font-size:14px;">A</button><button data-v="lg" style="font-size:16px;">A</button>
+                </div>
+              </div>
+              <div class="settings-row">
+                <div class="label-group"><div class="label-title">Reduce Motion</div><div class="label-sub">Disable window/boot animations</div></div>
+                <div data-role="motion-toggle"></div>
+              </div>
+              <div class="settings-row">
+                <div class="label-group"><div class="label-title">High Contrast</div><div class="label-sub">Stronger borders and text contrast</div></div>
+                <div data-role="contrast-toggle"></div>
+              </div>
+            </div>`;
+          const fontSeg = content.querySelector('[data-role="font-seg"]');
+          [...fontSeg.children].forEach(b => { b.classList.toggle('active', b.dataset.v === OS.prefs.fontSize); b.onclick = () => { OS.setFontSize(b.dataset.v); render('accessibility'); }; });
+          content.querySelector('[data-role="motion-toggle"]').appendChild(toggleEl(OS.prefs.reduceMotion, (v) => OS.setReduceMotion(v)));
+          content.querySelector('[data-role="contrast-toggle"]').appendChild(toggleEl(OS.prefs.highContrast, (v) => OS.setHighContrast(v)));
+        } else if (section === 'datetime') {
+          content.innerHTML = `
+            <div class="settings-section-title">Date & Time</div>
+            <div class="settings-section-desc">Time is read from your device clock.</div>
+            <div class="settings-card">
+              <div class="settings-row">
+                <div class="label-group"><div class="label-title">24-Hour Time</div><div class="label-sub">Show taskbar clock in 24h format</div></div>
+                <div data-role="clock-toggle"></div>
+              </div>
+              <div class="settings-row">
+                <div class="label-group"><div class="label-title">Current Time</div></div>
+                <div class="label-sub" style="font-size:13px;">${new Date().toLocaleString()}</div>
+              </div>
+            </div>`;
+          content.querySelector('[data-role="clock-toggle"]').appendChild(toggleEl(OS.prefs.clock24h, (v) => OS.setClock24h(v)));
+        } else if (section === 'account') {
+          content.innerHTML = `
+            <div class="settings-section-title">Account</div>
+            <div class="settings-section-desc">Personalize your DragonOS profile.</div>
+            <div class="settings-card">
+              <div class="settings-row">
+                <div class="label-group"><div class="label-title">Display Name</div><div class="label-sub">Shown in the Start Menu</div></div>
+                <input type="text" data-role="username" value="${OS.prefs.username}" style="width:160px;" />
+              </div>
+            </div>`;
+          const input = content.querySelector('[data-role="username"]');
+          input.addEventListener('change', () => OS.setUsername(input.value.trim()));
+        } else if (section === 'apps') {
+          content.innerHTML = `
+            <div class="settings-section-title">Apps</div>
+            <div class="settings-section-desc">${OS.appList.length} apps installed on DragonOS.</div>
+            <div class="app-directory">
+              ${OS.appList.map(a => `<div class="adi" data-app="${a.id}">${a.emoji} ${a.label}</div>`).join('')}
+            </div>`;
+          content.querySelectorAll('[data-app]').forEach(el => {
+            el.onclick = () => { const app = OS.appList.find(a => a.id === el.dataset.app); if (app) app.run(); };
+          });
+        } else if (section === 'storage') {
+          const usage = OS.storageUsage();
+          const limitBytes = 5 * 1024 * 1024;
+          const pct = Math.min(100, Math.round((usage.total / limitBytes) * 100));
+          content.innerHTML = `
+            <div class="settings-section-title">Storage</div>
+            <div class="settings-section-desc">DragonOS stores all data locally in this browser via localStorage.</div>
+            <div class="settings-card">
+              <div class="label-title">${(usage.total / 1024).toFixed(1)} KB used <span style="color:var(--text-dim);font-weight:400;">(~5 MB browser limit)</span></div>
+              <div class="storage-bar"><div class="storage-bar-fill" style="width:${pct}%"></div></div>
+              ${usage.items.map(it => `<div class="settings-row"><div class="label-group"><div class="label-title" style="font-size:12px;">${it.key.replace('dragonos_', '')}</div></div><div class="label-sub">${(it.size / 1024).toFixed(1)} KB</div></div>`).join('')}
+            </div>
+            <div class="settings-card">
+              <div class="settings-row"><div class="label-group"><div class="label-title">Reset File System</div><div class="label-sub">Deletes all files and folders</div></div><button data-act="reset-fs">🗑️ Reset</button></div>
+              <div class="settings-row"><div class="label-group"><div class="label-title">Empty Recycle Bin</div></div><button data-act="empty-trash">🗑️ Empty</button></div>
+              <div class="settings-row"><div class="label-group"><div class="label-title">Reset All Settings & Data</div><div class="label-sub">Restores DragonOS to factory defaults</div></div><button data-act="reset-all">♻️ Reset All</button></div>
+            </div>`;
+          content.querySelector('[data-act="reset-fs"]').onclick = () => { if (confirm('Reset all files?')) { DragonFS.reset(); render('storage'); } };
+          content.querySelector('[data-act="empty-trash"]').onclick = () => { if (confirm('Empty the Recycle Bin?')) { DragonFS.emptyTrash(); render('storage'); } };
           content.querySelector('[data-act="reset-all"]').onclick = () => { if (confirm('Reset all DragonOS settings and files?')) { localStorage.clear(); location.reload(); } };
+        } else if (section === 'about') {
+          content.innerHTML = `
+            <div class="settings-section-title">About DragonOS</div>
+            <div class="settings-card" style="text-align:center;padding:26px;">
+              <div style="font-size:48px;">🐉</div>
+              <div style="font-weight:700;font-size:16px;margin-top:6px;">DragonOS Web</div>
+              <div class="label-sub">Version 1.0</div>
+            </div>
+            <div class="settings-card">
+              <div class="settings-row"><div class="label-title">Platform</div><div class="label-sub">${navigator.platform || 'Web'}</div></div>
+              <div class="settings-row"><div class="label-title">Screen</div><div class="label-sub">${window.innerWidth}×${window.innerHeight}</div></div>
+              <div class="settings-row"><div class="label-title">Apps Installed</div><div class="label-sub">${OS.appList.length}</div></div>
+            </div>`;
         }
       }
-      render('appearance');
+      activate(openSection || 'appearance');
     }
   });
 };

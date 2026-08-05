@@ -32,7 +32,11 @@ const OS = (() => {
     try { return JSON.parse(localStorage.getItem('dragonos_prefs_v1')) || {}; } catch (e) { return {}; }
   }
   function savePrefs(p) { localStorage.setItem('dragonos_prefs_v1', JSON.stringify(p)); }
-  let prefs = Object.assign({ theme: 'dark', accent: '#ff5f45', accent2: '#ffa53e', wallpaper: 0 }, loadPrefs());
+  let prefs = Object.assign({
+    theme: 'dark', accent: '#ff5f45', accent2: '#ffa53e', wallpaper: 0, customWallpaper: null,
+    fontSize: 'md', reduceMotion: false, highContrast: false, clock24h: false,
+    username: 'Dragon', iconSize: 'md'
+  }, loadPrefs());
 
   function setTheme(t) {
     prefs.theme = t;
@@ -46,18 +50,71 @@ const OS = (() => {
   }
   function setWallpaper(i) {
     prefs.wallpaper = i;
+    prefs.customWallpaper = null;
     document.getElementById('desktop').style.background = wallpapers[i];
+    savePrefs(prefs);
+  }
+  function setCustomWallpaper(dataUrl) {
+    prefs.customWallpaper = dataUrl;
+    document.getElementById('desktop').style.background = `center/cover no-repeat url(${dataUrl})`;
+    savePrefs(prefs);
+  }
+  function setFontSize(size) {
+    prefs.fontSize = size;
+    document.documentElement.dataset.fontsize = size;
+    savePrefs(prefs);
+  }
+  function setReduceMotion(on) {
+    prefs.reduceMotion = on;
+    document.documentElement.classList.toggle('reduce-motion', on);
+    savePrefs(prefs);
+  }
+  function setHighContrast(on) {
+    prefs.highContrast = on;
+    document.documentElement.classList.toggle('high-contrast', on);
+    savePrefs(prefs);
+  }
+  function setClock24h(on) {
+    prefs.clock24h = on;
+    savePrefs(prefs);
+    updateClock();
+  }
+  function setUsername(name) {
+    prefs.username = name || 'Dragon';
+    savePrefs(prefs);
+    renderStartMenu();
+  }
+  function setIconSize(size) {
+    prefs.iconSize = size;
+    document.getElementById('icons').dataset.size = size;
     savePrefs(prefs);
   }
 
   function applyPrefs() {
     document.documentElement.dataset.theme = prefs.theme;
+    document.documentElement.dataset.fontsize = prefs.fontSize;
+    document.documentElement.classList.toggle('reduce-motion', prefs.reduceMotion);
+    document.documentElement.classList.toggle('high-contrast', prefs.highContrast);
     document.documentElement.style.setProperty('--accent', prefs.accent);
-    document.getElementById('desktop').style.background = wallpapers[prefs.wallpaper] || wallpapers[0];
+    if (prefs.customWallpaper) document.getElementById('desktop').style.background = `center/cover no-repeat url(${prefs.customWallpaper})`;
+    else document.getElementById('desktop').style.background = wallpapers[prefs.wallpaper] || wallpapers[0];
+  }
+
+  function storageUsage() {
+    let total = 0;
+    const items = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      const size = (localStorage.getItem(k) || '').length;
+      total += size;
+      if (k.startsWith('dragonos_')) items.push({ key: k, size });
+    }
+    return { total, items };
   }
 
   function renderDesktopIcons() {
     const icons = document.getElementById('icons');
+    icons.dataset.size = prefs.iconSize;
     icons.innerHTML = '';
     const shortcuts = [
       appList.find(a => a.id === 'explorer'),
@@ -86,7 +143,7 @@ const OS = (() => {
       <input class="start-search" placeholder="Search apps..." />
       <div class="start-grid"></div>
       <div class="start-footer">
-        <span>🐉 DragonOS</span>
+        <span>🐉 Hi, ${prefs.username}</span>
         <button id="lock-btn">🔒 Lock</button>
       </div>`;
     const grid = menu.querySelector('.start-grid');
@@ -122,7 +179,7 @@ const OS = (() => {
 
   function updateClock() {
     const now = new Date();
-    const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: !prefs.clock24h });
     const date = now.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
     const ct = document.getElementById('clock-time'); if (ct) ct.textContent = time;
     const cd = document.getElementById('clock-date'); if (cd) cd.textContent = date;
@@ -206,5 +263,10 @@ const OS = (() => {
 
   document.addEventListener('DOMContentLoaded', boot);
 
-  return { wallpapers, setTheme, setAccent, setWallpaper, showContextMenu, hideContextMenu, lock, unlock, appList };
+  return {
+    wallpapers, appList, prefs,
+    setTheme, setAccent, setWallpaper, setCustomWallpaper, setFontSize, setReduceMotion,
+    setHighContrast, setClock24h, setUsername, setIconSize,
+    showContextMenu, hideContextMenu, lock, unlock, storageUsage
+  };
 })();
