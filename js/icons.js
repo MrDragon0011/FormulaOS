@@ -148,60 +148,95 @@ const Icons = (() => {
   }
 
   /* Stylized side-view F1 car — standalone graphic (not a 24x24 tile icon), used by the race widget */
+  /* Neutral livery by default (no team colors) — matte carbon body, silver/white accents */
   function carSvg(body1, body2) {
-    body1 = body1 || '#ff6b5e'; body2 = body2 || '#c81e1e';
-    const dark = '#0e0f12', rim = '#4a4e57', tire = '#17181c';
-    return `<svg viewBox="0 0 240 84" xmlns="http://www.w3.org/2000/svg">
+    body1 = body1 || '#3a3d44'; body2 = body2 || '#121316';
+    const dark = '#0a0b0d', rim = '#8a8f99', rimDark = '#3a3d44', tire = '#161719', accent = '#e6e8ec';
+    return `<svg viewBox="0 0 260 92" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="rw-car-g" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="${body1}"/><stop offset="1" stop-color="${body2}"/>
+          <stop offset="0" stop-color="${body1}"/><stop offset=".55" stop-color="${body1}"/><stop offset="1" stop-color="${body2}"/>
         </linearGradient>
         <linearGradient id="rw-car-rim" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="${rim}"/><stop offset="1" stop-color="#22242a"/>
+          <stop offset="0" stop-color="${rim}"/><stop offset="1" stop-color="${rimDark}"/>
         </linearGradient>
+        <linearGradient id="rw-car-sheen" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+          <stop offset=".45" stop-color="#fff" stop-opacity=".22"/>
+          <stop offset=".55" stop-color="#fff" stop-opacity="0"/>
+        </linearGradient>
+        <pattern id="rw-car-weave" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <rect width="4" height="4" fill="none"/>
+          <path d="M0 0v4M2 0v4" stroke="#000" stroke-opacity=".12" stroke-width=".6"/>
+        </pattern>
+        <radialGradient id="rw-car-tire" cx=".35" cy=".3" r=".8">
+          <stop offset="0" stop-color="#2a2c30"/><stop offset="1" stop-color="${tire}"/>
+        </radialGradient>
       </defs>
-      <ellipse cx="122" cy="75" rx="108" ry="4.5" fill="#000" opacity=".3"/>
+      <ellipse cx="132" cy="83" rx="118" ry="5" fill="#000" opacity=".32"/>
 
       <!-- rear wing -->
-      <rect x="205" y="16" width="3.4" height="20" fill="${dark}"/>
-      <rect x="230" y="16" width="3.4" height="20" fill="${dark}"/>
-      <rect x="203" y="19" width="32" height="4.2" rx="1" fill="${dark}"/>
-      <rect x="203" y="27" width="32" height="3" rx="1" fill="${dark}" opacity=".7"/>
-      <rect x="217" y="36" width="3" height="12" fill="${dark}"/>
+      <rect x="221" y="15" width="3.4" height="22" fill="${dark}"/>
+      <rect x="250" y="15" width="3.4" height="22" fill="${dark}"/>
+      <path d="M219 18 254 18 254 22.6 219 22.6Z" fill="${dark}"/>
+      <path d="M219 18 254 18 254 22.6 219 22.6Z" fill="url(#rw-car-sheen)"/>
+      <rect x="219" y="27.5" width="35" height="3" rx="1" fill="${dark}" opacity=".75"/>
+      <rect x="233" y="38" width="3" height="13" fill="${dark}"/>
+      <rect x="230" y="49" width="9" height="3" rx="1" fill="${dark}"/>
 
       <!-- rear wheel -->
-      <circle cx="196" cy="60" r="18.5" fill="${tire}"/>
-      <circle cx="196" cy="60" r="10.5" fill="url(#rw-car-rim)"/>
-      <path d="M196 51v18M187 60h18M189.5 53.5l13 13M202.5 53.5l-13 13" stroke="#5b5f68" stroke-width="1.1"/>
+      <circle cx="212" cy="65" r="20" fill="url(#rw-car-tire)"/>
+      <circle cx="212" cy="65" r="20" fill="none" stroke="#000" stroke-opacity=".4" stroke-width="1.2"/>
+      <path d="M197.5 51.5a20 20 0 0 0 0 27" fill="none" stroke="#000" stroke-opacity=".25" stroke-width="1.6"/>
+      <circle cx="212" cy="65" r="11.5" fill="url(#rw-car-rim)"/>
+      <circle cx="212" cy="65" r="3.6" fill="${dark}"/>
+      <path d="M212 55v20M200.5 65h23M203 55.5l18 19M221 55.5l-18 19" stroke="#4a4e57" stroke-width="1.1"/>
 
       <!-- floor / diffuser -->
-      <path d="M150 66 210 66 216 72 140 72Z" fill="${dark}"/>
+      <path d="M160 71 228 71 235 79 152 79Z" fill="${dark}"/>
+      <path d="M168 73.5h54M168 76h54" stroke="#000" stroke-opacity=".4" stroke-width=".8"/>
+
+      <!-- sidepod undercut shadow -->
+      <path d="M140 40 172 43 178 60 148 60Z" fill="${dark}" opacity=".6"/>
 
       <!-- body -->
-      <path d="M4 52 22 44 55 36 88 33 108 32 132 33 165 38 196 48 196 55 172 55 172 60 55 60 55 55 22 55 4 55Z" fill="url(#rw-car-g)"/>
-      <path d="M60 55 200 55 200 58 60 58Z" fill="${dark}" opacity=".35"/>
+      <path d="M4 57 24 48 60 39 95 36 117 35 144 36 180 42 212 53 212 61 186 61 186 66 60 66 60 61 24 61 4 61Z" fill="url(#rw-car-g)"/>
+      <path d="M4 57 24 48 60 39 95 36 117 35 144 36 180 42 212 53 212 61 186 61 186 66 60 66 60 61 24 61 4 61Z" fill="url(#rw-car-weave)"/>
+      <path d="M4 57 24 48 60 39 95 36 117 35 144 36 180 42 212 53 212 61 186 61 186 66 60 66 60 61 24 61 4 61Z" fill="url(#rw-car-sheen)"/>
+      <path d="M64 61 216 61 216 64 64 64Z" fill="${dark}" opacity=".4"/>
 
-      <!-- sidepod intake -->
-      <path d="M138 38 165 40 165 52 142 52Z" fill="${dark}" opacity=".55"/>
+      <!-- livery accent stripe (neutral silver, no team color) -->
+      <path d="M62 40 106 36 101 51 58 55Z" fill="${accent}" opacity=".92"/>
+      <path d="M108 35.6 143.5 36.5 139 52 103 51.5Z" fill="${accent}" opacity=".22"/>
+      <circle cx="90" cy="45.5" r="6.4" fill="#151619"/>
+      <circle cx="90" cy="45.5" r="6.4" fill="none" stroke="${accent}" stroke-width=".8" opacity=".7"/>
 
       <!-- halo + cockpit -->
-      <path d="M96 33 Q108 12 128 32" fill="none" stroke="${dark}" stroke-width="4.2" stroke-linecap="round"/>
-      <path d="M100 33 Q109 22 124 32Z" fill="#1c1e24"/>
-      <circle cx="112" cy="27" r="4.6" fill="#c7cbd2"/>
+      <path d="M100 36 Q113 12 136 35" fill="none" stroke="${dark}" stroke-width="4.6" stroke-linecap="round"/>
+      <path d="M100 36 Q113 12 136 35" fill="none" stroke="#3a3d44" stroke-width="1.2" stroke-linecap="round" opacity=".6"/>
+      <path d="M104 36 Q114 25 132 35Z" fill="#1c1e24"/>
+      <circle cx="117" cy="29.5" r="5" fill="#c7cbd2"/>
+      <circle cx="117" cy="29.5" r="5" fill="url(#rw-car-sheen)"/>
+      <path d="M78 40 60 39" stroke="${dark}" stroke-width="2.4" stroke-linecap="round"/>
+      <rect x="76" y="34" width="7" height="4.5" rx="1.5" fill="${dark}"/>
 
-      <!-- livery accent stripe -->
-      <path d="M60 36 100 33 96 46 55 49Z" fill="#ffffff" opacity=".85"/>
+      <!-- front suspension arms -->
+      <path d="M60 55 40 50M60 60 40 63" stroke="#4a4e57" stroke-width="1.4" stroke-linecap="round"/>
 
       <!-- front wing -->
-      <rect x="0" y="49" width="26" height="3.2" rx="1" fill="${dark}"/>
-      <rect x="0" y="53.5" width="26" height="2.4" rx="1" fill="${dark}" opacity=".7"/>
-      <rect x="0" y="45" width="3" height="14" fill="${dark}"/>
-      <rect x="23" y="45" width="3" height="14" fill="${dark}"/>
+      <rect x="0" y="53" width="28" height="3.4" rx="1" fill="${dark}"/>
+      <rect x="0" y="58" width="28" height="2.6" rx="1" fill="${dark}" opacity=".75"/>
+      <rect x="0" y="62" width="24" height="2" rx="1" fill="${dark}" opacity=".55"/>
+      <rect x="0" y="49" width="3.2" height="16" fill="${dark}"/>
+      <rect x="25" y="49" width="3.2" height="16" fill="${dark}"/>
+      <path d="M2 49 26 49 26 51 2 51Z" fill="url(#rw-car-sheen)"/>
 
       <!-- front wheel -->
-      <circle cx="36" cy="58" r="14" fill="${tire}"/>
-      <circle cx="36" cy="58" r="7.8" fill="url(#rw-car-rim)"/>
-      <path d="M36 51.5v13M29.5 58h13M31.5 53.5l9 9M40.5 53.5l-9 9" stroke="#5b5f68" stroke-width=".9"/>
+      <circle cx="40" cy="63" r="15.4" fill="url(#rw-car-tire)"/>
+      <circle cx="40" cy="63" r="15.4" fill="none" stroke="#000" stroke-opacity=".4" stroke-width="1"/>
+      <circle cx="40" cy="63" r="8.6" fill="url(#rw-car-rim)"/>
+      <circle cx="40" cy="63" r="2.6" fill="${dark}"/>
+      <path d="M40 55v16M32 63h16M34.3 57.3l11.4 11.4M45.7 57.3 34.3 68.7" stroke="#4a4e57" stroke-width=".95"/>
     </svg>`;
   }
   return { svg, html, monoSvg, inlineSvg, inline, carSvg };
