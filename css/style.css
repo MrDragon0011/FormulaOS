@@ -368,6 +368,10 @@ button{font-family:inherit;}
 .settings-row .label-title{font-size:13px;font-weight:600;}
 .settings-row .label-sub{font-size:11px;color:var(--text-dim);}
 .settings-row select, .settings-row input[type=text]{background:rgba(255,255,255,.08);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px 10px;font-size:12px;}
+.settings-card input[type=email], .settings-card input[type=password]{background:rgba(255,255,255,.08);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:8px 10px;font-size:12.5px;}
+.settings-card button{background:rgba(255,255,255,.08);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 12px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+.settings-card button:hover{background:var(--accent);color:#fff;}
+.team-pick.active span{color:var(--text);font-weight:600;}
 .seg{display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
 .seg button{border:none;background:transparent;color:var(--text);padding:6px 12px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
 .seg button .icon-inline{margin-right:0;}

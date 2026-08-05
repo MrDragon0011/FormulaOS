@@ -37,6 +37,7 @@ const OS = (() => {
     fontSize: 'md', reduceMotion: false, highContrast: false, clock24h: false,
     username: 'Driver', iconSize: 'md', brightness: 100, dockPinned: DEFAULT_DOCK_PINNED.slice()
   }, loadPrefs());
+  let activeTeam = null; // set when a signed-in user's favorite team overrides the theme
 
   function pinToDock(id) {
     if (id === 'trash' || prefs.dockPinned.includes(id)) return;
@@ -114,11 +115,22 @@ const OS = (() => {
     document.documentElement.dataset.fontsize = prefs.fontSize;
     document.documentElement.classList.toggle('reduce-motion', prefs.reduceMotion);
     document.documentElement.classList.toggle('high-contrast', prefs.highContrast);
-    document.documentElement.style.setProperty('--accent', prefs.accent);
-    if (prefs.customWallpaper) applyBackground(`center/cover no-repeat url(${prefs.customWallpaper})`);
-    else applyBackground(wallpaperCss(prefs.wallpaper || 0));
+    document.documentElement.style.setProperty('--accent', activeTeam ? activeTeam.accent : prefs.accent);
+    if (prefs.customWallpaper && !activeTeam) applyBackground(`center/cover no-repeat url(${prefs.customWallpaper})`);
+    else applyBackground(wallpaperCss(activeTeam ? activeTeam.palette : (prefs.wallpaper || 0)));
     document.getElementById('desktop').style.filter = `brightness(${prefs.brightness}%)`;
     const lu = document.getElementById('lock-username'); if (lu) lu.textContent = prefs.username;
+  }
+
+  /* Applies (or clears) the signed-in user's favorite-team livery across accent, wallpaper, and the race widget's car */
+  function setActiveTeam(team) {
+    activeTeam = team && team.id !== 'neutral' ? team : null;
+    applyPrefs();
+    renderRaceWidget();
+  }
+  function onAuthUpdate({ user, profile }) {
+    const team = user && profile && profile.favorite_team ? teamById(profile.favorite_team) : null;
+    setActiveTeam(team);
   }
 
   function storageUsage() {
@@ -507,7 +519,7 @@ const OS = (() => {
         <div class="rw-circuit">${race.circuit}</div>
       </div>
       <div class="rw-countdown" data-role="rw-countdown"></div>
-      <div class="rw-car">${Icons.carSvg()}</div>
+      <div class="rw-car">${activeTeam && activeTeam.car ? Icons.carSvg(activeTeam.car[0], activeTeam.car[1]) : Icons.carSvg()}</div>
     `;
     updateRaceCountdown();
   }
@@ -549,6 +561,8 @@ const OS = (() => {
     renderDock();
     updateClock();
     setInterval(updateClock, 1000 * 15);
+    Auth.onChange(onAuthUpdate);
+    Auth.init();
     renderRaceWidget();
     setInterval(updateRaceCountdown, 1000);
 
@@ -653,6 +667,7 @@ const OS = (() => {
     setTheme, toggleTheme, setAccent, setWallpaper, setCustomWallpaper, setFontSize, setReduceMotion,
     setHighContrast, setClock24h, setUsername, setIconSize, setBrightness,
     showContextMenu, hideContextMenu, lock, unlock, storageUsage, openLaunchpad, openSpotlight,
-    pinToDock, unpinFromDock, notifyFSChange, renderDesktopIcons, renderDock
+    pinToDock, unpinFromDock, notifyFSChange, renderDesktopIcons, renderDock,
+    getActiveTeam: () => activeTeam
   };
 })();

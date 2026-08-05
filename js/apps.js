@@ -416,6 +416,50 @@ Apps.settings = function (openSection) {
             </div>`;
           content.querySelector('[data-role="clock-toggle"]').appendChild(toggleEl(OS.prefs.clock24h, (v) => OS.setClock24h(v)));
         } else if (section === 'account') {
+          const user = Auth.currentUser();
+          const profile = Auth.currentProfile();
+          let authBlock;
+          if (!Auth.configured()) {
+            authBlock = `
+              <div class="settings-card">
+                <div class="label-title">Accounts not set up yet</div>
+                <div class="label-sub" style="margin-top:4px;">Add your Supabase project URL and anon key to js/supabase-config.js to enable sign-in and favorite teams.</div>
+              </div>`;
+          } else if (!user) {
+            authBlock = `
+              <div class="settings-card">
+                <div class="label-title" style="margin-bottom:10px;">Sign in</div>
+                <div style="display:flex;flex-direction:column;gap:8px;max-width:280px;">
+                  <input type="email" data-role="email" placeholder="Email" />
+                  <input type="password" data-role="password" placeholder="Password" />
+                  <div style="display:flex;gap:8px;">
+                    <button data-act="signin">${Icons.inline('person')}<span>Sign In</span></button>
+                    <button data-act="signup">${Icons.inline('edit')}<span>Create Account</span></button>
+                  </div>
+                  <div class="label-sub" data-role="auth-msg"></div>
+                </div>
+              </div>`;
+          } else {
+            const currentTeamId = profile && profile.favorite_team;
+            authBlock = `
+              <div class="settings-card">
+                <div class="settings-row">
+                  <div class="label-group"><div class="label-title">Signed in</div><div class="label-sub">${user.email}</div></div>
+                  <button data-act="signout">${Icons.inline('close')}<span>Sign Out</span></button>
+                </div>
+              </div>
+              <div class="settings-card">
+                <div class="label-title" style="margin-bottom:10px;">Favorite Team</div>
+                <div class="label-sub" style="margin-bottom:10px;">Sets your accent color, wallpaper livery, and the Next Race car.</div>
+                <div class="swatch-row" data-role="team-row" style="flex-wrap:wrap;gap:10px;">
+                  ${TEAMS.map(t => `
+                    <div class="team-pick${t.id === currentTeamId ? ' active' : ''}" data-team="${t.id}" style="display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;width:78px;">
+                      <div class="swatch" style="background:${t.accent};width:34px;height:34px;${t.id === currentTeamId ? 'border-color:#fff;' : ''}"></div>
+                      <span style="font-size:11px;color:var(--text-dim);text-align:center;">${t.name}</span>
+                    </div>`).join('')}
+                </div>
+              </div>`;
+          }
           content.innerHTML = `
             <div class="settings-section-title">Account</div>
             <div class="settings-section-desc">Personalize your FormulaOS profile.</div>
@@ -424,9 +468,33 @@ Apps.settings = function (openSection) {
                 <div class="label-group"><div class="label-title">Display Name</div><div class="label-sub">Shown in the Start Menu</div></div>
                 <input type="text" data-role="username" value="${OS.prefs.username}" style="width:160px;" />
               </div>
-            </div>`;
+            </div>
+            ${authBlock}`;
           const input = content.querySelector('[data-role="username"]');
           input.addEventListener('change', () => OS.setUsername(input.value.trim()));
+
+          if (Auth.configured() && !user) {
+            const msg = content.querySelector('[data-role="auth-msg"]');
+            const runAuth = (fn) => async () => {
+              const email = content.querySelector('[data-role="email"]').value.trim();
+              const password = content.querySelector('[data-role="password"]').value;
+              msg.textContent = '';
+              try { await fn(email, password); msg.textContent = 'Check your inbox to confirm, then sign in.'; render('account'); }
+              catch (e) { msg.textContent = e.message || 'Something went wrong.'; }
+            };
+            content.querySelector('[data-act="signin"]').onclick = async () => {
+              const email = content.querySelector('[data-role="email"]').value.trim();
+              const password = content.querySelector('[data-role="password"]').value;
+              try { await Auth.signIn(email, password); render('account'); }
+              catch (e) { msg.textContent = e.message || 'Sign in failed.'; }
+            };
+            content.querySelector('[data-act="signup"]').onclick = runAuth(Auth.signUp);
+          } else if (user) {
+            content.querySelector('[data-act="signout"]').onclick = async () => { await Auth.signOut(); render('account'); };
+            content.querySelectorAll('.team-pick').forEach(el => {
+              el.onclick = async () => { await Auth.setFavoriteTeam(el.dataset.team); render('account'); };
+            });
+          }
         } else if (section === 'apps') {
           content.innerHTML = `
             <div class="settings-section-title">Apps</div>
