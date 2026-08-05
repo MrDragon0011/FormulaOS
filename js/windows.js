@@ -1,4 +1,15 @@
 /* DragonOS Window Manager */
+
+/* Binds both dblclick (mouse) and double-tap (touch) to open an item */
+function bindOpen(el, handler) {
+  el.addEventListener('dblclick', (e) => { e.preventDefault(); handler(e); });
+  let lastTap = 0;
+  el.addEventListener('touchend', (e) => {
+    const now = Date.now();
+    if (now - lastTap < 350) { e.preventDefault(); handler(e); }
+    lastTap = now;
+  });
+}
 const WM = (() => {
   const windowsEl = () => document.getElementById('windows');
   const taskbarAppsEl = () => document.getElementById('taskbar-apps');
@@ -90,42 +101,64 @@ const WM = (() => {
     const meta = { title, icon, appId, minimized: false, maximized: false, prevRect: null };
     registry.set(id, { el, meta });
 
-    // Drag
+    // Drag (mouse + touch)
     const header = el.querySelector('.window-header');
     let dragging = false, sx, sy, sl, st;
-    header.addEventListener('mousedown', (e) => {
+    function pt(e) { return e.touches ? e.touches[0] : e; }
+    function dragStart(e) {
       if (e.target.closest('.win-btn')) return;
       focus(id);
       if (meta.maximized) return;
-      dragging = true; sx = e.clientX; sy = e.clientY;
+      dragging = true;
+      const p = pt(e);
+      sx = p.clientX; sy = p.clientY;
       sl = el.offsetLeft; st = el.offsetTop;
       document.body.style.userSelect = 'none';
-    });
-    window.addEventListener('mousemove', (e) => {
+    }
+    function dragMove(e) {
       if (!dragging) return;
-      el.style.left = Math.max(0, sl + (e.clientX - sx)) + 'px';
-      el.style.top = Math.max(0, st + (e.clientY - sy)) + 'px';
-    });
-    window.addEventListener('mouseup', () => { dragging = false; document.body.style.userSelect = ''; });
+      if (e.cancelable) e.preventDefault();
+      const p = pt(e);
+      el.style.left = Math.max(0, sl + (p.clientX - sx)) + 'px';
+      el.style.top = Math.max(0, st + (p.clientY - sy)) + 'px';
+    }
+    function dragEnd() { dragging = false; document.body.style.userSelect = ''; }
+    header.addEventListener('mousedown', dragStart);
+    window.addEventListener('mousemove', dragMove);
+    window.addEventListener('mouseup', dragEnd);
+    header.addEventListener('touchstart', dragStart, { passive: true });
+    window.addEventListener('touchmove', dragMove, { passive: false });
+    window.addEventListener('touchend', dragEnd);
 
-    // Resize
+    // Resize (mouse + touch)
     const handle = el.querySelector('.resize-handle');
     if (handle) {
       let resizing = false, rsx, rsy, rw, rh;
-      handle.addEventListener('mousedown', (e) => {
+      function rStart(e) {
         e.stopPropagation();
-        resizing = true; rsx = e.clientX; rsy = e.clientY;
+        resizing = true;
+        const p = pt(e);
+        rsx = p.clientX; rsy = p.clientY;
         rw = el.offsetWidth; rh = el.offsetHeight;
-      });
-      window.addEventListener('mousemove', (e) => {
+      }
+      function rMove(e) {
         if (!resizing) return;
-        el.style.width = Math.max(280, rw + (e.clientX - rsx)) + 'px';
-        el.style.height = Math.max(180, rh + (e.clientY - rsy)) + 'px';
-      });
-      window.addEventListener('mouseup', () => resizing = false);
+        if (e.cancelable) e.preventDefault();
+        const p = pt(e);
+        el.style.width = Math.max(280, rw + (p.clientX - rsx)) + 'px';
+        el.style.height = Math.max(180, rh + (p.clientY - rsy)) + 'px';
+      }
+      function rEnd() { resizing = false; }
+      handle.addEventListener('mousedown', rStart);
+      window.addEventListener('mousemove', rMove);
+      window.addEventListener('mouseup', rEnd);
+      handle.addEventListener('touchstart', rStart, { passive: true });
+      window.addEventListener('touchmove', rMove, { passive: false });
+      window.addEventListener('touchend', rEnd);
     }
 
     el.addEventListener('mousedown', () => focus(id));
+    el.addEventListener('touchstart', () => focus(id), { passive: true });
 
     el.querySelector('.win-btn.close').onclick = () => close(id);
     el.querySelector('.win-btn.min').onclick = () => {

@@ -45,10 +45,11 @@ Apps.explorer = function (startPath) {
           const el = document.createElement('div');
           el.className = 'explorer-item';
           el.innerHTML = `<div class="emoji">${iconFor(name, dir)}</div><div class="label">${name}</div>`;
-          el.ondblclick = () => {
+          bindOpen(el, () => {
             if (dir) { path = full; render(); }
+            else if (/\.(png|jpg|jpeg|gif|svg)$/i.test(name)) Apps.imageViewer(full);
             else Apps.textEditor(full);
-          };
+          });
           el.oncontextmenu = (e) => {
             e.preventDefault();
             OS.showContextMenu(e.clientX, e.clientY, [
@@ -67,6 +68,23 @@ Apps.explorer = function (startPath) {
       body.querySelector('[data-act="new-file"]').onclick = () => {
         const n = prompt('File name', 'untitled.txt'); if (n) { DragonFS.touch((path === '/' ? '' : path) + '/' + n); render(); }
       };
+
+      // Drag & drop upload from the OS file system
+      ['dragover', 'dragenter'].forEach(ev => grid.addEventListener(ev, (e) => { e.preventDefault(); grid.style.background = 'rgba(255,95,69,.08)'; }));
+      ['dragleave', 'drop'].forEach(ev => grid.addEventListener(ev, () => { grid.style.background = ''; }));
+      grid.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const files = [...(e.dataTransfer.files || [])];
+        files.forEach(f => {
+          const reader = new FileReader();
+          const isText = /\.(txt|md|json|js|css|html|csv)$/i.test(f.name) || f.type.startsWith('text/');
+          reader.onload = () => {
+            DragonFS.write((path === '/' ? '' : path) + '/' + f.name, reader.result);
+            render();
+          };
+          if (isText) reader.readAsText(f); else reader.readAsDataURL(f);
+        });
+      });
       render();
     }
   });

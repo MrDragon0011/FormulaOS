@@ -17,6 +17,12 @@ const OS = (() => {
     { id: 'calculator', label: 'Calculator', emoji: '🧮', run: () => Apps.calculator() },
     { id: 'notes', label: 'Sticky Notes', emoji: '🗒️', run: () => Apps.notes() },
     { id: 'photos', label: 'Photos', emoji: '🖼️', run: () => Apps.photos() },
+    { id: 'paint', label: 'Paint', emoji: '🎨', run: () => Apps.paint() },
+    { id: 'media', label: 'Media Player', emoji: '🎬', run: () => Apps.mediaPlayer() },
+    { id: 'calendar', label: 'Calendar', emoji: '📅', run: () => Apps.calendar() },
+    { id: 'weather', label: 'Weather', emoji: '⛅', run: () => Apps.weather() },
+    { id: 'taskmgr', label: 'Task Manager', emoji: '📊', run: () => Apps.taskManager() },
+    { id: 'snake', label: 'Dragon Snake', emoji: '🎮', run: () => Apps.snake() },
     { id: 'settings', label: 'Settings', emoji: '⚙️', run: () => Apps.settings() },
     { id: 'about', label: 'About', emoji: '🐉', run: () => Apps.about() },
   ];
@@ -67,7 +73,7 @@ const OS = (() => {
         document.querySelectorAll('.desktop-icon').forEach(x => x.classList.remove('selected'));
         el.classList.add('selected');
       };
-      el.ondblclick = () => app.run();
+      bindOpen(el, () => app.run());
       icons.appendChild(el);
     });
   }
@@ -181,8 +187,17 @@ const OS = (() => {
 
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'q') {
-        // no-op reserved
+      if (e.altKey && e.key === 'Tab') {
+        e.preventDefault();
+        const ids = [...WM.registry.keys()];
+        if (ids.length < 2) return;
+        const focused = ids.find(id => WM.registry.get(id).el.classList.contains('focused'));
+        const idx = focused ? ids.indexOf(focused) : -1;
+        const next = ids[(idx + 1) % ids.length];
+        const w = WM.registry.get(next);
+        w.meta.minimized = false;
+        w.el.classList.remove('hidden');
+        WM.focus(next);
       }
     });
   }
