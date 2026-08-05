@@ -13,7 +13,7 @@ const DragonFS = (() => {
       '/Trash': { type: 'dir', children: [] },
       '/Documents/welcome.txt': {
         type: 'file',
-        content: 'Welcome to DragonOS 🐉\n\nThis is a fully in-browser operating system.\n\n- Double-click icons to open apps\n- Right-click the desktop for options\n- Open Settings to change your wallpaper and theme\n- Everything you save here persists in this browser via localStorage\n\nEnjoy!'
+        content: 'Welcome to DragonOS\n\nThis is a fully in-browser operating system.\n\n- Double-click icons to open apps\n- Right-click the desktop for options\n- Open Settings to change your wallpaper and theme\n- Everything you save here persists in this browser via localStorage\n\nEnjoy!'
       },
       '/Documents/todo.txt': { type: 'file', content: '- Take over the world\n- Or just enjoy this OS\n- Either way' }
     };

@@ -21,7 +21,30 @@ const Icons = (() => {
     dragon: '<path d="M4 15.5c1.3-6 4.7-11 8-11 3.7 0 6.6 3 6.6 7 0 3-1.7 5-4 5-1.4 0-2.3-.9-2.3-2.2 0-1.7 1.4-3.3 1.4-4.8 0-.8-.5-1.3-1.2-1.3-1.7 0-3 2.6-3 5.4 0 1 .2 1.7.2 1.7-2 1.4-4.3 2.3-5.7 2.3z"/><circle cx="16.2" cy="8.6" r=".9" fill="#fff" stroke="none"/>',
     launchpad: '<rect x="4" y="4" width="6.2" height="6.2" rx="1.6"/><rect x="13.8" y="4" width="6.2" height="6.2" rx="1.6"/><rect x="4" y="13.8" width="6.2" height="6.2" rx="1.6"/><rect x="13.8" y="13.8" width="6.2" height="6.2" rx="1.6"/>',
     file: '<path d="M7 3.5h7l4 4V20a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1z"/><path d="M14 3.5V8h4M9 12h6M9 15.3h6M9 18.6h3.5"/>',
-    search: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="M19.5 19.5 15 15"/>'
+    search: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="M19.5 19.5 15 15"/>',
+    refresh: '<path d="M20 11A8 8 0 1 0 18.6 16.8"/><path d="M20 4.5v6.5h-6.5"/>',
+    close: '<path d="M6 6l12 12M18 6L6 18"/>',
+    undo: '<path d="M9 7 4 12l5 5"/><path d="M4 12h10.5a5.5 5.5 0 0 1 0 11H13"/>',
+    edit: '<path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M14 6.5l3.5 3.5"/>',
+    save: '<path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M7 14h10v6H7z"/>',
+    upload: '<path d="M12 16V6M8 10l4-4 4 4"/><path d="M5 18.5h14"/>',
+    'folder-open': '<path d="M3 7.5a1 1 0 0 1 1-1h4.3l1.4 1.7H20a1 1 0 0 1 1 1l-1.7 8.8a1 1 0 0 1-1 .8H5.7a1 1 0 0 1-1-.8L3 7.5z"/>',
+    home: '<path d="M4 11 12 4l8 7"/><path d="M6 10v9a1 1 0 0 0 1 1h4v-5h2v5h4a1 1 0 0 0 1-1v-9"/>',
+    monitor: '<rect x="3" y="4.5" width="18" height="12" rx="1.5"/><path d="M9 20h6M12 16.5V20"/>',
+    clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3.2 2"/>',
+    person: '<circle cx="12" cy="8.3" r="3.3"/><path d="M5 20c1-4 4-6 7-6s6 2 7 6"/>',
+    accessibility: '<circle cx="12" cy="5" r="1.8"/><path d="M4.5 8.5h15M12 8.5v5m0 0-3.5 7M12 13.5l3.5 7M8.5 12.5l-2 2M15.5 12.5l2 2"/>',
+    sun: '<circle cx="12" cy="12" r="4.2"/><path d="M12 3v2.3M12 18.7V21M4.2 12H1.9M22.1 12h-2.3M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6"/>',
+    moon: '<path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/>',
+    'moon-stars': '<path d="M18.3 14.6A7.6 7.6 0 1 1 9.8 6a6.3 6.3 0 0 0 8.5 8.6z"/><path d="M19.5 3.2v3.1M18 4.7h3" stroke-width="1.4"/>',
+    'cloud-rain': '<path d="M6.5 17.5a3.8 3.8 0 0 1-.4-7.6 5.2 5.2 0 0 1 9.9-1.6 3.7 3.7 0 0 1-.6 9.2H6.5z"/><path d="M8.5 19.3l-1 2M12 19.3l-1 2M15.5 19.3l-1 2"/>',
+    snowflake: '<path d="M12 3v18M4.7 7.5l14.6 9M19.3 7.5l-14.6 9"/>',
+    music: '<circle cx="7" cy="18" r="2.4"/><circle cx="17" cy="16" r="2.4"/><path d="M9.4 18V6.5L19.4 4v11.5"/>',
+    chevronUp: '<path d="M6 15l6-6 6 6"/>',
+    chevronLeft: '<path d="M15 6l-6 6 6 6"/>',
+    chevronRight: '<path d="M9 6l6 6-6 6"/>',
+    chevronDown: '<path d="M6 9l6 6 6-6"/>',
+    fileGeneric: '<path d="M7 3.5h7l4 4V20a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1z"/>'
   };
   const colors = {
     explorer: ['#5ec8ff', '#1d7fd6'], trash: ['#9aa3ad', '#5b6572'], 'trash-full': ['#ffab5e', '#d6650c'], notepad: ['#ffd166', '#e8960c'],
@@ -30,7 +53,8 @@ const Icons = (() => {
     media: ['#a78bfa', '#6d28d9'], calendar: ['#ff8a8a', '#dc2626'], weather: ['#8ecdff', '#2b83d6'],
     taskmgr: ['#7ee08a', '#209b4b'], snake: ['#7bdd8a', '#1f8f45'], settings: ['#a7b0ba', '#4a5560'],
     about: ['#ffab5e', '#e0611a'], dragon: ['#ffab5e', '#e0611a'], launchpad: ['#c4c9ff', '#5865e0'],
-    search: ['#9aa3ad', '#4a5560'], file: ['#c3cad4', '#6b7686']
+    search: ['#9aa3ad', '#4a5560'], file: ['#c3cad4', '#6b7686'], music: ['#a78bfa', '#6d28d9'],
+    sun: ['#ffd166', '#f59f00'], 'cloud-rain': ['#8ecdff', '#2b83d6'], snowflake: ['#bfe9ff', '#5fb3e0']
   };
   function svg(id) {
     const g = glyphs[id] || glyphs.about;
@@ -59,5 +83,15 @@ const Icons = (() => {
     if (!g) return '';
     return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${g}</svg>`;
   }
-  return { svg, html, monoSvg };
+
+  /* Inline glyph (no tile/background), for use next to text in menus, lists, buttons */
+  function inlineSvg(id) {
+    const g = glyphs[id] || monoGlyphs[id];
+    if (!g) return '';
+    return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${g}</svg>`;
+  }
+  function inline(id, cls) {
+    return `<span class="icon-inline${cls ? ' ' + cls : ''}">${inlineSvg(id)}</span>`;
+  }
+  return { svg, html, monoSvg, inlineSvg, inline };
 })();

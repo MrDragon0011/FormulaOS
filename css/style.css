@@ -72,6 +72,13 @@
 .mb-logo .app-icon, .mb-logo svg{width:18px;height:18px;}
 .adi-icon{width:20px;height:20px;vertical-align:middle;margin-right:2px;}
 .about-icon{width:60px;height:60px;}
+.icon-inline{display:inline-flex;flex:none;width:14px;height:14px;vertical-align:-2px;margin-right:6px;}
+.icon-inline:only-child{margin-right:0;}
+.icon-inline svg{width:100%;height:100%;display:block;}
+.ctx-item .icon-inline, #mb-dropdown .dd-item .icon-inline{width:15px;height:15px;opacity:.85;margin-right:0;}
+.explorer-sidebar .item .icon-inline, .settings-sidebar .item .icon-inline{width:15px;height:15px;margin-right:0;}
+.cc-tile .icon-inline{width:20px;height:20px;margin-right:0;}
+.app-toolbar .icon-inline{width:13px;height:13px;margin-right:0;}
 
 *{box-sizing:border-box;}
 html,body{height:100%;margin:0;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;}
@@ -293,6 +300,7 @@ button{font-family:inherit;}
 .app-toolbar{display:flex;gap:6px;padding:8px;border-bottom:1px solid var(--border);background:var(--window-header);flex-wrap:wrap;}
 .app-toolbar button, .app-toolbar select{
   background:rgba(255,255,255,.08);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px 10px;font-size:12px;cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;
 }
 .app-toolbar button:hover{background:var(--accent);color:#fff;}
 .app-toolbar input[type=text]{flex:1;background:rgba(255,255,255,.08);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px 10px;font-size:12px;}
@@ -337,7 +345,8 @@ button{font-family:inherit;}
 .settings-row .label-sub{font-size:11px;color:var(--text-dim);}
 .settings-row select, .settings-row input[type=text]{background:rgba(255,255,255,.08);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px 10px;font-size:12px;}
 .seg{display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
-.seg button{border:none;background:transparent;color:var(--text);padding:6px 12px;font-size:12px;cursor:pointer;}
+.seg button{border:none;background:transparent;color:var(--text);padding:6px 12px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+.seg button .icon-inline{margin-right:0;}
 .seg button.active{background:var(--accent);color:#fff;}
 .toggle{position:relative;width:42px;height:24px;border-radius:14px;background:rgba(255,255,255,.18);border:1px solid var(--border);cursor:pointer;flex:none;}
 .toggle::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .15s ease;}
@@ -366,7 +375,6 @@ button{font-family:inherit;}
 
 /* About */
 .about-hero{display:flex;flex-direction:column;align-items:center;gap:10px;padding:30px 20px;text-align:center;}
-.about-hero .emoji{font-size:60px;}
 .about-list{padding:0 24px 20px;font-size:13px;color:var(--text-dim);line-height:1.8;}
 
 /* Photos / gallery */

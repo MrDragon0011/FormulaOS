@@ -4,24 +4,24 @@ const Apps = {};
 /* ---------------- File Explorer ---------------- */
 Apps.explorer = function (startPath) {
   WM.open({
-    title: 'File Explorer', icon: '📁', appId: 'explorer', width: 640, height: 440,
+    title: 'File Explorer', icon: 'explorer', appId: 'explorer', width: 640, height: 440,
     onMount(body) {
       let path = startPath || '/';
       body.innerHTML = `
         <div class="explorer">
           <div class="explorer-sidebar">
-            <div class="item" data-p="/">🏠 Home</div>
-            <div class="item" data-p="/Documents">📄 Documents</div>
-            <div class="item" data-p="/Pictures">🖼️ Pictures</div>
-            <div class="item" data-p="/Desktop">🖥️ Desktop</div>
-            <div class="item" data-p="/Trash">🗑️ Recycle Bin</div>
+            <div class="item" data-p="/">${Icons.inline('home')}<span>Home</span></div>
+            <div class="item" data-p="/Documents">${Icons.inline('explorer')}<span>Documents</span></div>
+            <div class="item" data-p="/Pictures">${Icons.inline('photos')}<span>Pictures</span></div>
+            <div class="item" data-p="/Desktop">${Icons.inline('monitor')}<span>Desktop</span></div>
+            <div class="item" data-p="/Trash">${Icons.inline('trash')}<span>Recycle Bin</span></div>
           </div>
           <div class="explorer-main">
             <div class="app-toolbar">
-              <button data-act="up">⬆ Up</button>
-              <button data-act="new-folder">📁+ Folder</button>
-              <button data-act="new-file">📄+ File</button>
-              <button data-act="empty-trash" style="display:none;">🗑️ Empty Recycle Bin</button>
+              <button data-act="up">${Icons.inline('chevronUp')}<span>Up</span></button>
+              <button data-act="new-folder">${Icons.inline('folder-open')}<span>Folder</span></button>
+              <button data-act="new-file">${Icons.inline('fileGeneric')}<span>File</span></button>
+              <button data-act="empty-trash" style="display:none;">${Icons.inline('trash')}<span>Empty Recycle Bin</span></button>
             </div>
             <div class="explorer-path"></div>
             <div class="explorer-grid"></div>
@@ -40,7 +40,7 @@ Apps.explorer = function (startPath) {
 
       function render() {
         const inTrash = path === '/Trash';
-        pathEl.textContent = inTrash ? '🗑️ Recycle Bin' : path;
+        pathEl.innerHTML = inTrash ? `${Icons.inline('trash')}<span>Recycle Bin</span>` : path;
         emptyTrashBtn.style.display = inTrash ? '' : 'none';
         body.querySelector('[data-act="new-folder"]').style.display = inTrash ? 'none' : '';
         body.querySelector('[data-act="new-file"]').style.display = inTrash ? 'none' : '';
@@ -58,8 +58,8 @@ Apps.explorer = function (startPath) {
             el.oncontextmenu = (e) => {
               e.preventDefault();
               OS.showContextMenu(e.clientX, e.clientY, [
-                { label: '↩️ Restore', action: () => { DragonFS.restore(name); render(); OS.notifyFSChange(); OS.renderDock(); } },
-                { label: '🗑 Delete Permanently', action: () => { if (confirm(`Permanently delete "${name}"?`)) { DragonFS.remove(full); render(); OS.renderDock(); } } }
+                { label: `${Icons.inline('undo')}<span>Restore</span>`, action: () => { DragonFS.restore(name); render(); OS.notifyFSChange(); OS.renderDock(); } },
+                { label: `${Icons.inline('trash')}<span>Delete Permanently</span>`, action: () => { if (confirm(`Permanently delete "${name}"?`)) { DragonFS.remove(full); render(); OS.renderDock(); } } }
               ]);
             };
             bindOpen(el, () => { if (confirm(`Restore "${name}" to its original location?`)) { DragonFS.restore(name); render(); OS.notifyFSChange(); OS.renderDock(); } });
@@ -83,8 +83,8 @@ Apps.explorer = function (startPath) {
           el.oncontextmenu = (e) => {
             e.preventDefault();
             const items = [
-              { label: '🗑 Move to Recycle Bin', action: () => { DragonFS.trash(full); render(); OS.notifyFSChange(); OS.renderDock(); } },
-              { label: '✏️ Rename', action: () => { const n = prompt('New name', name); if (n) { DragonFS.rename(full, n); render(); OS.notifyFSChange(); } } }
+              { label: `${Icons.inline('trash')}<span>Move to Recycle Bin</span>`, action: () => { DragonFS.trash(full); render(); OS.notifyFSChange(); OS.renderDock(); } },
+              { label: `${Icons.inline('edit')}<span>Rename</span>`, action: () => { const n = prompt('New name', name); if (n) { DragonFS.rename(full, n); render(); OS.notifyFSChange(); } } }
             ];
             OS.showContextMenu(e.clientX, e.clientY, items);
           };
@@ -126,12 +126,12 @@ Apps.explorer = function (startPath) {
 /* ---------------- Text Editor ---------------- */
 Apps.textEditor = function (path) {
   WM.open({
-    title: path ? DragonFS.nameOf(path) : 'Untitled — Notepad', icon: '📝', appId: 'notepad', width: 560, height: 440,
+    title: path ? DragonFS.nameOf(path) : 'Untitled — Notepad', icon: 'notepad', appId: 'notepad', width: 560, height: 440,
     onMount(body, winId) {
       body.innerHTML = `
         <div class="app-toolbar">
-          <button data-act="save">💾 Save</button>
-          <button data-act="save-as">📁 Save As</button>
+          <button data-act="save">${Icons.inline('save')}<span>Save</span></button>
+          <button data-act="save-as">${Icons.inline('folder-open')}<span>Save As</span></button>
           <span style="flex:1"></span>
           <span id="status-${winId}" style="font-size:11px;color:var(--text-dim);align-self:center;"></span>
         </div>
@@ -165,7 +165,7 @@ Apps.textEditor = function (path) {
 /* ---------------- Terminal ---------------- */
 Apps.terminal = function () {
   WM.open({
-    title: 'Terminal', icon: '⌨️', appId: 'terminal', single: true, width: 560, height: 380,
+    title: 'Terminal', icon: 'terminal', appId: 'terminal', single: true, width: 560, height: 380,
     onMount(body) {
       body.innerHTML = `<div class="terminal"><div class="output"></div>
         <div class="terminal-input-row"><span class="prompt">dragon@web:~$</span><input autofocus /></div></div>`;
@@ -204,7 +204,7 @@ Apps.terminal = function () {
         date: () => new Date().toString(),
         whoami: () => 'dragon',
         neofetch: () => `
-   🐉  DragonOS
+   /\\_/\\  DragonOS
    -----------
    OS: DragonOS Web v1.0
    Host: ${navigator.platform}
@@ -245,13 +245,13 @@ Apps.terminal = function () {
 /* ---------------- Browser ---------------- */
 Apps.browser = function () {
   WM.open({
-    title: 'Web Browser', icon: '🌐', appId: 'browser', width: 720, height: 500,
+    title: 'Web Browser', icon: 'browser', appId: 'browser', width: 720, height: 500,
     onMount(body) {
       body.innerHTML = `
         <div class="app-toolbar">
-          <button data-act="back">◀</button>
-          <button data-act="fwd">▶</button>
-          <button data-act="go">↻</button>
+          <button data-act="back">${Icons.inline('chevronLeft')}</button>
+          <button data-act="fwd">${Icons.inline('chevronRight')}</button>
+          <button data-act="go">${Icons.inline('refresh')}</button>
           <input type="text" value="https://en.wikipedia.org/wiki/Special:Random" />
         </div>
         <iframe style="width:100%;height:calc(100% - 46px);border:none;background:#fff;"></iframe>`;
@@ -272,22 +272,22 @@ Apps.browser = function () {
 /* ---------------- Settings ---------------- */
 Apps.settings = function (openSection) {
   WM.open({
-    title: 'Settings', icon: '⚙️', appId: 'settings', single: true, width: 620, height: 500,
+    title: 'Settings', icon: 'settings', appId: 'settings', single: true, width: 620, height: 500,
     onMount(body) {
       const SECTIONS = [
-        { id: 'appearance', label: 'Appearance', icon: '🎨' },
-        { id: 'desktop', label: 'Desktop & Icons', icon: '🖥️' },
-        { id: 'accessibility', label: 'Accessibility', icon: '♿' },
-        { id: 'datetime', label: 'Date & Time', icon: '🕐' },
-        { id: 'account', label: 'Account', icon: '👤' },
-        { id: 'apps', label: 'Apps', icon: '🧩' },
-        { id: 'storage', label: 'Storage', icon: '💾' },
-        { id: 'about', label: 'About', icon: 'ℹ️' },
+        { id: 'appearance', label: 'Appearance', icon: 'paint' },
+        { id: 'desktop', label: 'Desktop & Icons', icon: 'monitor' },
+        { id: 'accessibility', label: 'Accessibility', icon: 'accessibility' },
+        { id: 'datetime', label: 'Date & Time', icon: 'clock' },
+        { id: 'account', label: 'Account', icon: 'person' },
+        { id: 'apps', label: 'Apps', icon: 'launchpad' },
+        { id: 'storage', label: 'Storage', icon: 'save' },
+        { id: 'about', label: 'About', icon: 'dragon' },
       ];
       body.innerHTML = `
         <div class="settings-shell">
           <div class="settings-sidebar">
-            ${SECTIONS.map(s => `<div class="item" data-s="${s.id}">${s.icon} ${s.label}</div>`).join('')}
+            ${SECTIONS.map(s => `<div class="item" data-s="${s.id}">${Icons.inline(s.icon)}<span>${s.label}</span></div>`).join('')}
           </div>
           <div class="settings-main app-pad" id="settings-content"></div>
         </div>`;
@@ -317,7 +317,7 @@ Apps.settings = function (openSection) {
               <div class="settings-row">
                 <div class="label-group"><div class="label-title">Theme</div><div class="label-sub">Light or dark interface</div></div>
                 <div class="seg" data-role="theme-seg">
-                  <button data-v="dark">🌙 Dark</button><button data-v="light">☀️ Light</button>
+                  <button data-v="dark">${Icons.inline('moon')}<span>Dark</span></button><button data-v="light">${Icons.inline('sun')}<span>Light</span></button>
                 </div>
               </div>
             </div>
@@ -333,7 +333,7 @@ Apps.settings = function (openSection) {
                 ${OS.wallpapers.map((w, i) => `<div class="wallpaper-thumb" style="background:${w}" data-wp="${i}"></div>`).join('')}
               </div>
               <div style="margin-top:10px;display:flex;gap:8px;align-items:center;">
-                <button data-act="upload-wp">📁 Upload custom image…</button>
+                <button data-act="upload-wp">${Icons.inline('upload')}<span>Upload custom image…</span></button>
                 <input type="file" accept="image/*" data-role="wp-file" style="display:none" />
               </div>
             </div>`;
@@ -370,7 +370,7 @@ Apps.settings = function (openSection) {
             <div class="settings-card">
               <div class="settings-row">
                 <div class="label-group"><div class="label-title">Refresh Desktop</div><div class="label-sub">Re-render desktop icons</div></div>
-                <button data-act="refresh">🔄 Refresh</button>
+                <button data-act="refresh">${Icons.inline('refresh')}<span>Refresh</span></button>
               </div>
             </div>`;
           const iconSeg = content.querySelector('[data-role="icon-seg"]');
@@ -450,9 +450,9 @@ Apps.settings = function (openSection) {
               ${usage.items.map(it => `<div class="settings-row"><div class="label-group"><div class="label-title" style="font-size:12px;">${it.key.replace('dragonos_', '')}</div></div><div class="label-sub">${(it.size / 1024).toFixed(1)} KB</div></div>`).join('')}
             </div>
             <div class="settings-card">
-              <div class="settings-row"><div class="label-group"><div class="label-title">Reset File System</div><div class="label-sub">Deletes all files and folders</div></div><button data-act="reset-fs">🗑️ Reset</button></div>
-              <div class="settings-row"><div class="label-group"><div class="label-title">Empty Recycle Bin</div></div><button data-act="empty-trash">🗑️ Empty</button></div>
-              <div class="settings-row"><div class="label-group"><div class="label-title">Reset All Settings & Data</div><div class="label-sub">Restores DragonOS to factory defaults</div></div><button data-act="reset-all">♻️ Reset All</button></div>
+              <div class="settings-row"><div class="label-group"><div class="label-title">Reset File System</div><div class="label-sub">Deletes all files and folders</div></div><button data-act="reset-fs">${Icons.inline('trash')}<span>Reset</span></button></div>
+              <div class="settings-row"><div class="label-group"><div class="label-title">Empty Recycle Bin</div></div><button data-act="empty-trash">${Icons.inline('trash')}<span>Empty</span></button></div>
+              <div class="settings-row"><div class="label-group"><div class="label-title">Reset All Settings & Data</div><div class="label-sub">Restores DragonOS to factory defaults</div></div><button data-act="reset-all">${Icons.inline('refresh')}<span>Reset All</span></button></div>
             </div>`;
           content.querySelector('[data-act="reset-fs"]').onclick = () => { if (confirm('Reset all files?')) { DragonFS.reset(); render('storage'); } };
           content.querySelector('[data-act="empty-trash"]').onclick = () => { if (confirm('Empty the Recycle Bin?')) { DragonFS.emptyTrash(); render('storage'); } };
@@ -461,7 +461,7 @@ Apps.settings = function (openSection) {
           content.innerHTML = `
             <div class="settings-section-title">About DragonOS</div>
             <div class="settings-card" style="text-align:center;padding:26px;">
-              <div style="font-size:48px;">🐉</div>
+              <div style="display:flex;justify-content:center;">${Icons.html('dragon', 'about-icon')}</div>
               <div style="font-weight:700;font-size:16px;margin-top:6px;">DragonOS Web</div>
               <div class="label-sub">Version 1.0</div>
             </div>
@@ -480,7 +480,7 @@ Apps.settings = function (openSection) {
 /* ---------------- Calculator ---------------- */
 Apps.calculator = function () {
   WM.open({
-    title: 'Calculator', icon: '🧮', appId: 'calculator', single: true, width: 300, height: 420, resizable: false,
+    title: 'Calculator', icon: 'calculator', appId: 'calculator', single: true, width: 300, height: 420, resizable: false,
     onMount(body) {
       body.innerHTML = `
         <div class="calc">
@@ -519,7 +519,7 @@ Apps.calculator = function () {
 /* ---------------- About ---------------- */
 Apps.about = function () {
   WM.open({
-    title: 'About DragonOS', icon: '🐉', appId: 'about', single: true, width: 380, height: 420, resizable: false,
+    title: 'About DragonOS', icon: 'dragon', appId: 'about', single: true, width: 380, height: 420, resizable: false,
     onMount(body) {
       body.innerHTML = `
         <div class="about-hero">
@@ -532,7 +532,7 @@ Apps.about = function () {
           • Files persist via localStorage<br/>
           • Draggable, resizable windows<br/>
           • Built-in Terminal, Notepad, File Explorer, Browser, Calculator<br/>
-          • Fully themeable — try Settings ⚙️<br/><br/>
+          • Fully themeable — try Settings<br/><br/>
           Built with vanilla HTML, CSS &amp; JavaScript. No frameworks, no build step.
         </div>`;
     }
@@ -542,7 +542,7 @@ Apps.about = function () {
 /* ---------------- Photos / Gallery ---------------- */
 Apps.photos = function () {
   WM.open({
-    title: 'Photos', icon: '🖼️', appId: 'photos', single: true, width: 520, height: 400,
+    title: 'Photos', icon: 'photos', appId: 'photos', single: true, width: 520, height: 400,
     onMount(body) {
       const wallpapers = OS.wallpapers;
       body.innerHTML = `<div class="gallery">${wallpapers.map((w, i) => `<div class="card" style="background:${w}"><span>Wallpaper ${i + 1}</span></div>`).join('')}</div>`;
@@ -554,7 +554,7 @@ Apps.photos = function () {
 /* ---------------- Sticky Notes ---------------- */
 Apps.notes = function () {
   WM.open({
-    title: 'Sticky Notes', icon: '🗒️', appId: 'notes', single: true, width: 340, height: 440,
+    title: 'Sticky Notes', icon: 'notes', appId: 'notes', single: true, width: 340, height: 440,
     onMount(body) {
       body.innerHTML = `<div class="app-toolbar"><button data-act="add">+ New note</button></div><div class="notes-list"></div>`;
       const list = body.querySelector('.notes-list');

@@ -10,22 +10,22 @@ const OS = (() => {
   ];
 
   const appList = [
-    { id: 'explorer', label: 'Finder', emoji: '📁', run: () => Apps.explorer() },
-    { id: 'trash', label: 'Recycle Bin', emoji: '🗑️', run: () => Apps.explorer('/Trash') },
-    { id: 'notepad', label: 'Notepad', emoji: '📝', run: () => Apps.textEditor() },
-    { id: 'terminal', label: 'Terminal', emoji: '⌨️', run: () => Apps.terminal() },
-    { id: 'browser', label: 'Browser', emoji: '🌐', run: () => Apps.browser() },
-    { id: 'calculator', label: 'Calculator', emoji: '🧮', run: () => Apps.calculator() },
-    { id: 'notes', label: 'Sticky Notes', emoji: '🗒️', run: () => Apps.notes() },
-    { id: 'photos', label: 'Photos', emoji: '🖼️', run: () => Apps.photos() },
-    { id: 'paint', label: 'Paint', emoji: '🎨', run: () => Apps.paint() },
-    { id: 'media', label: 'Media Player', emoji: '🎬', run: () => Apps.mediaPlayer() },
-    { id: 'calendar', label: 'Calendar', emoji: '📅', run: () => Apps.calendar() },
-    { id: 'weather', label: 'Weather', emoji: '⛅', run: () => Apps.weather() },
-    { id: 'taskmgr', label: 'Task Manager', emoji: '📊', run: () => Apps.taskManager() },
-    { id: 'snake', label: 'Dragon Snake', emoji: '🎮', run: () => Apps.snake() },
-    { id: 'settings', label: 'Settings', emoji: '⚙️', run: () => Apps.settings() },
-    { id: 'about', label: 'About', emoji: '🐉', run: () => Apps.about() },
+    { id: 'explorer', label: 'Finder', run: () => Apps.explorer() },
+    { id: 'trash', label: 'Recycle Bin', run: () => Apps.explorer('/Trash') },
+    { id: 'notepad', label: 'Notepad', run: () => Apps.textEditor() },
+    { id: 'terminal', label: 'Terminal', run: () => Apps.terminal() },
+    { id: 'browser', label: 'Browser', run: () => Apps.browser() },
+    { id: 'calculator', label: 'Calculator', run: () => Apps.calculator() },
+    { id: 'notes', label: 'Sticky Notes', run: () => Apps.notes() },
+    { id: 'photos', label: 'Photos', run: () => Apps.photos() },
+    { id: 'paint', label: 'Paint', run: () => Apps.paint() },
+    { id: 'media', label: 'Media Player', run: () => Apps.mediaPlayer() },
+    { id: 'calendar', label: 'Calendar', run: () => Apps.calendar() },
+    { id: 'weather', label: 'Weather', run: () => Apps.weather() },
+    { id: 'taskmgr', label: 'Task Manager', run: () => Apps.taskManager() },
+    { id: 'snake', label: 'Dragon Snake', run: () => Apps.snake() },
+    { id: 'settings', label: 'Settings', run: () => Apps.settings() },
+    { id: 'about', label: 'About', run: () => Apps.about() },
   ];
   const DEFAULT_DOCK_PINNED = ['explorer', 'notepad', 'terminal', 'browser', 'photos', 'settings'];
 
@@ -210,7 +210,7 @@ const OS = (() => {
       e.preventDefault();
       const winId = findWindowByAppId(app.id);
       const items = [{ label: `Open ${app.label}`, action: () => activateApp(app) }];
-      if (winId) items.push({ label: '✕ Quit', action: () => { WM.registry.forEach((w, id) => { if (w.meta.appId === app.id) WM.close(id); }); } });
+      if (winId) items.push({ label: `${Icons.inline('close')}<span>Quit</span>`, action: () => { WM.registry.forEach((w, id) => { if (w.meta.appId === app.id) WM.close(id); }); } });
       if (opts.trash) {
         const trashCount = DragonFS.listTrash().length;
         items.push({ label: trashCount ? `Empty Recycle Bin (${trashCount})` : 'Empty Recycle Bin', disabled: !trashCount, action: () => { if (confirm('Permanently delete everything in the Recycle Bin?')) { DragonFS.emptyTrash(); renderDock(); notifyFSChange(); } } });
@@ -370,7 +370,7 @@ const OS = (() => {
         ];
       case 'view':
         return [
-          { label: prefs.theme === 'dark' ? '☀️ Switch to Light Mode' : '🌙 Switch to Dark Mode', action: () => toggleTheme() },
+          { label: prefs.theme === 'dark' ? `${Icons.inline('sun')}<span>Switch to Light Mode</span>` : `${Icons.inline('moon')}<span>Switch to Dark Mode</span>`, action: () => toggleTheme() },
           { label: 'Show Launchpad', action: () => openLaunchpad() },
         ];
       case 'window':
@@ -412,12 +412,12 @@ const OS = (() => {
     if (!cc.classList.contains('hidden')) { cc.classList.add('hidden'); return; }
     cc.innerHTML = `
       <div class="cc-row">
-        <div class="cc-tile" data-t="theme">🌙<div>Dark Mode</div></div>
-        <div class="cc-tile" data-t="dnd">🌜<div>Do Not Disturb</div></div>
+        <div class="cc-tile" data-t="theme">${Icons.inline('moon')}<div>Dark Mode</div></div>
+        <div class="cc-tile" data-t="dnd">${Icons.inline('moon-stars')}<div>Do Not Disturb</div></div>
       </div>
       <div class="cc-row">
-        <div class="cc-tile" data-t="wifi">📶<div>Wi-Fi</div></div>
-        <div class="cc-tile" data-t="reduce">♿<div>Reduce Motion</div></div>
+        <div class="cc-tile" data-t="wifi">${Icons.inline('wifi')}<div>Wi-Fi</div></div>
+        <div class="cc-tile" data-t="reduce">${Icons.inline('accessibility')}<div>Reduce Motion</div></div>
       </div>
       <div class="cc-slider">
         <label>Display Brightness</label>
@@ -515,11 +515,11 @@ const OS = (() => {
       if (e.target !== desktop && e.target.id !== 'icons') return;
       e.preventDefault();
       showContextMenu(e.clientX, e.clientY, [
-        { label: '🔄 Refresh', action: () => renderDesktopIcons() },
-        { label: '📁 New Folder', action: () => { const n = prompt('Folder name', 'New Folder'); if (n) { DragonFS.mkdir('/Desktop/' + n); renderDesktopIcons(); } } },
+        { label: `${Icons.inline('refresh')}<span>Refresh</span>`, action: () => renderDesktopIcons() },
+        { label: `${Icons.inline('folder-open')}<span>New Folder</span>`, action: () => { const n = prompt('Folder name', 'New Folder'); if (n) { DragonFS.mkdir('/Desktop/' + n); renderDesktopIcons(); } } },
         { sep: true },
-        { label: '🖼️ Change Wallpaper', action: () => Apps.settings('appearance') },
-        { label: '⚙️ Settings', action: () => Apps.settings() },
+        { label: `${Icons.inline('photos')}<span>Change Wallpaper</span>`, action: () => Apps.settings('appearance') },
+        { label: `${Icons.inline('settings')}<span>Settings</span>`, action: () => Apps.settings() },
       ]);
     });
     desktop.addEventListener('dragover', (e) => { if ([...e.dataTransfer.types].includes('files')) e.preventDefault(); });

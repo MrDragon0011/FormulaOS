@@ -67,7 +67,7 @@ const WM = (() => {
           <button class="win-btn min" title="Minimize"></button>
           <button class="win-btn max" title="Maximize"></button>
         </div>
-        <div class="window-title"><span>${icon || '🗔'}</span><span>${title}</span></div>
+        <div class="window-title">${Icons.inline(icon || 'file', 'window-title-icon')}<span>${title}</span></div>
       </div>
       <div class="window-body"></div>
       ${resizable ? '<div class="resize-handle"></div>' : ''}

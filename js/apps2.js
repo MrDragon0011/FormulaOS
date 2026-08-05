@@ -3,7 +3,7 @@
 /* ---------------- Image Viewer ---------------- */
 Apps.imageViewer = function (path) {
   WM.open({
-    title: path ? DragonFS.nameOf(path) : 'Image Viewer', icon: '🖼️', width: 520, height: 420,
+    title: path ? DragonFS.nameOf(path) : 'Image Viewer', icon: 'photos', width: 520, height: 420,
     onMount(body) {
       const data = path ? DragonFS.read(path) : null;
       body.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:repeating-conic-gradient(#00000022 0% 25%, transparent 0% 50%) 50%/24px 24px;overflow:auto;">
@@ -16,14 +16,14 @@ Apps.imageViewer = function (path) {
 /* ---------------- Paint ---------------- */
 Apps.paint = function () {
   WM.open({
-    title: 'Paint', icon: '🎨', appId: 'paint', width: 620, height: 480,
+    title: 'Paint', icon: 'paint', appId: 'paint', width: 620, height: 480,
     onMount(body) {
       body.innerHTML = `
         <div class="app-toolbar">
           <input type="color" value="#ff5f45" data-role="color" style="width:34px;height:30px;padding:0;border:none;background:none;cursor:pointer;" />
           <select data-role="size"><option value="2">Thin</option><option value="5" selected>Medium</option><option value="12">Thick</option></select>
-          <button data-act="clear">🗑 Clear</button>
-          <button data-act="save">💾 Save to Pictures</button>
+          <button data-act="clear">${Icons.inline('trash')}<span>Clear</span></button>
+          <button data-act="save">${Icons.inline('save')}<span>Save to Pictures</span></button>
         </div>
         <canvas style="width:100%;height:calc(100% - 46px);touch-action:none;cursor:crosshair;background:#fff;"></canvas>`;
       const canvas = body.querySelector('canvas');
@@ -78,13 +78,13 @@ Apps.paint = function () {
 /* ---------------- Media Player ---------------- */
 Apps.mediaPlayer = function (path) {
   WM.open({
-    title: 'Media Player', icon: '🎬', width: 480, height: 380,
+    title: 'Media Player', icon: 'media', width: 480, height: 380,
     onMount(body) {
       body.innerHTML = `
-        <div class="app-toolbar"><button data-act="open">📂 Open file…</button><input type="file" accept="audio/*,video/*" style="display:none" /></div>
+        <div class="app-toolbar"><button data-act="open">${Icons.inline('folder-open')}<span>Open file…</span></button><input type="file" accept="audio/*,video/*" style="display:none" /></div>
         <div style="height:calc(100% - 46px);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;padding:14px;">
           <video style="max-width:100%;max-height:100%;display:none;border-radius:8px;" controls></video>
-          <div class="audio-art" style="font-size:60px;display:none;">🎵</div>
+          <div class="audio-art" style="width:60px;height:60px;display:none;">${Icons.svg('music')}</div>
           <audio style="width:100%;display:none;" controls></audio>
           <div class="mp-empty" style="color:var(--text-dim);font-size:13px;">No media loaded — open a local audio or video file.</div>
         </div>`;
@@ -114,7 +114,7 @@ Apps.mediaPlayer = function (path) {
 /* ---------------- Calendar ---------------- */
 Apps.calendar = function () {
   WM.open({
-    title: 'Calendar', icon: '📅', appId: 'calendar', single: true, width: 400, height: 420,
+    title: 'Calendar', icon: 'calendar', appId: 'calendar', single: true, width: 400, height: 420,
     onMount(body) {
       let view = new Date();
       body.innerHTML = `
@@ -153,18 +153,18 @@ Apps.calendar = function () {
 /* ---------------- Weather ---------------- */
 Apps.weather = function () {
   WM.open({
-    title: 'Weather', icon: '⛅', appId: 'weather', single: true, width: 320, height: 380, resizable: false,
+    title: 'Weather', icon: 'weather', appId: 'weather', single: true, width: 320, height: 380, resizable: false,
     onMount(body) {
       const conditions = [
-        { icon: '☀️', label: 'Sunny', temp: 78 },
-        { icon: '⛅', label: 'Partly Cloudy', temp: 68 },
-        { icon: '🌧️', label: 'Rainy', temp: 58 },
-        { icon: '❄️', label: 'Snowy', temp: 29 },
+        { icon: 'sun', label: 'Sunny', temp: 78 },
+        { icon: 'weather', label: 'Partly Cloudy', temp: 68 },
+        { icon: 'cloud-rain', label: 'Rainy', temp: 58 },
+        { icon: 'snowflake', label: 'Snowy', temp: 29 },
       ];
       const c = conditions[Math.floor((new Date().getDate()) % conditions.length)];
       body.innerHTML = `
         <div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:linear-gradient(160deg,#2a6ba8,#7ec8e3);color:#fff;text-align:center;">
-          <div style="font-size:64px;">${c.icon}</div>
+          <div style="width:72px;height:72px;">${Icons.svg(c.icon)}</div>
           <div style="font-size:44px;font-weight:200;">${c.temp}°F</div>
           <div style="font-size:14px;opacity:.85;">${c.label} · Dragon City</div>
           <div style="font-size:11px;opacity:.6;margin-top:12px;">Demo data — no live network calls</div>
@@ -176,9 +176,9 @@ Apps.weather = function () {
 /* ---------------- Task Manager ---------------- */
 Apps.taskManager = function () {
   WM.open({
-    title: 'Task Manager', icon: '📊', appId: 'taskmgr', single: true, width: 380, height: 400,
+    title: 'Task Manager', icon: 'taskmgr', appId: 'taskmgr', single: true, width: 380, height: 400,
     onMount(body) {
-      body.innerHTML = `<div class="app-toolbar"><button data-act="refresh">↻ Refresh</button></div><div class="tm-list app-pad"></div>`;
+      body.innerHTML = `<div class="app-toolbar"><button data-act="refresh">${Icons.inline('refresh')}<span>Refresh</span></button></div><div class="tm-list app-pad"></div>`;
       const list = body.querySelector('.tm-list');
       function render() {
         list.innerHTML = '';
@@ -186,7 +186,7 @@ Apps.taskManager = function () {
         WM.registry.forEach((w, id) => {
           const row = document.createElement('div');
           row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px;border-bottom:1px solid var(--border);font-size:13px;';
-          row.innerHTML = `<span>${w.meta.icon || '🗔'}</span><span style="flex:1">${w.meta.title}</span><button data-id="${id}" style="background:#ff5f57;border:none;color:#fff;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:11px;">End Task</button>`;
+          row.innerHTML = `${Icons.inline(w.meta.icon || 'file', 'tm-icon')}<span style="flex:1">${w.meta.title}</span><button data-id="${id}" style="background:#ff5f57;border:none;color:#fff;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:11px;">End Task</button>`;
           row.querySelector('button').onclick = () => { WM.close(id); render(); };
           list.appendChild(row);
         });
@@ -200,16 +200,16 @@ Apps.taskManager = function () {
 /* ---------------- Snake Game ---------------- */
 Apps.snake = function () {
   WM.open({
-    title: 'Dragon Snake', icon: '🎮', width: 360, height: 420, resizable: false,
+    title: 'Dragon Snake', icon: 'snake', width: 360, height: 420, resizable: false,
     onMount(body) {
       body.innerHTML = `
-        <div class="app-toolbar"><span style="align-self:center;font-size:12px;">Score: <b class="score">0</b></span><span style="flex:1"></span><button data-act="restart">↻ Restart</button></div>
+        <div class="app-toolbar"><span style="align-self:center;font-size:12px;">Score: <b class="score">0</b></span><span style="flex:1"></span><button data-act="restart">${Icons.inline('refresh')}<span>Restart</span></button></div>
         <div style="display:flex;align-items:center;justify-content:center;height:calc(100% - 46px);background:#0c0714;">
           <canvas width="300" height="300" style="touch-action:none;"></canvas>
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,44px);grid-template-rows:repeat(2,40px);gap:4px;justify-content:center;padding:8px 0;">
-          <div></div><button data-dir="up" style="grid-column:2;">▲</button><div></div>
-          <button data-dir="left">◀</button><button data-dir="down">▼</button><button data-dir="right">▶</button>
+          <div></div><button data-dir="up" style="grid-column:2;">${Icons.inline('chevronUp')}</button><div></div>
+          <button data-dir="left">${Icons.inline('chevronLeft')}</button><button data-dir="down">${Icons.inline('chevronDown')}</button><button data-dir="right">${Icons.inline('chevronRight')}</button>
         </div>`;
       const canvas = body.querySelector('canvas');
       const ctx = canvas.getContext('2d');
