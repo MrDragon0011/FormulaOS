@@ -1,4 +1,4 @@
-/* DragonOS Window Manager */
+/* FormulaOS Window Manager */
 
 /* Binds both dblclick (mouse) and double-tap (touch) to open an item */
 function bindOpen(el, handler) {

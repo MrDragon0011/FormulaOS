@@ -1,6 +1,6 @@
-# 🐉 DragonOS
+# 🏁 FormulaOS
 
-A full web-based operating system — window manager, taskbar, start menu, virtual file system, and built-in apps — running entirely in the browser with zero build step.
+A full web-based operating system with a Formula 1 theme — window manager, taskbar, start menu, virtual file system, and built-in apps — running entirely in the browser with zero build step.
 
 ## Apps
 - 📁 File Explorer (virtual FS persisted to `localStorage`)

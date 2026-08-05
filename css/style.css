@@ -1,6 +1,6 @@
 :root{
-  --accent:#ff5f45;
-  --accent-2:#ffa53e;
+  --accent:#e10600;
+  --accent-2:#ffc300;
   --bar-bg:rgba(28,22,40,.55);
   --bar-border:rgba(255,255,255,.08);
   --window-bg:rgba(34,28,48,.86);
@@ -100,8 +100,8 @@ button{font-family:inherit;}
   content:'';position:absolute;inset:0;background:radial-gradient(60% 60% at 50% 45%, rgba(10,7,20,.35), rgba(10,7,20,.75) 100%);
 }
 #boot-screen>*{position:relative;z-index:1;}
-.boot-logo{width:72px;height:72px;filter:drop-shadow(0 0 30px #ff6b4a);animation:pulse 1.6s ease-in-out infinite;}
-.boot-title{font-size:26px;letter-spacing:6px;font-weight:600;background:linear-gradient(90deg,#ff8a5c,#ffd36e);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.boot-logo{width:72px;height:72px;filter:drop-shadow(0 0 30px #e10600);animation:pulse 1.6s ease-in-out infinite;}
+.boot-title{font-size:26px;letter-spacing:6px;font-weight:600;background:linear-gradient(90deg,#ff3b30,#ffc300);-webkit-background-clip:text;background-clip:text;color:transparent;}
 .boot-bar{width:240px;height:6px;border-radius:4px;background:rgba(255,255,255,.12);overflow:hidden;}
 .boot-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent-2));animation:load 1.8s ease forwards;}
 .boot-status{font-size:12px;color:#c8b8e8;letter-spacing:1px;}

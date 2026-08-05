@@ -1,4 +1,4 @@
-/* DragonOS Applications */
+/* FormulaOS Applications */
 const Apps = {};
 
 /* ---------------- File Explorer ---------------- */
@@ -47,10 +47,10 @@ Apps.explorer = function (startPath) {
         body.querySelectorAll('.explorer-sidebar .item').forEach(it => it.classList.toggle('active', it.dataset.p === path));
         grid.innerHTML = '';
         if (inTrash) {
-          const items = DragonFS.listTrash();
+          const items = FormulaFS.listTrash();
           if (!items.length) { grid.innerHTML = '<div style="grid-column:1/-1;color:var(--text-dim);font-size:13px;padding:20px;">Recycle Bin is empty.</div>'; return; }
           items.forEach(({ name, path: full, origin }) => {
-            const dir = DragonFS.isDir(full);
+            const dir = FormulaFS.isDir(full);
             const el = document.createElement('div');
             el.className = 'explorer-item';
             el.innerHTML = `${Icons.html(iconFor(name, dir))}<div class="label">${name}</div>`;
@@ -58,23 +58,23 @@ Apps.explorer = function (startPath) {
             el.oncontextmenu = (e) => {
               e.preventDefault();
               OS.showContextMenu(e.clientX, e.clientY, [
-                { label: `${Icons.inline('undo')}<span>Restore</span>`, action: () => { DragonFS.restore(name); render(); OS.notifyFSChange(); OS.renderDock(); } },
-                { label: `${Icons.inline('trash')}<span>Delete Permanently</span>`, action: () => { if (confirm(`Permanently delete "${name}"?`)) { DragonFS.remove(full); render(); OS.renderDock(); } } }
+                { label: `${Icons.inline('undo')}<span>Restore</span>`, action: () => { FormulaFS.restore(name); render(); OS.notifyFSChange(); OS.renderDock(); } },
+                { label: `${Icons.inline('trash')}<span>Delete Permanently</span>`, action: () => { if (confirm(`Permanently delete "${name}"?`)) { FormulaFS.remove(full); render(); OS.renderDock(); } } }
               ]);
             };
-            bindOpen(el, () => { if (confirm(`Restore "${name}" to its original location?`)) { DragonFS.restore(name); render(); OS.notifyFSChange(); OS.renderDock(); } });
+            bindOpen(el, () => { if (confirm(`Restore "${name}" to its original location?`)) { FormulaFS.restore(name); render(); OS.notifyFSChange(); OS.renderDock(); } });
             grid.appendChild(el);
           });
           return;
         }
-        DragonFS.list(path).forEach(name => {
+        FormulaFS.list(path).forEach(name => {
           const full = (path === '/' ? '' : path) + '/' + name;
-          const dir = DragonFS.isDir(full);
+          const dir = FormulaFS.isDir(full);
           const el = document.createElement('div');
           el.className = 'explorer-item';
           el.draggable = true;
           el.innerHTML = `${Icons.html(iconFor(name, dir))}<div class="label">${name}</div>`;
-          el.addEventListener('dragstart', (e) => { e.dataTransfer.setData('application/x-dragonos-path', full); e.dataTransfer.effectAllowed = 'move'; });
+          el.addEventListener('dragstart', (e) => { e.dataTransfer.setData('application/x-formulaos-path', full); e.dataTransfer.effectAllowed = 'move'; });
           bindOpen(el, () => {
             if (dir) { path = full; render(); }
             else if (/\.(png|jpg|jpeg|gif|svg)$/i.test(name)) Apps.imageViewer(full);
@@ -83,8 +83,8 @@ Apps.explorer = function (startPath) {
           el.oncontextmenu = (e) => {
             e.preventDefault();
             const items = [
-              { label: `${Icons.inline('trash')}<span>Move to Recycle Bin</span>`, action: () => { DragonFS.trash(full); render(); OS.notifyFSChange(); OS.renderDock(); } },
-              { label: `${Icons.inline('edit')}<span>Rename</span>`, action: () => { const n = prompt('New name', name); if (n) { DragonFS.rename(full, n); render(); OS.notifyFSChange(); } } }
+              { label: `${Icons.inline('trash')}<span>Move to Recycle Bin</span>`, action: () => { FormulaFS.trash(full); render(); OS.notifyFSChange(); OS.renderDock(); } },
+              { label: `${Icons.inline('edit')}<span>Rename</span>`, action: () => { const n = prompt('New name', name); if (n) { FormulaFS.rename(full, n); render(); OS.notifyFSChange(); } } }
             ];
             OS.showContextMenu(e.clientX, e.clientY, items);
           };
@@ -92,15 +92,15 @@ Apps.explorer = function (startPath) {
         });
       }
       body.querySelectorAll('.explorer-sidebar .item').forEach(it => it.onclick = () => { path = it.dataset.p; render(); });
-      body.querySelector('[data-act="up"]').onclick = () => { const p = DragonFS.parentOf(path); if (p) { path = p; render(); } };
+      body.querySelector('[data-act="up"]').onclick = () => { const p = FormulaFS.parentOf(path); if (p) { path = p; render(); } };
       body.querySelector('[data-act="new-folder"]').onclick = () => {
-        const n = prompt('Folder name'); if (n) { DragonFS.mkdir((path === '/' ? '' : path) + '/' + n); render(); }
+        const n = prompt('Folder name'); if (n) { FormulaFS.mkdir((path === '/' ? '' : path) + '/' + n); render(); }
       };
       body.querySelector('[data-act="new-file"]').onclick = () => {
-        const n = prompt('File name', 'untitled.txt'); if (n) { DragonFS.touch((path === '/' ? '' : path) + '/' + n); render(); }
+        const n = prompt('File name', 'untitled.txt'); if (n) { FormulaFS.touch((path === '/' ? '' : path) + '/' + n); render(); }
       };
-      emptyTrashBtn.onclick = () => { if (confirm('Permanently delete everything in the Recycle Bin?')) { DragonFS.emptyTrash(); render(); OS.renderDock(); } };
-      document.addEventListener('dragonos:fschange', render);
+      emptyTrashBtn.onclick = () => { if (confirm('Permanently delete everything in the Recycle Bin?')) { FormulaFS.emptyTrash(); render(); OS.renderDock(); } };
+      document.addEventListener('formulaos:fschange', render);
 
       // Drag & drop upload from the OS file system
       ['dragover', 'dragenter'].forEach(ev => grid.addEventListener(ev, (e) => { e.preventDefault(); grid.style.background = 'rgba(255,95,69,.08)'; }));
@@ -112,7 +112,7 @@ Apps.explorer = function (startPath) {
           const reader = new FileReader();
           const isText = /\.(txt|md|json|js|css|html|csv)$/i.test(f.name) || f.type.startsWith('text/');
           reader.onload = () => {
-            DragonFS.write((path === '/' ? '' : path) + '/' + f.name, reader.result);
+            FormulaFS.write((path === '/' ? '' : path) + '/' + f.name, reader.result);
             render();
           };
           if (isText) reader.readAsText(f); else reader.readAsDataURL(f);
@@ -126,7 +126,7 @@ Apps.explorer = function (startPath) {
 /* ---------------- Text Editor ---------------- */
 Apps.textEditor = function (path) {
   WM.open({
-    title: path ? DragonFS.nameOf(path) : 'Untitled — Notepad', icon: 'notepad', appId: 'notepad', width: 560, height: 440,
+    title: path ? FormulaFS.nameOf(path) : 'Untitled — Notepad', icon: 'notepad', appId: 'notepad', width: 560, height: 440,
     onMount(body, winId) {
       body.innerHTML = `
         <div class="app-toolbar">
@@ -139,14 +139,14 @@ Apps.textEditor = function (path) {
       const textarea = body.querySelector('textarea');
       const status = body.querySelector(`#status-${winId}`);
       let currentPath = path || null;
-      if (path) textarea.value = DragonFS.read(path) || '';
+      if (path) textarea.value = FormulaFS.read(path) || '';
 
       function save(newPath) {
         const target = newPath || currentPath;
         if (!target) return saveAs();
-        DragonFS.write(target, textarea.value);
+        FormulaFS.write(target, textarea.value);
         currentPath = target;
-        WM.setTitle(winId, DragonFS.nameOf(target));
+        WM.setTitle(winId, FormulaFS.nameOf(target));
         status.textContent = 'Saved ' + new Date().toLocaleTimeString();
       }
       function saveAs() {
@@ -168,7 +168,7 @@ Apps.terminal = function () {
     title: 'Terminal', icon: 'terminal', appId: 'terminal', single: true, width: 560, height: 380,
     onMount(body) {
       body.innerHTML = `<div class="terminal"><div class="output"></div>
-        <div class="terminal-input-row"><span class="prompt">dragon@web:~$</span><input autofocus /></div></div>`;
+        <div class="terminal-input-row"><span class="prompt">driver@pit:~$</span><input autofocus /></div></div>`;
       const out = body.querySelector('.output');
       const input = body.querySelector('input');
       let cwd = '/';
@@ -180,35 +180,35 @@ Apps.terminal = function () {
         out.appendChild(div);
         body.querySelector('.terminal').scrollTop = 999999;
       }
-      print('DragonOS Terminal — type "help" for commands.');
+      print('FormulaOS Terminal — type "help" for commands.');
 
       const commands = {
         help: () => 'Commands: help, ls, cd, cat, echo, mkdir, touch, rm, pwd, clear, date, whoami, neofetch, open <app>',
         pwd: () => cwd,
-        ls: (args) => DragonFS.list(args[0] ? resolve(args[0]) : cwd).join('  ') || '(empty)',
+        ls: (args) => FormulaFS.list(args[0] ? resolve(args[0]) : cwd).join('  ') || '(empty)',
         cd: (args) => {
           const target = args[0] ? resolve(args[0]) : '/';
-          if (DragonFS.isDir(target)) { cwd = target; return ''; }
+          if (FormulaFS.isDir(target)) { cwd = target; return ''; }
           return 'cd: no such directory: ' + (args[0] || '');
         },
         cat: (args) => {
           if (!args[0]) return 'usage: cat <file>';
-          const c = DragonFS.read(resolve(args[0]));
+          const c = FormulaFS.read(resolve(args[0]));
           return c === null ? 'cat: no such file' : c;
         },
         echo: (args) => args.join(' '),
-        mkdir: (args) => args[0] ? (DragonFS.mkdir(resolve(args[0])) ? '' : 'mkdir: failed') : 'usage: mkdir <dir>',
-        touch: (args) => args[0] ? (DragonFS.touch(resolve(args[0])) ? '' : 'touch: failed') : 'usage: touch <file>',
-        rm: (args) => args[0] ? (DragonFS.remove(resolve(args[0])) ? '' : 'rm: failed') : 'usage: rm <path>',
+        mkdir: (args) => args[0] ? (FormulaFS.mkdir(resolve(args[0])) ? '' : 'mkdir: failed') : 'usage: mkdir <dir>',
+        touch: (args) => args[0] ? (FormulaFS.touch(resolve(args[0])) ? '' : 'touch: failed') : 'usage: touch <file>',
+        rm: (args) => args[0] ? (FormulaFS.remove(resolve(args[0])) ? '' : 'rm: failed') : 'usage: rm <path>',
         clear: () => { out.innerHTML = ''; return null; },
         date: () => new Date().toString(),
-        whoami: () => 'dragon',
+        whoami: () => 'driver',
         neofetch: () => `
-   /\\_/\\  DragonOS
+   #=#=#  FormulaOS
    -----------
-   OS: DragonOS Web v1.0
+   OS: FormulaOS Web v1.0
    Host: ${navigator.platform}
-   Shell: dragon-sh
+   Shell: pit-sh
    Resolution: ${window.innerWidth}x${window.innerHeight}
    Theme: ${document.documentElement.dataset.theme || 'dark'}`,
         open: (args) => {
@@ -219,14 +219,14 @@ Apps.terminal = function () {
       };
 
       function resolve(p) {
-        if (p.startsWith('/')) return DragonFS.normalize(p);
-        return DragonFS.normalize((cwd === '/' ? '' : cwd) + '/' + p);
+        if (p.startsWith('/')) return FormulaFS.normalize(p);
+        return FormulaFS.normalize((cwd === '/' ? '' : cwd) + '/' + p);
       }
 
       input.addEventListener('keydown', (e) => {
         if (e.key !== 'Enter') return;
         const raw = input.value;
-        print(`dragon@web:${cwd}$ ${raw}`);
+        print(`driver@pit:${cwd}$ ${raw}`);
         input.value = '';
         const [cmd, ...args] = raw.trim().split(/\s+/);
         if (!cmd) return;
@@ -282,7 +282,7 @@ Apps.settings = function (openSection) {
         { id: 'account', label: 'Account', icon: 'person' },
         { id: 'apps', label: 'Apps', icon: 'launchpad' },
         { id: 'storage', label: 'Storage', icon: 'save' },
-        { id: 'about', label: 'About', icon: 'dragon' },
+        { id: 'about', label: 'About', icon: 'flag' },
       ];
       body.innerHTML = `
         <div class="settings-shell">
@@ -312,7 +312,7 @@ Apps.settings = function (openSection) {
         if (section === 'appearance') {
           content.innerHTML = `
             <div class="settings-section-title">Appearance</div>
-            <div class="settings-section-desc">Customize how DragonOS looks.</div>
+            <div class="settings-section-desc">Customize how FormulaOS looks.</div>
             <div class="settings-card">
               <div class="settings-row">
                 <div class="label-group"><div class="label-title">Theme</div><div class="label-sub">Light or dark interface</div></div>
@@ -324,7 +324,7 @@ Apps.settings = function (openSection) {
             <div class="settings-card">
               <div class="label-title" style="margin-bottom:10px;">Accent Color</div>
               <div class="swatch-row" data-role="accent-row">
-                ${['#ff5f45', '#3e8bff', '#33c17a', '#c14fff', '#ff2e7e', '#ffb000'].map(c => `<div class="swatch" style="background:${c}" data-accent="${c}"></div>`).join('')}
+                ${['#e10600', '#3e8bff', '#33c17a', '#ff8700', '#c14fff', '#ffc300'].map(c => `<div class="swatch" style="background:${c}" data-accent="${c}"></div>`).join('')}
               </div>
             </div>
             <div class="settings-card">
@@ -379,7 +379,7 @@ Apps.settings = function (openSection) {
         } else if (section === 'accessibility') {
           content.innerHTML = `
             <div class="settings-section-title">Accessibility</div>
-            <div class="settings-section-desc">Make DragonOS easier to see and use.</div>
+            <div class="settings-section-desc">Make FormulaOS easier to see and use.</div>
             <div class="settings-card">
               <div class="settings-row">
                 <div class="label-group"><div class="label-title">Text Size</div><div class="label-sub">UI font scale</div></div>
@@ -418,7 +418,7 @@ Apps.settings = function (openSection) {
         } else if (section === 'account') {
           content.innerHTML = `
             <div class="settings-section-title">Account</div>
-            <div class="settings-section-desc">Personalize your DragonOS profile.</div>
+            <div class="settings-section-desc">Personalize your FormulaOS profile.</div>
             <div class="settings-card">
               <div class="settings-row">
                 <div class="label-group"><div class="label-title">Display Name</div><div class="label-sub">Shown in the Start Menu</div></div>
@@ -430,7 +430,7 @@ Apps.settings = function (openSection) {
         } else if (section === 'apps') {
           content.innerHTML = `
             <div class="settings-section-title">Apps</div>
-            <div class="settings-section-desc">${OS.appList.length} apps installed on DragonOS.</div>
+            <div class="settings-section-desc">${OS.appList.length} apps installed on FormulaOS.</div>
             <div class="app-directory">
               ${OS.appList.map(a => `<div class="adi" data-app="${a.id}">${Icons.html(a.id, 'adi-icon')} ${a.label}</div>`).join('')}
             </div>`;
@@ -443,26 +443,26 @@ Apps.settings = function (openSection) {
           const pct = Math.min(100, Math.round((usage.total / limitBytes) * 100));
           content.innerHTML = `
             <div class="settings-section-title">Storage</div>
-            <div class="settings-section-desc">DragonOS stores all data locally in this browser via localStorage.</div>
+            <div class="settings-section-desc">FormulaOS stores all data locally in this browser via localStorage.</div>
             <div class="settings-card">
               <div class="label-title">${(usage.total / 1024).toFixed(1)} KB used <span style="color:var(--text-dim);font-weight:400;">(~5 MB browser limit)</span></div>
               <div class="storage-bar"><div class="storage-bar-fill" style="width:${pct}%"></div></div>
-              ${usage.items.map(it => `<div class="settings-row"><div class="label-group"><div class="label-title" style="font-size:12px;">${it.key.replace('dragonos_', '')}</div></div><div class="label-sub">${(it.size / 1024).toFixed(1)} KB</div></div>`).join('')}
+              ${usage.items.map(it => `<div class="settings-row"><div class="label-group"><div class="label-title" style="font-size:12px;">${it.key.replace('formulaos_', '')}</div></div><div class="label-sub">${(it.size / 1024).toFixed(1)} KB</div></div>`).join('')}
             </div>
             <div class="settings-card">
               <div class="settings-row"><div class="label-group"><div class="label-title">Reset File System</div><div class="label-sub">Deletes all files and folders</div></div><button data-act="reset-fs">${Icons.inline('trash')}<span>Reset</span></button></div>
               <div class="settings-row"><div class="label-group"><div class="label-title">Empty Recycle Bin</div></div><button data-act="empty-trash">${Icons.inline('trash')}<span>Empty</span></button></div>
-              <div class="settings-row"><div class="label-group"><div class="label-title">Reset All Settings & Data</div><div class="label-sub">Restores DragonOS to factory defaults</div></div><button data-act="reset-all">${Icons.inline('refresh')}<span>Reset All</span></button></div>
+              <div class="settings-row"><div class="label-group"><div class="label-title">Reset All Settings & Data</div><div class="label-sub">Restores FormulaOS to factory defaults</div></div><button data-act="reset-all">${Icons.inline('refresh')}<span>Reset All</span></button></div>
             </div>`;
-          content.querySelector('[data-act="reset-fs"]').onclick = () => { if (confirm('Reset all files?')) { DragonFS.reset(); render('storage'); } };
-          content.querySelector('[data-act="empty-trash"]').onclick = () => { if (confirm('Empty the Recycle Bin?')) { DragonFS.emptyTrash(); render('storage'); } };
-          content.querySelector('[data-act="reset-all"]').onclick = () => { if (confirm('Reset all DragonOS settings and files?')) { localStorage.clear(); location.reload(); } };
+          content.querySelector('[data-act="reset-fs"]').onclick = () => { if (confirm('Reset all files?')) { FormulaFS.reset(); render('storage'); } };
+          content.querySelector('[data-act="empty-trash"]').onclick = () => { if (confirm('Empty the Recycle Bin?')) { FormulaFS.emptyTrash(); render('storage'); } };
+          content.querySelector('[data-act="reset-all"]').onclick = () => { if (confirm('Reset all FormulaOS settings and files?')) { localStorage.clear(); location.reload(); } };
         } else if (section === 'about') {
           content.innerHTML = `
-            <div class="settings-section-title">About DragonOS</div>
+            <div class="settings-section-title">About FormulaOS</div>
             <div class="settings-card" style="text-align:center;padding:26px;">
-              <div style="display:flex;justify-content:center;">${Icons.html('dragon', 'about-icon')}</div>
-              <div style="font-weight:700;font-size:16px;margin-top:6px;">DragonOS Web</div>
+              <div style="display:flex;justify-content:center;">${Icons.html('flag', 'about-icon')}</div>
+              <div style="font-weight:700;font-size:16px;margin-top:6px;">FormulaOS Web</div>
               <div class="label-sub">Version 1.0</div>
             </div>
             <div class="settings-card">
@@ -519,12 +519,12 @@ Apps.calculator = function () {
 /* ---------------- About ---------------- */
 Apps.about = function () {
   WM.open({
-    title: 'About DragonOS', icon: 'dragon', appId: 'about', single: true, width: 380, height: 420, resizable: false,
+    title: 'About FormulaOS', icon: 'flag', appId: 'about', single: true, width: 380, height: 420, resizable: false,
     onMount(body) {
       body.innerHTML = `
         <div class="about-hero">
-          ${Icons.html('dragon', 'about-icon')}
-          <h2 style="margin:0">DragonOS</h2>
+          ${Icons.html('flag', 'about-icon')}
+          <h2 style="margin:0">FormulaOS</h2>
           <div style="color:var(--text-dim);font-size:13px">Version 1.0 — a web-based operating system</div>
         </div>
         <div class="about-list">
@@ -558,7 +558,7 @@ Apps.notes = function () {
     onMount(body) {
       body.innerHTML = `<div class="app-toolbar"><button data-act="add">+ New note</button></div><div class="notes-list"></div>`;
       const list = body.querySelector('.notes-list');
-      const KEY = 'dragonos_notes_v1';
+      const KEY = 'formulaos_notes_v1';
       let notes = JSON.parse(localStorage.getItem(KEY) || '[]');
       function save() { localStorage.setItem(KEY, JSON.stringify(notes)); }
       function render() {

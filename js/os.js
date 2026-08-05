@@ -1,4 +1,4 @@
-/* DragonOS Core */
+/* FormulaOS Core */
 const OS = (() => {
   const wallpapers = Array.from({ length: Wallpaper.count() }, (_, i) => Wallpaper.cssValue(i));
   function applyBackground(cssValue) {
@@ -21,20 +21,20 @@ const OS = (() => {
     { id: 'calendar', label: 'Calendar', run: () => Apps.calendar() },
     { id: 'weather', label: 'Weather', run: () => Apps.weather() },
     { id: 'taskmgr', label: 'Task Manager', run: () => Apps.taskManager() },
-    { id: 'snake', label: 'Dragon Snake', run: () => Apps.snake() },
+    { id: 'snake', label: 'Track Racer', run: () => Apps.snake() },
     { id: 'settings', label: 'Settings', run: () => Apps.settings() },
     { id: 'about', label: 'About', run: () => Apps.about() },
   ];
   const DEFAULT_DOCK_PINNED = ['explorer', 'notepad', 'terminal', 'browser', 'photos', 'settings'];
 
   function loadPrefs() {
-    try { return JSON.parse(localStorage.getItem('dragonos_prefs_v1')) || {}; } catch (e) { return {}; }
+    try { return JSON.parse(localStorage.getItem('formulaos_prefs_v1')) || {}; } catch (e) { return {}; }
   }
-  function savePrefs(p) { localStorage.setItem('dragonos_prefs_v1', JSON.stringify(p)); }
+  function savePrefs(p) { localStorage.setItem('formulaos_prefs_v1', JSON.stringify(p)); }
   let prefs = Object.assign({
-    theme: 'dark', accent: '#ff5f45', accent2: '#ffa53e', wallpaper: 0, customWallpaper: null,
+    theme: 'dark', accent: '#e10600', accent2: '#ffc300', wallpaper: 0, customWallpaper: null,
     fontSize: 'md', reduceMotion: false, highContrast: false, clock24h: false,
-    username: 'Dragon', iconSize: 'md', brightness: 100, dockPinned: DEFAULT_DOCK_PINNED.slice()
+    username: 'Driver', iconSize: 'md', brightness: 100, dockPinned: DEFAULT_DOCK_PINNED.slice()
   }, loadPrefs());
 
   function pinToDock(id) {
@@ -48,7 +48,7 @@ const OS = (() => {
     savePrefs(prefs);
     renderDock();
   }
-  function notifyFSChange() { document.dispatchEvent(new CustomEvent('dragonos:fschange')); }
+  function notifyFSChange() { document.dispatchEvent(new CustomEvent('formulaos:fschange')); }
 
   function setTheme(t) {
     prefs.theme = t;
@@ -93,7 +93,7 @@ const OS = (() => {
     updateClock();
   }
   function setUsername(name) {
-    prefs.username = name || 'Dragon';
+    prefs.username = name || 'Driver';
     savePrefs(prefs);
     const lu = document.getElementById('lock-username'); if (lu) lu.textContent = prefs.username;
   }
@@ -127,7 +127,7 @@ const OS = (() => {
       const k = localStorage.key(i);
       const size = (localStorage.getItem(k) || '').length;
       total += size;
-      if (k.startsWith('dragonos_')) items.push({ key: k, size });
+      if (k.startsWith('formulaos_')) items.push({ key: k, size });
     }
     return { total, items };
   }
@@ -143,9 +143,9 @@ const OS = (() => {
     const icons = document.getElementById('icons');
     icons.dataset.size = prefs.iconSize;
     icons.innerHTML = '';
-    DragonFS.list('/Desktop').forEach(name => {
+    FormulaFS.list('/Desktop').forEach(name => {
       const full = '/Desktop/' + name;
-      const dir = DragonFS.isDir(full);
+      const dir = FormulaFS.isDir(full);
       const el = document.createElement('div');
       el.className = 'desktop-icon';
       el.draggable = true;
@@ -154,13 +154,13 @@ const OS = (() => {
         document.querySelectorAll('.desktop-icon').forEach(x => x.classList.remove('selected'));
         el.classList.add('selected');
       };
-      el.addEventListener('dragstart', (e) => { e.dataTransfer.setData('application/x-dragonos-path', full); e.dataTransfer.effectAllowed = 'move'; });
+      el.addEventListener('dragstart', (e) => { e.dataTransfer.setData('application/x-formulaos-path', full); e.dataTransfer.effectAllowed = 'move'; });
       el.oncontextmenu = (e) => {
         e.preventDefault();
         OS.showContextMenu(e.clientX, e.clientY, [
           { label: 'Open', action: () => bindOpenAction() },
-          { label: 'Move to Recycle Bin', action: () => { DragonFS.trash(full); renderDesktopIcons(); notifyFSChange(); renderDock(); } },
-          { label: 'Rename', action: () => { const n = prompt('New name', name); if (n) { DragonFS.rename(full, n); renderDesktopIcons(); notifyFSChange(); } } },
+          { label: 'Move to Recycle Bin', action: () => { FormulaFS.trash(full); renderDesktopIcons(); notifyFSChange(); renderDock(); } },
+          { label: 'Rename', action: () => { const n = prompt('New name', name); if (n) { FormulaFS.rename(full, n); renderDesktopIcons(); notifyFSChange(); } } },
         ]);
       };
       function bindOpenAction() {
@@ -172,7 +172,7 @@ const OS = (() => {
       icons.appendChild(el);
     });
   }
-  document.addEventListener('dragonos:fschange', renderDesktopIcons);
+  document.addEventListener('formulaos:fschange', renderDesktopIcons);
 
   /* ---------------- Dock ---------------- */
   function findWindowByAppId(appId) {
@@ -210,8 +210,8 @@ const OS = (() => {
       const items = [{ label: `Open ${app.label}`, action: () => activateApp(app) }];
       if (winId) items.push({ label: `${Icons.inline('close')}<span>Quit</span>`, action: () => { WM.registry.forEach((w, id) => { if (w.meta.appId === app.id) WM.close(id); }); } });
       if (opts.trash) {
-        const trashCount = DragonFS.listTrash().length;
-        items.push({ label: trashCount ? `Empty Recycle Bin (${trashCount})` : 'Empty Recycle Bin', disabled: !trashCount, action: () => { if (confirm('Permanently delete everything in the Recycle Bin?')) { DragonFS.emptyTrash(); renderDock(); notifyFSChange(); } } });
+        const trashCount = FormulaFS.listTrash().length;
+        items.push({ label: trashCount ? `Empty Recycle Bin (${trashCount})` : 'Empty Recycle Bin', disabled: !trashCount, action: () => { if (confirm('Permanently delete everything in the Recycle Bin?')) { FormulaFS.emptyTrash(); renderDock(); notifyFSChange(); } } });
       } else if (opts.pinned) {
         items.push({ label: 'Remove from Dock', action: () => unpinFromDock(app.id) });
       } else {
@@ -225,8 +225,8 @@ const OS = (() => {
       el.addEventListener('drop', (e) => {
         e.preventDefault();
         el.classList.remove('drag-over');
-        const path = e.dataTransfer.getData('application/x-dragonos-path');
-        if (path) { DragonFS.trash(path); renderDock(); notifyFSChange(); bounceDock('trash'); }
+        const path = e.dataTransfer.getData('application/x-formulaos-path');
+        if (path) { FormulaFS.trash(path); renderDock(); notifyFSChange(); bounceDock('trash'); }
       });
     }
     return el;
@@ -255,7 +255,7 @@ const OS = (() => {
       extra.forEach(id => { const app = appList.find(a => a.id === id); if (app) dock.appendChild(makeDockItem(app, true, { pinned: false })); });
     }
     dock.appendChild(sepEl());
-    const trashEmpty = DragonFS.listTrash().length === 0;
+    const trashEmpty = FormulaFS.listTrash().length === 0;
     dock.appendChild(makeDockItem(appList.find(a => a.id === 'trash'), false, { trash: true, iconId: trashEmpty ? 'trash' : 'trash-full' }));
 
     updateActiveAppName();
@@ -337,12 +337,12 @@ const OS = (() => {
     switch (kind) {
       case 'logo':
         return [
-          { label: `About This DragonOS`, action: () => Apps.about() },
+          { label: `About This FormulaOS`, action: () => Apps.about() },
           { sep: true },
           { label: 'System Settings…', action: () => Apps.settings() },
           { sep: true },
           { label: 'Lock Screen', action: () => lock() },
-          { label: 'Restart', action: () => { if (confirm('Restart DragonOS?')) location.reload(); } },
+          { label: 'Restart', action: () => { if (confirm('Restart FormulaOS?')) location.reload(); } },
         ];
       case 'app':
         return [
@@ -353,7 +353,7 @@ const OS = (() => {
       case 'file':
         return [
           { label: 'New Finder Window', action: () => Apps.explorer() },
-          { label: 'New Folder', action: () => { const n = prompt('Folder name', 'New Folder'); if (n) DragonFS.mkdir('/' + n); } },
+          { label: 'New Folder', action: () => { const n = prompt('Folder name', 'New Folder'); if (n) FormulaFS.mkdir('/' + n); } },
           { sep: true },
           { label: 'Close Window', disabled: !focusedId, action: () => focusedId && WM.close(focusedId[0]) },
         ];
@@ -380,7 +380,7 @@ const OS = (() => {
         ];
       case 'help':
         return [
-          { label: 'DragonOS Help', action: () => Apps.about() },
+          { label: 'FormulaOS Help', action: () => Apps.about() },
           { label: 'Keyboard Shortcuts', action: () => alert('⌘/Ctrl+Space — Spotlight\nAlt+Tab — Switch windows\nDrag a window to a screen edge — Snap\nF4 or Launchpad icon — App grid') },
         ];
       default: return [];
@@ -464,9 +464,9 @@ const OS = (() => {
   }
 
   function boot() {
-    document.getElementById('boot-logo-icon').innerHTML = Icons.svg('dragon');
-    document.getElementById('lock-avatar-icon').innerHTML = Icons.svg('dragon');
-    document.getElementById('mb-logo-btn').innerHTML = Icons.svg('dragon');
+    document.getElementById('boot-logo-icon').innerHTML = Icons.svg('flag');
+    document.getElementById('lock-avatar-icon').innerHTML = Icons.svg('flag');
+    document.getElementById('mb-logo-btn').innerHTML = Icons.svg('flag');
     document.getElementById('mb-search').innerHTML = Icons.monoSvg('search');
     document.getElementById('mb-wifi').innerHTML = Icons.monoSvg('wifi');
     document.getElementById('mb-battery').innerHTML = Icons.monoSvg('battery');
@@ -514,7 +514,7 @@ const OS = (() => {
       e.preventDefault();
       showContextMenu(e.clientX, e.clientY, [
         { label: `${Icons.inline('refresh')}<span>Refresh</span>`, action: () => renderDesktopIcons() },
-        { label: `${Icons.inline('folder-open')}<span>New Folder</span>`, action: () => { const n = prompt('Folder name', 'New Folder'); if (n) { DragonFS.mkdir('/Desktop/' + n); renderDesktopIcons(); } } },
+        { label: `${Icons.inline('folder-open')}<span>New Folder</span>`, action: () => { const n = prompt('Folder name', 'New Folder'); if (n) { FormulaFS.mkdir('/Desktop/' + n); renderDesktopIcons(); } } },
         { sep: true },
         { label: `${Icons.inline('photos')}<span>Change Wallpaper</span>`, action: () => Apps.settings('appearance') },
         { label: `${Icons.inline('settings')}<span>Settings</span>`, action: () => Apps.settings() },
@@ -529,7 +529,7 @@ const OS = (() => {
       files.forEach(f => {
         const reader = new FileReader();
         const isText = /\.(txt|md|json|js|css|html|csv)$/i.test(f.name) || f.type.startsWith('text/');
-        reader.onload = () => { DragonFS.write('/Desktop/' + f.name, reader.result); renderDesktopIcons(); };
+        reader.onload = () => { FormulaFS.write('/Desktop/' + f.name, reader.result); renderDesktopIcons(); };
         if (isText) reader.readAsText(f); else reader.readAsDataURL(f);
       });
     });

@@ -1,4 +1,4 @@
-/* DragonOS custom icon set — no emoji */
+/* FormulaOS custom icon set — no emoji */
 const Icons = (() => {
   /* Thin line glyphs — used ONLY inline next to text (menus, sidebars, buttons).
      currentColor stroke so they stay theme-adaptive; never placed on a tile. */
@@ -19,8 +19,8 @@ const Icons = (() => {
     taskmgr: '<rect x="3.5" y="3.5" width="17" height="17" rx="2"/><path d="M8 16.5v-4M12 16.5v-7M16 16.5v-2.5"/>',
     snake: '<rect x="3.5" y="3.5" width="17" height="17" rx="2"/><path d="M7 8h6a2.5 2.5 0 0 1 0 5H9a2.5 2.5 0 0 0 0 5h6.5"/><circle cx="16.8" cy="8" r="1.1" fill="currentColor" stroke="none"/>',
     settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l1.9-1.4-2-3.4-2.2.8a7.6 7.6 0 0 0-2.6-1.5L14 2.5h-4l-.5 2.5a7.6 7.6 0 0 0-2.6 1.5l-2.2-.8-2 3.4L4.6 10.5a7.6 7.6 0 0 0 0 3L2.7 15l2 3.4 2.2-.8c.76.66 1.64 1.17 2.6 1.5l.5 2.4h4l.5-2.4a7.6 7.6 0 0 0 2.6-1.5l2.2.8 2-3.4-1.9-1.5z"/>',
-    about: '<path d="M4 15.5c1.3-6 4.7-11 8-11 3.7 0 6.6 3 6.6 7 0 3-1.7 5-4 5-1.4 0-2.3-.9-2.3-2.2 0-1.7 1.4-3.3 1.4-4.8 0-.8-.5-1.3-1.2-1.3-1.7 0-3 2.6-3 5.4 0 1 .2 1.7.2 1.7-2 1.4-4.3 2.3-5.7 2.3z"/><circle cx="16.2" cy="8.6" r=".9" fill="currentColor" stroke="none"/>',
-    dragon: '<path d="M4 15.5c1.3-6 4.7-11 8-11 3.7 0 6.6 3 6.6 7 0 3-1.7 5-4 5-1.4 0-2.3-.9-2.3-2.2 0-1.7 1.4-3.3 1.4-4.8 0-.8-.5-1.3-1.2-1.3-1.7 0-3 2.6-3 5.4 0 1 .2 1.7.2 1.7-2 1.4-4.3 2.3-5.7 2.3z"/><circle cx="16.2" cy="8.6" r=".9" fill="currentColor" stroke="none"/>',
+    about: '<g transform="rotate(-12 12 12)"><path d="M6 5v15" stroke-width="1.6"/><rect x="7.5" y="6" width="11" height="8"/><path d="M7.5 10h11M10.25 6v8M13 6v8M15.75 6v8"/></g>',
+    flag: '<g transform="rotate(-12 12 12)"><path d="M6 5v15" stroke-width="1.6"/><rect x="7.5" y="6" width="11" height="8"/><path d="M7.5 10h11M10.25 6v8M13 6v8M15.75 6v8"/></g>',
     launchpad: '<rect x="4" y="4" width="6.2" height="6.2" rx="1.6"/><rect x="13.8" y="4" width="6.2" height="6.2" rx="1.6"/><rect x="4" y="13.8" width="6.2" height="6.2" rx="1.6"/><rect x="13.8" y="13.8" width="6.2" height="6.2" rx="1.6"/>',
     file: '<path d="M7 3.5h7l4 4V20a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1z"/><path d="M14 3.5V8h4M9 12h6M9 15.3h6M9 18.6h3.5"/>',
     search: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="M19.5 19.5 15 15"/>',
@@ -68,8 +68,8 @@ const Icons = (() => {
     taskmgr: '<rect x="6.3" y="13" width="3" height="6.3" rx="1" fill="#fff"/><rect x="10.5" y="8.7" width="3" height="10.6" rx="1" fill="#fff"/><rect x="14.7" y="11" width="3" height="8.3" rx="1" fill="#fff"/>',
     snake: '<path d="M6.5 9.5h6a3 3 0 0 1 0 6H10a3 3 0 0 0 0 6h6.5" stroke="#fff" stroke-width="3.1" fill="none" stroke-linecap="round"/><circle cx="17.6" cy="9" r="1.3" fill="#fff"/>',
     settings: '<path fill-rule="evenodd" fill="#fff" fill-opacity=".95" d="M14 2.5h-4l-.5 2.5a7.6 7.6 0 0 0-2.6 1.5l-2.2-.8-2 3.4L4.6 10.5a7.6 7.6 0 0 0 0 3L2.7 15l2 3.4 2.2-.8c.76.66 1.64 1.17 2.6 1.5l.5 2.4h4l.5-2.4a7.6 7.6 0 0 0 2.6-1.5l2.2.8 2-3.4-1.9-1.5a7.6 7.6 0 0 0 0-3l1.9-1.4-2-3.4-2.2.8a7.6 7.6 0 0 0-2.6-1.5zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>',
-    about: '<path d="M4 15.5c1.3-6 4.7-11 8-11 3.7 0 6.6 3 6.6 7 0 3-1.7 5-4 5-1.4 0-2.3-.9-2.3-2.2 0-1.7 1.4-3.3 1.4-4.8 0-.8-.5-1.3-1.2-1.3-1.7 0-3 2.6-3 5.4 0 1 .2 1.7.2 1.7-2 1.4-4.3 2.3-5.7 2.3z" fill="#fff" fill-opacity=".95"/><circle cx="16.2" cy="8.6" r=".9" fill="rgba(0,0,0,.32)"/>',
-    dragon: '<path d="M4 15.5c1.3-6 4.7-11 8-11 3.7 0 6.6 3 6.6 7 0 3-1.7 5-4 5-1.4 0-2.3-.9-2.3-2.2 0-1.7 1.4-3.3 1.4-4.8 0-.8-.5-1.3-1.2-1.3-1.7 0-3 2.6-3 5.4 0 1 .2 1.7.2 1.7-2 1.4-4.3 2.3-5.7 2.3z" fill="#fff" fill-opacity=".95"/><circle cx="16.2" cy="8.6" r=".9" fill="rgba(0,0,0,.32)"/>',
+    about: '<g transform="rotate(-12 12 12)"><rect x="5.7" y="4.5" width="1.7" height="16" rx=".85" fill="#fff"/><rect x="7.5" y="6" width="11" height="8" fill="none" stroke="#fff" stroke-width=".9" stroke-opacity=".55"/><rect x="7.5" y="6" width="2.75" height="4" fill="#fff"/><rect x="13" y="6" width="2.75" height="4" fill="#fff"/><rect x="10.25" y="10" width="2.75" height="4" fill="#fff"/><rect x="15.75" y="10" width="2.75" height="4" fill="#fff"/></g>',
+    flag: '<g transform="rotate(-12 12 12)"><rect x="5.7" y="4.5" width="1.7" height="16" rx=".85" fill="#fff"/><rect x="7.5" y="6" width="11" height="8" fill="none" stroke="#fff" stroke-width=".9" stroke-opacity=".55"/><rect x="7.5" y="6" width="2.75" height="4" fill="#fff"/><rect x="13" y="6" width="2.75" height="4" fill="#fff"/><rect x="10.25" y="10" width="2.75" height="4" fill="#fff"/><rect x="15.75" y="10" width="2.75" height="4" fill="#fff"/></g>',
     launchpad: '<rect x="4.6" y="4.6" width="6" height="6" rx="1.7" fill="#fff"/><rect x="13.4" y="4.6" width="6" height="6" rx="1.7" fill="#fff"/><rect x="4.6" y="13.4" width="6" height="6" rx="1.7" fill="#fff"/><rect x="13.4" y="13.4" width="6" height="6" rx="1.7" fill="#fff"/>',
     file: '<path d="M7.3 3.6h6.6l4 4V20a1 1 0 0 1-1 1H7.3a1 1 0 0 1-1-1V4.6a1 1 0 0 1 1-1z" fill="#fff" fill-opacity=".95"/><path d="M13.9 3.6v3.6a1 1 0 0 0 1 1H18.5z" fill="rgba(0,0,0,.15)"/>',
     music: '<circle cx="7" cy="18" r="2.3" fill="#fff"/><circle cx="17" cy="16" r="2.3" fill="#fff"/><path d="M9.3 18V6.7L19.3 4.2v11.4" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"/>',
@@ -78,7 +78,7 @@ const Icons = (() => {
     snowflake: '<path d="M12 4v16M5.4 7.8l13.2 8.4M18.6 7.8 5.4 16.2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>'
   };
 
-  /* Restrained DragonOS palette — six families, each a soft-to-deep pair.
+  /* Restrained FormulaOS palette — six families, each a soft-to-deep pair.
      Every icon is assigned one family; glyph shape (not hue) carries identity. */
   const family = {
     blue: ['#8fc7ff', '#3f7fd9'],
@@ -87,15 +87,16 @@ const Icons = (() => {
     slateDeep: ['#7c8698', '#3d4552'],
     orange: ['#ffbe86', '#e8813a'],
     emerald: ['#8fe0b8', '#2a9d63'],
-    cyan: ['#8fe3ea', '#2a9bab']
+    cyan: ['#8fe3ea', '#2a9bab'],
+    red: ['#ff6b5e', '#c81e1e']
   };
   const colors = {
     explorer: family.blue, trash: family.slate, 'trash-full': family.orange, notepad: family.orange,
     terminal: family.slateDeep, browser: family.cyan, calculator: family.slate,
     notes: family.orange, photos: family.violet, paint: family.violet,
     media: family.violet, calendar: family.orange, weather: family.cyan,
-    taskmgr: family.emerald, snake: family.emerald, settings: family.slate,
-    about: family.orange, dragon: family.orange, launchpad: family.violet,
+    taskmgr: family.emerald, snake: family.red, settings: family.slate,
+    about: family.red, flag: family.red, launchpad: family.violet,
     search: family.slate, file: family.slate, music: family.violet,
     sun: family.orange, 'cloud-rain': family.cyan, snowflake: family.cyan
   };

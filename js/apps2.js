@@ -1,11 +1,11 @@
-/* DragonOS Applications — Part 2 */
+/* FormulaOS Applications — Part 2 */
 
 /* ---------------- Image Viewer ---------------- */
 Apps.imageViewer = function (path) {
   WM.open({
-    title: path ? DragonFS.nameOf(path) : 'Image Viewer', icon: 'photos', width: 520, height: 420,
+    title: path ? FormulaFS.nameOf(path) : 'Image Viewer', icon: 'photos', width: 520, height: 420,
     onMount(body) {
-      const data = path ? DragonFS.read(path) : null;
+      const data = path ? FormulaFS.read(path) : null;
       body.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:repeating-conic-gradient(#00000022 0% 25%, transparent 0% 50%) 50%/24px 24px;overflow:auto;">
         ${data ? `<img src="${data}" style="max-width:100%;max-height:100%;object-fit:contain;box-shadow:0 10px 30px rgba(0,0,0,.4);" />` : '<div style="color:var(--text-dim)">No image</div>'}
       </div>`;
@@ -69,7 +69,7 @@ Apps.paint = function () {
       body.querySelector('[data-act="clear"]').onclick = () => { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height); };
       body.querySelector('[data-act="save"]').onclick = () => {
         const name = prompt('Save as (in /Pictures):', 'painting.png');
-        if (name) { DragonFS.write('/Pictures/' + name.replace(/[^\w.\-]/g, '_'), canvas.toDataURL()); alert('Saved to /Pictures'); }
+        if (name) { FormulaFS.write('/Pictures/' + name.replace(/[^\w.\-]/g, '_'), canvas.toDataURL()); alert('Saved to /Pictures'); }
       };
     }
   });
@@ -166,7 +166,7 @@ Apps.weather = function () {
         <div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:linear-gradient(160deg,#2a6ba8,#7ec8e3);color:#fff;text-align:center;">
           <div style="width:72px;height:72px;">${Icons.svg(c.icon)}</div>
           <div style="font-size:44px;font-weight:200;">${c.temp}°F</div>
-          <div style="font-size:14px;opacity:.85;">${c.label} · Dragon City</div>
+          <div style="font-size:14px;opacity:.85;">${c.label} · Monaco</div>
           <div style="font-size:11px;opacity:.6;margin-top:12px;">Demo data — no live network calls</div>
         </div>`;
     }
@@ -200,7 +200,7 @@ Apps.taskManager = function () {
 /* ---------------- Snake Game ---------------- */
 Apps.snake = function () {
   WM.open({
-    title: 'Dragon Snake', icon: 'snake', width: 360, height: 420, resizable: false,
+    title: 'Track Racer', icon: 'snake', width: 360, height: 420, resizable: false,
     onMount(body) {
       body.innerHTML = `
         <div class="app-toolbar"><span style="align-self:center;font-size:12px;">Score: <b class="score">0</b></span><span style="flex:1"></span><button data-act="restart">${Icons.inline('refresh')}<span>Restart</span></button></div>
