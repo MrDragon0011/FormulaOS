@@ -27,7 +27,7 @@ const OS = (() => {
     { id: 'settings', label: 'Settings', emoji: '⚙️', run: () => Apps.settings() },
     { id: 'about', label: 'About', emoji: '🐉', run: () => Apps.about() },
   ];
-  const DOCK_PINNED = ['explorer', 'notepad', 'terminal', 'browser', 'photos', 'settings'];
+  const DEFAULT_DOCK_PINNED = ['explorer', 'notepad', 'terminal', 'browser', 'photos', 'settings'];
 
   function loadPrefs() {
     try { return JSON.parse(localStorage.getItem('dragonos_prefs_v1')) || {}; } catch (e) { return {}; }
@@ -36,8 +36,21 @@ const OS = (() => {
   let prefs = Object.assign({
     theme: 'dark', accent: '#ff5f45', accent2: '#ffa53e', wallpaper: 0, customWallpaper: null,
     fontSize: 'md', reduceMotion: false, highContrast: false, clock24h: false,
-    username: 'Dragon', iconSize: 'md', brightness: 100
+    username: 'Dragon', iconSize: 'md', brightness: 100, dockPinned: DEFAULT_DOCK_PINNED.slice()
   }, loadPrefs());
+
+  function pinToDock(id) {
+    if (id === 'trash' || prefs.dockPinned.includes(id)) return;
+    prefs.dockPinned.push(id);
+    savePrefs(prefs);
+    renderDock();
+  }
+  function unpinFromDock(id) {
+    prefs.dockPinned = prefs.dockPinned.filter(x => x !== id);
+    savePrefs(prefs);
+    renderDock();
+  }
+  function notifyFSChange() { document.dispatchEvent(new CustomEvent('dragonos:fschange')); }
 
   function setTheme(t) {
     prefs.theme = t;
@@ -121,24 +134,47 @@ const OS = (() => {
     return { total, items };
   }
 
-  /* ---------------- Desktop icons ---------------- */
+  /* ---------------- Desktop icons (mirrors the real /Desktop folder) ---------------- */
+  function fileIconId(name, isDir) {
+    if (isDir) return 'explorer';
+    if (/\.(txt|md)$/i.test(name)) return 'notepad';
+    if (/\.(png|jpg|jpeg|gif|svg)$/i.test(name)) return 'photos';
+    return 'file';
+  }
   function renderDesktopIcons() {
     const icons = document.getElementById('icons');
     icons.dataset.size = prefs.iconSize;
     icons.innerHTML = '';
-    const shortcuts = ['trash', 'calculator', 'notes', 'about'].map(id => appList.find(a => a.id === id));
-    shortcuts.forEach(app => {
+    DragonFS.list('/Desktop').forEach(name => {
+      const full = '/Desktop/' + name;
+      const dir = DragonFS.isDir(full);
       const el = document.createElement('div');
       el.className = 'desktop-icon';
-      el.innerHTML = `${Icons.html(app.id)}<div class="label">${app.label}</div>`;
+      el.draggable = true;
+      el.innerHTML = `${Icons.html(fileIconId(name, dir))}<div class="label">${name}</div>`;
       el.onclick = () => {
         document.querySelectorAll('.desktop-icon').forEach(x => x.classList.remove('selected'));
         el.classList.add('selected');
       };
-      bindOpen(el, () => app.run());
+      el.addEventListener('dragstart', (e) => { e.dataTransfer.setData('application/x-dragonos-path', full); e.dataTransfer.effectAllowed = 'move'; });
+      el.oncontextmenu = (e) => {
+        e.preventDefault();
+        OS.showContextMenu(e.clientX, e.clientY, [
+          { label: 'Open', action: () => bindOpenAction() },
+          { label: 'Move to Recycle Bin', action: () => { DragonFS.trash(full); renderDesktopIcons(); notifyFSChange(); renderDock(); } },
+          { label: 'Rename', action: () => { const n = prompt('New name', name); if (n) { DragonFS.rename(full, n); renderDesktopIcons(); notifyFSChange(); } } },
+        ]);
+      };
+      function bindOpenAction() {
+        if (dir) Apps.explorer(full);
+        else if (/\.(png|jpg|jpeg|gif|svg)$/i.test(name)) Apps.imageViewer(full);
+        else Apps.textEditor(full);
+      }
+      bindOpen(el, bindOpenAction);
       icons.appendChild(el);
     });
   }
+  document.addEventListener('dragonos:fschange', renderDesktopIcons);
 
   /* ---------------- Dock ---------------- */
   function findWindowByAppId(appId) {
@@ -163,19 +199,38 @@ const OS = (() => {
     }
     bounceDock(app.id);
   }
-  function makeDockItem(app, running) {
+  function makeDockItem(app, running, opts) {
+    opts = opts || {};
     const el = document.createElement('div');
     el.className = 'dock-item';
     el.dataset.app = app.id;
-    el.innerHTML = `${Icons.html(app.id)}<span class="dock-label">${app.label}</span>${running ? '<span class="dot"></span>' : ''}`;
+    el.innerHTML = `${Icons.html(opts.iconId || app.id)}<span class="dock-label">${app.label}</span>${running ? '<span class="dot"></span>' : ''}`;
     el.onclick = () => activateApp(app);
     el.oncontextmenu = (e) => {
       e.preventDefault();
       const winId = findWindowByAppId(app.id);
       const items = [{ label: `Open ${app.label}`, action: () => activateApp(app) }];
       if (winId) items.push({ label: '✕ Quit', action: () => { WM.registry.forEach((w, id) => { if (w.meta.appId === app.id) WM.close(id); }); } });
+      if (opts.trash) {
+        const trashCount = DragonFS.listTrash().length;
+        items.push({ label: trashCount ? `Empty Recycle Bin (${trashCount})` : 'Empty Recycle Bin', disabled: !trashCount, action: () => { if (confirm('Permanently delete everything in the Recycle Bin?')) { DragonFS.emptyTrash(); renderDock(); notifyFSChange(); } } });
+      } else if (opts.pinned) {
+        items.push({ label: 'Remove from Dock', action: () => unpinFromDock(app.id) });
+      } else {
+        items.push({ label: 'Add to Dock', action: () => pinToDock(app.id) });
+      }
       showContextMenu(e.clientX, e.clientY, items);
     };
+    if (opts.trash) {
+      el.addEventListener('dragover', (e) => { e.preventDefault(); el.classList.add('drag-over'); });
+      el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+      el.addEventListener('drop', (e) => {
+        e.preventDefault();
+        el.classList.remove('drag-over');
+        const path = e.dataTransfer.getData('application/x-dragonos-path');
+        if (path) { DragonFS.trash(path); renderDock(); notifyFSChange(); bounceDock('trash'); }
+      });
+    }
     return el;
   }
   function sepEl() { const d = document.createElement('div'); d.className = 'dock-sep'; return d; }
@@ -185,23 +240,25 @@ const OS = (() => {
     dock.innerHTML = '';
     const launchpadBtn = document.createElement('div');
     launchpadBtn.className = 'dock-item';
-    launchpadBtn.innerHTML = `<span class="app-icon mono-tile">${Icons.monoSvg('rocket')}</span><span class="dock-label">Launchpad</span>`;
+    launchpadBtn.innerHTML = `<span class="app-icon mono-tile">${Icons.monoSvg('grid')}</span><span class="dock-label">App Grid</span>`;
     launchpadBtn.onclick = openLaunchpad;
     dock.appendChild(launchpadBtn);
     dock.appendChild(sepEl());
 
     const runningIds = new Set([...WM.registry.values()].map(w => w.meta.appId).filter(Boolean));
-    DOCK_PINNED.forEach(id => {
+    const pinned = prefs.dockPinned.filter(id => id !== 'trash' && appList.some(a => a.id === id));
+    pinned.forEach(id => {
       const app = appList.find(a => a.id === id);
-      if (app) dock.appendChild(makeDockItem(app, runningIds.has(id)));
+      if (app) dock.appendChild(makeDockItem(app, runningIds.has(id), { pinned: true }));
     });
-    const extra = [...runningIds].filter(id => !DOCK_PINNED.includes(id) && id !== 'trash');
+    const extra = [...runningIds].filter(id => !pinned.includes(id) && id !== 'trash');
     if (extra.length) {
       dock.appendChild(sepEl());
-      extra.forEach(id => { const app = appList.find(a => a.id === id); if (app) dock.appendChild(makeDockItem(app, true)); });
+      extra.forEach(id => { const app = appList.find(a => a.id === id); if (app) dock.appendChild(makeDockItem(app, true, { pinned: false })); });
     }
     dock.appendChild(sepEl());
-    dock.appendChild(makeDockItem(appList.find(a => a.id === 'trash'), false));
+    const trashEmpty = DragonFS.listTrash().length === 0;
+    dock.appendChild(makeDockItem(appList.find(a => a.id === 'trash'), false, { trash: true, iconId: trashEmpty ? 'trash' : 'trash-full' }));
 
     updateActiveAppName();
   }
@@ -226,6 +283,14 @@ const OS = (() => {
         el.className = 'lp-app';
         el.innerHTML = `${Icons.html(app.id)}<div>${app.label}</div>`;
         el.onclick = () => { app.run(); closeLaunchpad(); };
+        el.oncontextmenu = (e) => {
+          e.preventDefault();
+          const pinned = prefs.dockPinned.includes(app.id);
+          showContextMenu(e.clientX, e.clientY, [
+            { label: `Open ${app.label}`, action: () => { app.run(); closeLaunchpad(); } },
+            pinned ? { label: 'Remove from Dock', action: () => unpinFromDock(app.id) } : { label: 'Add to Dock', action: () => pinToDock(app.id) },
+          ]);
+        };
         grid.appendChild(el);
       });
     }
@@ -451,11 +516,24 @@ const OS = (() => {
       e.preventDefault();
       showContextMenu(e.clientX, e.clientY, [
         { label: '🔄 Refresh', action: () => renderDesktopIcons() },
-        { label: '📁 New Folder', action: () => { const n = prompt('Folder name', 'New Folder'); if (n) DragonFS.mkdir('/' + n); } },
+        { label: '📁 New Folder', action: () => { const n = prompt('Folder name', 'New Folder'); if (n) { DragonFS.mkdir('/Desktop/' + n); renderDesktopIcons(); } } },
         { sep: true },
         { label: '🖼️ Change Wallpaper', action: () => Apps.settings('appearance') },
         { label: '⚙️ Settings', action: () => Apps.settings() },
       ]);
+    });
+    desktop.addEventListener('dragover', (e) => { if ([...e.dataTransfer.types].includes('files')) e.preventDefault(); });
+    desktop.addEventListener('drop', (e) => {
+      if (!(e.target === desktop || e.target.id === 'icons')) return;
+      const files = [...(e.dataTransfer.files || [])];
+      if (!files.length) return;
+      e.preventDefault();
+      files.forEach(f => {
+        const reader = new FileReader();
+        const isText = /\.(txt|md|json|js|css|html|csv)$/i.test(f.name) || f.type.startsWith('text/');
+        reader.onload = () => { DragonFS.write('/Desktop/' + f.name, reader.result); renderDesktopIcons(); };
+        if (isText) reader.readAsText(f); else reader.readAsDataURL(f);
+      });
     });
     desktop.addEventListener('click', (e) => {
       if (e.target === desktop || e.target.id === 'icons') {
@@ -502,6 +580,7 @@ const OS = (() => {
     wallpapers, appList, prefs,
     setTheme, toggleTheme, setAccent, setWallpaper, setCustomWallpaper, setFontSize, setReduceMotion,
     setHighContrast, setClock24h, setUsername, setIconSize, setBrightness,
-    showContextMenu, hideContextMenu, lock, unlock, storageUsage, openLaunchpad, openSpotlight
+    showContextMenu, hideContextMenu, lock, unlock, storageUsage, openLaunchpad, openSpotlight,
+    pinToDock, unpinFromDock, notifyFSChange, renderDesktopIcons, renderDock
   };
 })();

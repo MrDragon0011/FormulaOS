@@ -32,10 +32,10 @@ Apps.explorer = function (startPath) {
       const emptyTrashBtn = body.querySelector('[data-act="empty-trash"]');
 
       function iconFor(name, isDir) {
-        if (isDir) return name === 'Trash' ? '🗑️' : '📁';
-        if (/\.(txt|md)$/i.test(name)) return '📄';
-        if (/\.(png|jpg|jpeg|gif|svg)$/i.test(name)) return '🖼️';
-        return '📦';
+        if (isDir) return name === 'Trash' ? 'trash' : 'explorer';
+        if (/\.(txt|md)$/i.test(name)) return 'notepad';
+        if (/\.(png|jpg|jpeg|gif|svg)$/i.test(name)) return 'photos';
+        return 'file';
       }
 
       function render() {
@@ -53,16 +53,16 @@ Apps.explorer = function (startPath) {
             const dir = DragonFS.isDir(full);
             const el = document.createElement('div');
             el.className = 'explorer-item';
-            el.innerHTML = `<div class="emoji">${iconFor(name, dir)}</div><div class="label">${name}</div>`;
+            el.innerHTML = `${Icons.html(iconFor(name, dir))}<div class="label">${name}</div>`;
             el.title = origin ? `Originally: ${origin}` : '';
             el.oncontextmenu = (e) => {
               e.preventDefault();
               OS.showContextMenu(e.clientX, e.clientY, [
-                { label: '↩️ Restore', action: () => { DragonFS.restore(name); render(); } },
-                { label: '🗑 Delete Permanently', action: () => { if (confirm(`Permanently delete "${name}"?`)) { DragonFS.remove(full); render(); } } }
+                { label: '↩️ Restore', action: () => { DragonFS.restore(name); render(); OS.notifyFSChange(); OS.renderDock(); } },
+                { label: '🗑 Delete Permanently', action: () => { if (confirm(`Permanently delete "${name}"?`)) { DragonFS.remove(full); render(); OS.renderDock(); } } }
               ]);
             };
-            bindOpen(el, () => { if (confirm(`Restore "${name}" to its original location?`)) { DragonFS.restore(name); render(); } });
+            bindOpen(el, () => { if (confirm(`Restore "${name}" to its original location?`)) { DragonFS.restore(name); render(); OS.notifyFSChange(); OS.renderDock(); } });
             grid.appendChild(el);
           });
           return;
@@ -72,7 +72,9 @@ Apps.explorer = function (startPath) {
           const dir = DragonFS.isDir(full);
           const el = document.createElement('div');
           el.className = 'explorer-item';
-          el.innerHTML = `<div class="emoji">${iconFor(name, dir)}</div><div class="label">${name}</div>`;
+          el.draggable = true;
+          el.innerHTML = `${Icons.html(iconFor(name, dir))}<div class="label">${name}</div>`;
+          el.addEventListener('dragstart', (e) => { e.dataTransfer.setData('application/x-dragonos-path', full); e.dataTransfer.effectAllowed = 'move'; });
           bindOpen(el, () => {
             if (dir) { path = full; render(); }
             else if (/\.(png|jpg|jpeg|gif|svg)$/i.test(name)) Apps.imageViewer(full);
@@ -81,8 +83,8 @@ Apps.explorer = function (startPath) {
           el.oncontextmenu = (e) => {
             e.preventDefault();
             const items = [
-              { label: '🗑 Move to Recycle Bin', action: () => { DragonFS.trash(full); render(); } },
-              { label: '✏️ Rename', action: () => { const n = prompt('New name', name); if (n) { DragonFS.rename(full, n); render(); } } }
+              { label: '🗑 Move to Recycle Bin', action: () => { DragonFS.trash(full); render(); OS.notifyFSChange(); OS.renderDock(); } },
+              { label: '✏️ Rename', action: () => { const n = prompt('New name', name); if (n) { DragonFS.rename(full, n); render(); OS.notifyFSChange(); } } }
             ];
             OS.showContextMenu(e.clientX, e.clientY, items);
           };
@@ -97,7 +99,8 @@ Apps.explorer = function (startPath) {
       body.querySelector('[data-act="new-file"]').onclick = () => {
         const n = prompt('File name', 'untitled.txt'); if (n) { DragonFS.touch((path === '/' ? '' : path) + '/' + n); render(); }
       };
-      emptyTrashBtn.onclick = () => { if (confirm('Permanently delete everything in the Recycle Bin?')) { DragonFS.emptyTrash(); render(); } };
+      emptyTrashBtn.onclick = () => { if (confirm('Permanently delete everything in the Recycle Bin?')) { DragonFS.emptyTrash(); render(); OS.renderDock(); } };
+      document.addEventListener('dragonos:fschange', render);
 
       // Drag & drop upload from the OS file system
       ['dragover', 'dragenter'].forEach(ev => grid.addEventListener(ev, (e) => { e.preventDefault(); grid.style.background = 'rgba(255,95,69,.08)'; }));

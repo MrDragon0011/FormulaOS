@@ -226,6 +226,7 @@ button{font-family:inherit;}
 }
 .dock-item .app-icon{width:44px;height:44px;}
 .dock-item:hover{transform:translateY(-8px) scale(1.15);}
+.dock-item.drag-over{background:rgba(255,255,255,.18);transform:translateY(-8px) scale(1.2);}
 .dock-item .dot{position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--text);}
 .dock-item .dock-label{
   position:absolute;bottom:60px;left:50%;transform:translateX(-50%);background:rgba(20,16,30,.9);color:#fff;
@@ -316,7 +317,7 @@ button{font-family:inherit;}
 .explorer-grid{flex:1;overflow:auto;padding:12px;display:grid;grid-template-columns:repeat(auto-fill,86px);gap:10px;align-content:start;}
 .explorer-item{width:82px;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 4px;border-radius:8px;cursor:pointer;text-align:center;}
 .explorer-item:hover{background:rgba(255,255,255,.08);}
-.explorer-item .emoji{font-size:28px;}
+.explorer-item .app-icon{width:32px;height:32px;}
 .explorer-item .label{font-size:11px;word-break:break-word;}
 
 /* Settings */
