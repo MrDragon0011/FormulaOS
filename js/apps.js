@@ -287,7 +287,7 @@ Apps.browser = function () {
         if (!v) return HOME;
         if (/^https?:\/\//i.test(v)) return v;
         if (/^[\w-]+(\.[\w-]+)+([/?#].*)?$/.test(v)) return 'https://' + v;
-        return 'https://en.wikipedia.org/w/index.php?search=' + encodeURIComponent(v) + '&fulltext=1';
+        return 'https://marginalia-search.com/search?query=' + encodeURIComponent(v) + '&profile=default';
       }
 
       function isKnownBlocked(url) {
