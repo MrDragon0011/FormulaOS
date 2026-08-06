@@ -49,6 +49,15 @@ const Auth = (() => {
   async function signOut() {
     if (client) await client.auth.signOut();
   }
+  async function signInWithGoogle() {
+    if (!client) throw new Error('Supabase is not configured yet.');
+    const { error } = await client.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin + window.location.pathname }
+    });
+    if (error) throw error;
+    // On success the browser navigates away to Google, then back — nothing more to do here.
+  }
   async function setFavoriteTeam(teamId) {
     if (!client || !user) throw new Error('Sign in first.');
     const { error } = await client.from('profiles').upsert({ id: user.id, favorite_team: teamId, updated_at: new Date().toISOString() });
@@ -61,5 +70,5 @@ const Auth = (() => {
   function currentProfile() { return profile; }
   function isReady() { return ready; }
 
-  return { configured, init, onChange, signUp, signIn, signOut, setFavoriteTeam, currentUser, currentProfile, isReady };
+  return { configured, init, onChange, signUp, signIn, signOut, signInWithGoogle, setFavoriteTeam, currentUser, currentProfile, isReady };
 })();

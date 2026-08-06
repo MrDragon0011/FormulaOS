@@ -436,6 +436,8 @@ Apps.settings = function (openSection) {
                     <button data-act="signin">${Icons.inline('person')}<span>Sign In</span></button>
                     <button data-act="signup">${Icons.inline('edit')}<span>Create Account</span></button>
                   </div>
+                  <div class="auth-divider">or</div>
+                  <button class="btn-google" data-act="google" type="button">${Icons.googleButton()}<span>Continue with Google</span></button>
                   <div class="label-sub" data-role="auth-msg"></div>
                 </div>
               </div>`;
@@ -489,6 +491,11 @@ Apps.settings = function (openSection) {
               catch (e) { msg.textContent = e.message || 'Sign in failed.'; }
             };
             content.querySelector('[data-act="signup"]').onclick = runAuth(Auth.signUp);
+            content.querySelector('[data-act="google"]').onclick = async () => {
+              msg.textContent = '';
+              try { await Auth.signInWithGoogle(); }
+              catch (e) { msg.textContent = e.message || 'Google sign-in failed.'; }
+            };
           } else if (user) {
             content.querySelector('[data-act="signout"]').onclick = async () => { await Auth.signOut(); render('account'); };
             content.querySelectorAll('.team-pick').forEach(el => {

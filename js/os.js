@@ -586,8 +586,15 @@ const OS = (() => {
     document.getElementById('login-logo-icon').innerHTML = Icons.svg('flag');
     document.querySelectorAll('.wf-icon').forEach(el => { el.innerHTML = Icons.inlineSvg(el.dataset.icon); });
     document.getElementById('welcome-dismiss').onclick = dismissWelcome;
+    document.getElementById('login-google').innerHTML = `${Icons.googleButton()}<span>Continue with Google</span>`;
 
     document.getElementById('login-guest').onclick = () => resolveGateThenWelcome();
+    document.getElementById('login-google').onclick = async () => {
+      const msg = document.getElementById('login-msg');
+      msg.textContent = '';
+      try { await Auth.signInWithGoogle(); }
+      catch (e) { msg.textContent = e.message || 'Google sign-in failed.'; }
+    };
     document.getElementById('login-signin').onclick = async () => {
       const email = document.getElementById('login-email').value.trim();
       const password = document.getElementById('login-password').value;
