@@ -278,7 +278,8 @@ Apps.browser = function () {
       const KNOWN_BLOCKED = [
         'google.com', 'youtube.com', 'facebook.com', 'instagram.com', 'twitter.com', 'x.com',
         'amazon.com', 'netflix.com', 'linkedin.com', 'reddit.com', 'github.com', 'twitch.tv',
-        'apple.com', 'microsoft.com', 'spotify.com', 'discord.com', 'tiktok.com', 'pinterest.com'
+        'apple.com', 'microsoft.com', 'spotify.com', 'discord.com', 'tiktok.com', 'pinterest.com',
+        'duckduckgo.com', 'bing.com', 'startpage.com', 'ecosia.org', 'qwant.com'
       ];
 
       function normalize(raw) {
@@ -286,7 +287,7 @@ Apps.browser = function () {
         if (!v) return HOME;
         if (/^https?:\/\//i.test(v)) return v;
         if (/^[\w-]+(\.[\w-]+)+([/?#].*)?$/.test(v)) return 'https://' + v;
-        return 'https://html.duckduckgo.com/html/?q=' + encodeURIComponent(v);
+        return 'https://en.wikipedia.org/w/index.php?search=' + encodeURIComponent(v) + '&fulltext=1';
       }
 
       function isKnownBlocked(url) {
