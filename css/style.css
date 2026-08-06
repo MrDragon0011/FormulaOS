@@ -393,6 +393,12 @@ button{font-family:inherit;}
 
 /* Browser */
 .browser-status{padding:4px 10px;font-size:11px;color:var(--text-dim);border-bottom:1px solid var(--border);background:var(--window-header);}
+.browser-blocked{position:absolute;left:0;right:0;top:46px;bottom:0;display:flex;align-items:center;justify-content:center;background:var(--window-body,#1c1d22);}
+.browser-blocked-card{max-width:320px;text-align:center;padding:24px;}
+.browser-blocked-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:8px;}
+.browser-blocked-sub{font-size:12px;color:var(--text-dim);line-height:1.5;margin-bottom:16px;}
+.browser-blocked-card button{background:var(--accent);color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;}
+.browser-blocked-card button:hover{opacity:.9;}
 
 /* Text editor */
 .editor-area{width:100%;height:calc(100% - 46px);border:none;resize:none;outline:none;background:transparent;color:var(--text);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;padding:14px;line-height:1.6;}

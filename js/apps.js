@@ -258,12 +258,28 @@ Apps.browser = function () {
           <button data-act="open-new" title="Open in a new browser tab">${Icons.inline('folder-open')}</button>
         </div>
         <div class="browser-status" data-role="status" style="display:none;"></div>
+        <div class="browser-blocked" data-role="blocked" style="display:none;">
+          <div class="browser-blocked-card">
+            <div class="browser-blocked-title">This site can't be shown here</div>
+            <div class="browser-blocked-sub">It blocks embedding in other pages (a security setting most major sites use). Open it in a real browser tab instead.</div>
+            <button data-act="blocked-open-new">Open in a new browser tab</button>
+          </div>
+        </div>
         <iframe style="width:100%;height:calc(100% - 46px);border:none;background:#fff;"></iframe>`;
 
       const iframe = body.querySelector('iframe');
       const urlInput = body.querySelector('input');
       const statusEl = body.querySelector('[data-role="status"]');
+      const blockedEl = body.querySelector('[data-role="blocked"]');
       let history = [], historyIndex = -1, slowTimer = null;
+
+      // Sites known to send X-Frame-Options/CSP frame-ancestors that block embedding —
+      // showing this list upfront avoids a silent blank/broken-image iframe.
+      const KNOWN_BLOCKED = [
+        'google.com', 'youtube.com', 'facebook.com', 'instagram.com', 'twitter.com', 'x.com',
+        'amazon.com', 'netflix.com', 'linkedin.com', 'reddit.com', 'github.com', 'twitch.tv',
+        'apple.com', 'microsoft.com', 'spotify.com', 'discord.com', 'tiktok.com', 'pinterest.com'
+      ];
 
       function normalize(raw) {
         const v = raw.trim();
@@ -273,22 +289,43 @@ Apps.browser = function () {
         return 'https://html.duckduckgo.com/html/?q=' + encodeURIComponent(v);
       }
 
+      function isKnownBlocked(url) {
+        try {
+          const host = new URL(url).hostname.replace(/^www\./, '');
+          return KNOWN_BLOCKED.some(d => host === d || host.endsWith('.' + d));
+        } catch { return false; }
+      }
+
       function setStatus(text) {
         statusEl.textContent = text;
         statusEl.style.display = text ? '' : 'none';
       }
 
+      function showBlocked(show) {
+        blockedEl.style.display = show ? '' : 'none';
+        iframe.style.display = show ? 'none' : '';
+      }
+
       function goTo(url, pushHistory) {
         clearTimeout(slowTimer);
         urlInput.value = url;
-        setStatus('Loading…');
-        iframe.src = url;
+
+        if (isKnownBlocked(url)) {
+          setStatus('');
+          showBlocked(true);
+          iframe.src = 'about:blank';
+        } else {
+          showBlocked(false);
+          setStatus('Loading…');
+          iframe.src = url;
+          slowTimer = setTimeout(() => setStatus('Taking a while — this site may block being embedded. Try "Open in a new browser tab" →'), 4000);
+        }
+
         if (pushHistory !== false) {
           history = history.slice(0, historyIndex + 1);
           history.push(url);
           historyIndex = history.length - 1;
         }
-        slowTimer = setTimeout(() => setStatus('Taking a while — this site may block being embedded. Try "Open in a new browser tab" →'), 4000);
       }
 
       iframe.addEventListener('load', () => { clearTimeout(slowTimer); setStatus(''); });
@@ -298,6 +335,7 @@ Apps.browser = function () {
       body.querySelector('[data-act="back"]').onclick = () => { if (historyIndex > 0) { historyIndex--; goTo(history[historyIndex], false); } };
       body.querySelector('[data-act="fwd"]').onclick = () => { if (historyIndex < history.length - 1) { historyIndex++; goTo(history[historyIndex], false); } };
       body.querySelector('[data-act="open-new"]').onclick = () => window.open(urlInput.value, '_blank', 'noopener');
+      body.querySelector('[data-act="blocked-open-new"]').onclick = () => window.open(urlInput.value, '_blank', 'noopener');
       urlInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') goTo(normalize(urlInput.value)); });
 
       goTo(HOME);
