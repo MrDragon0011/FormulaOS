@@ -33,6 +33,25 @@
   <div class="lock-hint">Click anywhere or press any key to unlock</div>
 </div>
 
+<!-- Login Gate (every boot, unless a session is already active) -->
+<div id="login-gate" class="hidden">
+  <div class="welcome-card">
+    <div class="welcome-logo" id="login-logo-icon"></div>
+    <h1 class="welcome-title">Sign in to FormulaOS</h1>
+    <p class="welcome-sub">Sign in to sync your favorite team's livery, or just continue as a guest.</p>
+    <div style="display:flex;flex-direction:column;gap:10px;text-align:left;">
+      <input type="email" id="login-email" placeholder="Email" autocomplete="email" />
+      <input type="password" id="login-password" placeholder="Password" autocomplete="current-password" />
+      <div id="login-msg" class="welcome-sub" style="margin:0;min-height:16px;"></div>
+      <div style="display:flex;gap:8px;">
+        <button id="login-signin" style="flex:1;">Sign In</button>
+        <button id="login-signup" class="secondary" style="flex:1;">Create Account</button>
+      </div>
+    </div>
+    <button id="login-guest" class="secondary" style="margin-top:14px;">Continue as Guest</button>
+  </div>
+</div>
+
 <!-- Welcome Screen (first run) -->
 <div id="welcome-screen" class="hidden">
   <div class="welcome-card">

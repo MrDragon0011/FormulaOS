@@ -128,9 +128,18 @@ const OS = (() => {
     applyPrefs();
     renderRaceWidget();
   }
-  function onAuthUpdate({ user, profile }) {
+  let gateResolved = false;
+  function onAuthUpdate({ user, profile, ready }) {
     const team = user && profile && profile.favorite_team ? teamById(profile.favorite_team) : null;
     setActiveTeam(team);
+    if (!ready) return;
+    if (!gateResolved) {
+      gateResolved = true;
+      if (Auth.configured() && !user) showLoginGate();
+      else resolveGateThenWelcome();
+    } else if (user && !document.getElementById('login-gate').classList.contains('hidden')) {
+      resolveGateThenWelcome();
+    }
   }
 
   function storageUsage() {
@@ -555,6 +564,13 @@ const OS = (() => {
     localStorage.setItem(WELCOME_SEEN_KEY, '1');
   }
 
+  function showLoginGate() { document.getElementById('login-gate').classList.remove('hidden'); }
+  function hideLoginGate() { document.getElementById('login-gate').classList.add('hidden'); }
+  function resolveGateThenWelcome() {
+    hideLoginGate();
+    if (!localStorage.getItem(WELCOME_SEEN_KEY)) showWelcome();
+  }
+
   function boot() {
     document.getElementById('boot-logo-icon').innerHTML = Icons.svg('flag');
     document.getElementById('lock-avatar-icon').innerHTML = Icons.svg('flag');
@@ -565,9 +581,28 @@ const OS = (() => {
     document.getElementById('mb-control').innerHTML = Icons.monoSvg('control');
     document.getElementById('spotlight-icon').innerHTML = Icons.monoSvg('search');
     document.getElementById('welcome-logo-icon').innerHTML = Icons.svg('flag');
+    document.getElementById('login-logo-icon').innerHTML = Icons.svg('flag');
     document.querySelectorAll('.wf-icon').forEach(el => { el.innerHTML = Icons.inlineSvg(el.dataset.icon); });
     document.getElementById('welcome-dismiss').onclick = dismissWelcome;
-    if (!localStorage.getItem(WELCOME_SEEN_KEY)) showWelcome();
+
+    document.getElementById('login-guest').onclick = () => resolveGateThenWelcome();
+    document.getElementById('login-signin').onclick = async () => {
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      const msg = document.getElementById('login-msg');
+      msg.textContent = '';
+      try { await Auth.signIn(email, password); }
+      catch (e) { msg.textContent = e.message || 'Sign in failed.'; }
+    };
+    document.getElementById('login-signup').onclick = async () => {
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      const msg = document.getElementById('login-msg');
+      msg.textContent = '';
+      try { await Auth.signUp(email, password); msg.textContent = 'Check your inbox to confirm, then sign in.'; }
+      catch (e) { msg.textContent = e.message || 'Something went wrong.'; }
+    };
+
     applyPrefs();
     renderDesktopIcons();
     renderDock();
