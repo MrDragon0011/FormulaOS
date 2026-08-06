@@ -244,27 +244,63 @@ Apps.terminal = function () {
 
 /* ---------------- Browser ---------------- */
 Apps.browser = function () {
+  const HOME = 'https://en.wikipedia.org/wiki/Special:Random';
   WM.open({
-    title: 'Web Browser', icon: 'browser', appId: 'browser', width: 720, height: 500,
+    title: 'Web Browser', icon: 'browser', appId: 'browser', width: 760, height: 520,
     onMount(body) {
       body.innerHTML = `
         <div class="app-toolbar">
-          <button data-act="back">${Icons.inline('chevronLeft')}</button>
-          <button data-act="fwd">${Icons.inline('chevronRight')}</button>
-          <button data-act="go">${Icons.inline('refresh')}</button>
-          <input type="text" value="https://en.wikipedia.org/wiki/Special:Random" />
+          <button data-act="back" title="Back">${Icons.inline('chevronLeft')}</button>
+          <button data-act="fwd" title="Forward">${Icons.inline('chevronRight')}</button>
+          <button data-act="reload" title="Reload">${Icons.inline('refresh')}</button>
+          <button data-act="home" title="Home">${Icons.inline('home')}</button>
+          <input type="text" value="${HOME}" placeholder="Search or enter a URL" />
+          <button data-act="open-new" title="Open in a new browser tab">${Icons.inline('folder-open')}</button>
         </div>
+        <div class="browser-status" data-role="status" style="display:none;"></div>
         <iframe style="width:100%;height:calc(100% - 46px);border:none;background:#fff;"></iframe>`;
+
       const iframe = body.querySelector('iframe');
       const urlInput = body.querySelector('input');
-      function load() {
-        let v = urlInput.value.trim();
-        if (!/^https?:\/\//.test(v)) v = 'https://' + v;
-        iframe.src = v;
+      const statusEl = body.querySelector('[data-role="status"]');
+      let history = [], historyIndex = -1, slowTimer = null;
+
+      function normalize(raw) {
+        const v = raw.trim();
+        if (!v) return HOME;
+        if (/^https?:\/\//i.test(v)) return v;
+        if (/^[\w-]+(\.[\w-]+)+([/?#].*)?$/.test(v)) return 'https://' + v;
+        return 'https://html.duckduckgo.com/html/?q=' + encodeURIComponent(v);
       }
-      body.querySelector('[data-act="go"]').onclick = load;
-      urlInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') load(); });
-      load();
+
+      function setStatus(text) {
+        statusEl.textContent = text;
+        statusEl.style.display = text ? '' : 'none';
+      }
+
+      function goTo(url, pushHistory) {
+        clearTimeout(slowTimer);
+        urlInput.value = url;
+        setStatus('Loading…');
+        iframe.src = url;
+        if (pushHistory !== false) {
+          history = history.slice(0, historyIndex + 1);
+          history.push(url);
+          historyIndex = history.length - 1;
+        }
+        slowTimer = setTimeout(() => setStatus('Taking a while — this site may block being embedded. Try "Open in a new browser tab" →'), 4000);
+      }
+
+      iframe.addEventListener('load', () => { clearTimeout(slowTimer); setStatus(''); });
+
+      body.querySelector('[data-act="reload"]').onclick = () => goTo(history[historyIndex] || urlInput.value, false);
+      body.querySelector('[data-act="home"]').onclick = () => goTo(HOME);
+      body.querySelector('[data-act="back"]').onclick = () => { if (historyIndex > 0) { historyIndex--; goTo(history[historyIndex], false); } };
+      body.querySelector('[data-act="fwd"]').onclick = () => { if (historyIndex < history.length - 1) { historyIndex++; goTo(history[historyIndex], false); } };
+      body.querySelector('[data-act="open-new"]').onclick = () => window.open(urlInput.value, '_blank', 'noopener');
+      urlInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') goTo(normalize(urlInput.value)); });
+
+      goTo(HOME);
     }
   });
 };
