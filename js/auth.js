@@ -28,13 +28,21 @@ const Auth = (() => {
     });
   }
 
+  function validateCredentials(email, password) {
+    if (!email) throw new Error('Enter an email address.');
+    if (!/^\S+@\S+\.\S+$/.test(email)) throw new Error('Enter a valid email address.');
+    if (!password) throw new Error('Enter a password.');
+    if (password.length < 6) throw new Error('Password must be at least 6 characters.');
+  }
   async function signUp(email, password) {
     if (!client) throw new Error('Supabase is not configured yet.');
+    validateCredentials(email, password);
     const { error } = await client.auth.signUp({ email, password });
     if (error) throw error;
   }
   async function signIn(email, password) {
     if (!client) throw new Error('Supabase is not configured yet.');
+    validateCredentials(email, password);
     const { error } = await client.auth.signInWithPassword({ email, password });
     if (error) throw error;
   }
