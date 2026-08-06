@@ -394,6 +394,7 @@ const OS = (() => {
       case 'help':
         return [
           { label: 'FormulaOS Help', action: () => Apps.about() },
+          { label: 'Welcome Screen', action: () => showWelcome() },
           { label: 'Keyboard Shortcuts', action: () => alert('⌘/Ctrl+Space — Spotlight\nAlt+Tab — Switch windows\nDrag a window to a screen edge — Snap\nF4 or Launchpad icon — App grid') },
         ];
       default: return [];
@@ -547,6 +548,13 @@ const OS = (() => {
     document.getElementById('lock-screen').classList.add('hidden');
   }
 
+  const WELCOME_SEEN_KEY = 'formulaos_welcome_seen_v1';
+  function showWelcome() { document.getElementById('welcome-screen').classList.remove('hidden'); }
+  function dismissWelcome() {
+    document.getElementById('welcome-screen').classList.add('hidden');
+    localStorage.setItem(WELCOME_SEEN_KEY, '1');
+  }
+
   function boot() {
     document.getElementById('boot-logo-icon').innerHTML = Icons.svg('flag');
     document.getElementById('lock-avatar-icon').innerHTML = Icons.svg('flag');
@@ -556,6 +564,10 @@ const OS = (() => {
     document.getElementById('mb-battery').innerHTML = Icons.monoSvg('battery');
     document.getElementById('mb-control').innerHTML = Icons.monoSvg('control');
     document.getElementById('spotlight-icon').innerHTML = Icons.monoSvg('search');
+    document.getElementById('welcome-logo-icon').innerHTML = Icons.svg('flag');
+    document.querySelectorAll('.wf-icon').forEach(el => { el.innerHTML = Icons.inlineSvg(el.dataset.icon); });
+    document.getElementById('welcome-dismiss').onclick = dismissWelcome;
+    if (!localStorage.getItem(WELCOME_SEEN_KEY)) showWelcome();
     applyPrefs();
     renderDesktopIcons();
     renderDock();
