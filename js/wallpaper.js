@@ -156,5 +156,17 @@ const Wallpaper = (() => {
   }
   function count() { return palettes.length; }
 
-  return { cssValue, count };
+  /* Standalone circuit outline (no sky/sun/label) — used by the Track Atlas app */
+  function circuitSvg(trackSlug, color) {
+    const t = TRACKS[trackSlug] || DEFAULT_TRACK;
+    const trk = trackPath(t, 120, 120, 95);
+    color = color || '#e7e2da';
+    return `<svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">` +
+      `<path d="${trk.d}" fill="none" stroke="${color}" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" opacity=".18"/>` +
+      `<path d="${trk.d}" fill="none" stroke="${color}" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>` +
+      `</svg>`;
+  }
+  function trackLabel(trackSlug) { return (TRACKS[trackSlug] || DEFAULT_TRACK).label; }
+
+  return { cssValue, count, circuitSvg, trackLabel };
 })();

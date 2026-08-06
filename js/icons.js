@@ -46,7 +46,9 @@ const Icons = (() => {
     chevronLeft: '<path d="M15 6l-6 6 6 6"/>',
     chevronRight: '<path d="M9 6l6 6-6 6"/>',
     chevronDown: '<path d="M6 9l6 6 6-6"/>',
-    fileGeneric: '<path d="M7 3.5h7l4 4V20a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1z"/>'
+    fileGeneric: '<path d="M7 3.5h7l4 4V20a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1z"/>',
+    trackatlas: '<path d="M4 6.3 10 4.3l4 2 6-2v13.4l-6 2-4-2-6 2z"/><path d="M10 4.3v13.4M14 6.3v13.4"/><circle cx="12" cy="10.5" r="1.6"/>',
+    pitstrategy: '<circle cx="12" cy="13.5" r="7.8"/><path d="M10 2h4M16.3 3.6l1.4 1.4M12 13.5V8.7M12 13.5l3.4 2"/>'
   };
 
   /* Bold filled glyphs — used ONLY on glass tiles (dock, desktop, Launchpad).
@@ -75,7 +77,9 @@ const Icons = (() => {
     music: '<circle cx="7" cy="18" r="2.3" fill="#fff"/><circle cx="17" cy="16" r="2.3" fill="#fff"/><path d="M9.3 18V6.7L19.3 4.2v11.4" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"/>',
     sun: '<circle cx="12" cy="12" r="4.3" fill="#fff"/><path d="M12 3v2.3M12 18.7V21M4.2 12H1.9M22.1 12h-2.3M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>',
     'cloud-rain': '<path d="M6.5 15.8a3.8 3.8 0 0 1-.4-7.6 5.2 5.2 0 0 1 9.9-1.6 3.7 3.7 0 0 1-.6 9.2H6.5z" fill="#fff" fill-opacity=".95"/><path d="M8.5 18.6l-.9 1.8M12 18.6l-.9 1.8M15.5 18.6l-.9 1.8" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>',
-    snowflake: '<path d="M12 4v16M5.4 7.8l13.2 8.4M18.6 7.8 5.4 16.2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>'
+    snowflake: '<path d="M12 4v16M5.4 7.8l13.2 8.4M18.6 7.8 5.4 16.2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>',
+    trackatlas: '<path d="M4.3 6.6 10 4.6l4 2 5.7-2v12.8l-5.7 2-4-2-5.7 2z" fill="#fff" fill-opacity=".95"/><path d="M10 4.6v12.8M14 6.6v12.8" stroke="rgba(0,0,0,.22)" stroke-width="1.1"/><circle cx="12" cy="10.8" r="2" fill="rgba(0,0,0,.32)"/>',
+    pitstrategy: '<circle cx="12" cy="13.3" r="7.6" fill="#fff" fill-opacity=".95"/><rect x="10" y="1.8" width="4" height="2.6" rx="1" fill="#fff"/><rect x="16" y="3.2" width="2.6" height="1.6" rx=".8" fill="#fff" transform="rotate(45 17.3 4)"/><path d="M12 13.3V8.6M12 13.3l3.3 1.9" stroke="rgba(0,0,0,.4)" stroke-width="1.3" stroke-linecap="round"/>'
   };
 
   /* Restrained FormulaOS palette — six families, each a soft-to-deep pair.
@@ -98,7 +102,8 @@ const Icons = (() => {
     taskmgr: family.emerald, snake: family.red, settings: family.slate,
     about: family.red, flag: family.red, launchpad: family.violet,
     search: family.slate, file: family.slate, music: family.violet,
-    sun: family.orange, 'cloud-rain': family.cyan, snowflake: family.cyan
+    sun: family.orange, 'cloud-rain': family.cyan, snowflake: family.cyan,
+    trackatlas: family.blue, pitstrategy: family.orange
   };
   function svg(id) {
     const g = tileGlyphs[id] || tileGlyphs.about;

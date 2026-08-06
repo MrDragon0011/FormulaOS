@@ -365,6 +365,13 @@ button{font-family:inherit;}
 
 /* ---------- Generic app content styling ---------- */
 .app-pad{padding:14px;height:100%;overflow:auto;}
+.app-pad button, .app-pad select, .app-pad input[type=text], .app-pad input[type=number]{
+  background:rgba(255,255,255,.08);border:1px solid var(--border);color:var(--text);border-radius:6px;
+  padding:6px 10px;font-size:12px;cursor:pointer;font-family:inherit;
+}
+.app-pad button{display:inline-flex;align-items:center;gap:6px;}
+.app-pad button:hover{background:var(--accent);color:#fff;}
+.app-pad input[type=number]{cursor:text;}
 .app-toolbar{display:flex;gap:6px;padding:8px;border-bottom:1px solid var(--border);background:var(--window-header);flex-wrap:wrap;}
 .app-toolbar button, .app-toolbar select{
   background:rgba(255,255,255,.08);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px 10px;font-size:12px;cursor:pointer;

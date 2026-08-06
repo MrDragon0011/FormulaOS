@@ -23,6 +23,8 @@ const OS = (() => {
     { id: 'weather', label: 'Weather', run: () => Apps.weather() },
     { id: 'taskmgr', label: 'Task Manager', run: () => Apps.taskManager() },
     { id: 'snake', label: 'Track Racer', run: () => Apps.snake() },
+    { id: 'trackatlas', label: 'Track Atlas', run: () => Apps.trackAtlas() },
+    { id: 'pitstrategy', label: 'Pit Strategy', run: () => Apps.pitStrategy() },
     { id: 'settings', label: 'Settings', run: () => Apps.settings() },
     { id: 'about', label: 'About', run: () => Apps.about() },
   ];
@@ -711,6 +713,7 @@ const OS = (() => {
 
   return {
     wallpapers, wallpaperCss, appList, prefs, nextRace,
+    raceCalendar: () => RACE_CALENDAR.slice(),
     setTheme, toggleTheme, setAccent, setWallpaper, setCustomWallpaper, setFontSize, setReduceMotion,
     setHighContrast, setClock24h, setUsername, setIconSize, setBrightness,
     showContextMenu, hideContextMenu, lock, unlock, storageUsage, openLaunchpad, openSpotlight,
