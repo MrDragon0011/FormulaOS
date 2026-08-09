@@ -406,11 +406,15 @@ Apps.settings = function (openSection) {
               <div class="label-title" style="margin-bottom:10px;">Wallpaper</div>
               <div class="wallpaper-row" data-role="wp-row">
                 ${OS.wallpapers.map((_, i) => `<div class="wallpaper-thumb" style="background:${OS.wallpaperCss(i)}" data-wp="${i}"></div>`).join('')}
+                ${OS.prefs.customWallpaper ? `
+                  <div class="wallpaper-thumb wallpaper-thumb-custom active" style="background-image:url(${OS.prefs.customWallpaper})" data-wp-custom="1" title="Your uploaded image">
+                    <button class="wallpaper-thumb-remove" data-act="clear-wp" title="Remove custom image">${Icons.inline('close')}</button>
+                  </div>` : `
+                  <div class="wallpaper-thumb wallpaper-thumb-add" data-act="upload-wp" title="Upload a custom image">${Icons.inline('upload')}</div>`}
               </div>
-              <div style="margin-top:10px;display:flex;gap:8px;align-items:center;">
-                <button data-act="upload-wp">${Icons.inline('upload')}<span>Upload custom image…</span></button>
-                <input type="file" accept="image/*" data-role="wp-file" style="display:none" />
-              </div>
+              <input type="file" accept="image/*" data-role="wp-file" style="display:none" />
+              <div class="label-sub" data-role="wp-hint" style="margin-top:8px;">${OS.prefs.customWallpaper ? 'Custom image in use. Pick a track above, or remove it, to go back to a track wallpaper.' : 'Click the tile above or drag & drop an image onto it. Large images are resized automatically.'}</div>
+              <div class="settings-error" data-role="wp-error" style="display:none;"></div>
             </div>`;
           const themeSeg = content.querySelector('[data-role="theme-seg"]');
           [...themeSeg.children].forEach(b => { b.classList.toggle('active', b.dataset.v === OS.prefs.theme); b.onclick = () => { OS.setTheme(b.dataset.v); render('appearance'); }; });
@@ -422,14 +426,53 @@ Apps.settings = function (openSection) {
             b.classList.toggle('active', !OS.prefs.customWallpaper && parseInt(b.dataset.wp) === OS.prefs.wallpaper);
             b.onclick = () => { OS.setWallpaper(parseInt(b.dataset.wp)); render('appearance'); };
           });
+
+          const wpErrorEl = content.querySelector('[data-role="wp-error"]');
+          function wpError(msg) { wpErrorEl.textContent = msg; wpErrorEl.style.display = msg ? '' : 'none'; }
+
+          function resizeImage(file, maxDim, quality) {
+            return new Promise((resolve, reject) => {
+              const img = new Image();
+              const url = URL.createObjectURL(file);
+              img.onload = () => {
+                URL.revokeObjectURL(url);
+                const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+                const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+                const canvas = document.createElement('canvas');
+                canvas.width = w; canvas.height = h;
+                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                resolve(canvas.toDataURL('image/jpeg', quality));
+              };
+              img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Could not read that image')); };
+              img.src = url;
+            });
+          }
+
+          function handleWpFile(f) {
+            wpError('');
+            if (!f) return;
+            if (!f.type.startsWith('image/')) { wpError('That file isn\'t an image.'); return; }
+            resizeImage(f, 2400, 0.85).then(dataUrl => {
+              if (!OS.setCustomWallpaper(dataUrl)) { wpError('Image is too large to save — try a smaller one.'); return; }
+              render('appearance');
+            }).catch(() => wpError('Could not read that image.'));
+          }
+
           const wpFile = content.querySelector('[data-role="wp-file"]');
-          content.querySelector('[data-act="upload-wp"]').onclick = () => wpFile.click();
-          wpFile.addEventListener('change', () => {
-            const f = wpFile.files[0]; if (!f) return;
-            const reader = new FileReader();
-            reader.onload = () => OS.setCustomWallpaper(reader.result);
-            reader.readAsDataURL(f);
-          });
+          wpFile.addEventListener('change', () => handleWpFile(wpFile.files[0]));
+
+          const addTile = content.querySelector('[data-act="upload-wp"]');
+          if (addTile) {
+            addTile.onclick = () => wpFile.click();
+            addTile.addEventListener('dragover', (e) => { e.preventDefault(); addTile.classList.add('drag-over'); });
+            addTile.addEventListener('dragleave', () => addTile.classList.remove('drag-over'));
+            addTile.addEventListener('drop', (e) => {
+              e.preventDefault(); addTile.classList.remove('drag-over');
+              handleWpFile(e.dataTransfer.files[0]);
+            });
+          }
+          const clearWp = content.querySelector('[data-act="clear-wp"]');
+          if (clearWp) clearWp.onclick = (e) => { e.stopPropagation(); OS.setWallpaper(OS.prefs.wallpaper || 0); render('appearance'); };
         } else if (section === 'desktop') {
           content.innerHTML = `
             <div class="settings-section-title">Desktop & Icons</div>

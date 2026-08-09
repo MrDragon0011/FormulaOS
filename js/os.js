@@ -33,7 +33,10 @@ const OS = (() => {
   function loadPrefs() {
     try { return JSON.parse(localStorage.getItem('formulaos_prefs_v1')) || {}; } catch (e) { return {}; }
   }
-  function savePrefs(p) { localStorage.setItem('formulaos_prefs_v1', JSON.stringify(p)); }
+  function savePrefs(p) {
+    try { localStorage.setItem('formulaos_prefs_v1', JSON.stringify(p)); return true; }
+    catch (e) { return false; }
+  }
   let prefs = Object.assign({
     theme: 'dark', accent: '#e10600', accent2: '#ffc300', wallpaper: 0, customWallpaper: null,
     fontSize: 'md', reduceMotion: false, highContrast: false, clock24h: false,
@@ -72,9 +75,14 @@ const OS = (() => {
     savePrefs(prefs);
   }
   function setCustomWallpaper(dataUrl) {
+    const prevCustom = prefs.customWallpaper;
     prefs.customWallpaper = dataUrl;
+    if (!savePrefs(prefs)) {
+      prefs.customWallpaper = prevCustom;
+      return false;
+    }
     applyBackground(`center/cover no-repeat url(${dataUrl})`);
-    savePrefs(prefs);
+    return true;
   }
   function setFontSize(size) {
     prefs.fontSize = size;
