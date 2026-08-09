@@ -582,7 +582,34 @@ const OS = (() => {
     if (!localStorage.getItem(WELCOME_SEEN_KEY)) showWelcome();
   }
 
+  /* Flag colors for the next Grand Prix's host country — recolors the boot screen so
+     the very first thing you see ties into the live race calendar, not a static logo. */
+  const COUNTRY_FLAG_COLORS = {
+    bahrain: ['#ce1126', '#ffffff'], jeddah: ['#006c35', '#ffffff'],
+    albertpark: ['#00008b', '#ffffff'], suzuka: ['#bc002d', '#ffffff'],
+    shanghai: ['#de2910', '#ffde00'], miami: ['#b31942', '#3c3b6e'],
+    imola: ['#009246', '#ce2b37'], monaco: ['#ce1126', '#ffffff'],
+    montreal: ['#ff0000', '#ffffff'], barcelona: ['#aa151b', '#f1bf00'],
+    redbullring: ['#ed2939', '#ffffff'], silverstone: ['#c8102e', '#012169'],
+    spa: ['#000000', '#ffcd00'], hungaroring: ['#ce2939', '#477050'],
+    zandvoort: ['#ae1c28', '#21468b'], monza: ['#009246', '#ce2b37'],
+    baku: ['#00b9e4', '#ed2939'], singapore: ['#ed2939', '#ffffff'],
+    cota: ['#b31942', '#3c3b6e'], mexico: ['#006847', '#ce1126'],
+    interlagos: ['#009c3b', '#ffdf00'], vegas: ['#b31942', '#3c3b6e'],
+    lusail: ['#8a1538', '#ffffff'], yasmarina: ['#00732f', '#ffffff']
+  };
+  function nextRaceFlagColors() { return COUNTRY_FLAG_COLORS[nextRace().track] || [prefs.accent, prefs.accent2]; }
+
   function boot() {
+    const [fc1, fc2] = nextRaceFlagColors();
+    const bootLogo = document.getElementById('boot-logo-icon');
+    if (bootLogo) bootLogo.style.filter = `drop-shadow(0 0 30px ${fc1})`;
+    const bootTitle = document.querySelector('.boot-title');
+    if (bootTitle) bootTitle.style.background = `linear-gradient(90deg, ${fc1}, ${fc2})`;
+    const bootBarFill = document.querySelector('.boot-bar-fill');
+    if (bootBarFill) bootBarFill.style.background = `linear-gradient(90deg, ${fc1}, ${fc2})`;
+    const bootStatus = document.querySelector('.boot-status');
+    if (bootStatus) bootStatus.textContent = `Loading ${nextRace().circuit}…`;
     document.getElementById('boot-logo-icon').innerHTML = Icons.svg('flag');
     document.getElementById('lock-avatar-icon').innerHTML = Icons.svg('flag');
     document.getElementById('mb-logo-btn').innerHTML = Icons.svg('flag');
