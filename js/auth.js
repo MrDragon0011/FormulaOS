@@ -85,6 +85,12 @@ const Auth = (() => {
   async function signOut() {
     if (client) await client.auth.signOut();
   }
+  async function deleteAccount() {
+    if (!client || !user) throw new Error('Sign in first.');
+    const { error } = await client.rpc('delete_own_account');
+    if (error) throw error;
+    await client.auth.signOut();
+  }
   async function signInWithGoogle() {
     if (!client) throw new Error('Supabase is not configured yet.');
     const { error } = await client.auth.signInWithOAuth({
@@ -106,5 +112,5 @@ const Auth = (() => {
   function currentProfile() { return profile; }
   function isReady() { return ready; }
 
-  return { configured, init, onChange, signUp, signIn, signOut, signInWithGoogle, setFavoriteTeam, currentUser, currentProfile, isReady };
+  return { configured, init, onChange, signUp, signIn, signOut, deleteAccount, signInWithGoogle, setFavoriteTeam, currentUser, currentProfile, isReady };
 })();

@@ -578,6 +578,13 @@ Apps.settings = function (openSection) {
                       <span style="font-size:11px;color:var(--text-dim);text-align:center;">${t.name}</span>
                     </div>`).join('')}
                 </div>
+              </div>
+              <div class="settings-card">
+                <div class="settings-row">
+                  <div class="label-group"><div class="label-title">Delete Account</div><div class="label-sub">Permanently deletes your account and profile. This can't be undone.</div></div>
+                  <button data-act="delete-account">${Icons.inline('trash')}<span>Delete Account</span></button>
+                </div>
+                <div class="label-sub" data-role="delete-msg"></div>
               </div>`;
           }
           content.innerHTML = `
@@ -616,6 +623,12 @@ Apps.settings = function (openSection) {
             };
           } else if (user) {
             content.querySelector('[data-act="signout"]').onclick = async () => { await Auth.signOut(); render('account'); };
+            content.querySelector('[data-act="delete-account"]').onclick = async () => {
+              if (!confirm('Permanently delete your FormulaOS account? This cannot be undone.')) return;
+              const msg = content.querySelector('[data-role="delete-msg"]');
+              try { await Auth.deleteAccount(); render('account'); }
+              catch (e) { msg.textContent = e.message || 'Could not delete account.'; }
+            };
             let dragId = null;
             content.querySelectorAll('.team-pick').forEach(el => {
               el.onclick = async () => {
