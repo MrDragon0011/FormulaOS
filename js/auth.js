@@ -15,6 +15,16 @@ const Auth = (() => {
   async function loadProfile() {
     const { data } = await client.from('profiles').select('*').eq('id', user.id).single();
     profile = data || null;
+    if (!profile || !profile.username) {
+      const pendingUsername = user.user_metadata && user.user_metadata.username;
+      if (pendingUsername) {
+        const { data: upserted, error } = await client.from('profiles')
+          .upsert({ id: user.id, username: pendingUsername, updated_at: new Date().toISOString() })
+          .select().single();
+        if (upserted) profile = upserted;
+        else if (error) console.warn('FormulaOS: could not save username to profile —', error.message);
+      }
+    }
     ready = true;
     notify();
   }
@@ -34,11 +44,19 @@ const Auth = (() => {
     if (!password) throw new Error('Enter a password.');
     if (password.length < 6) throw new Error('Password must be at least 6 characters.');
   }
-  async function signUp(email, password) {
+  function validateUsername(username) {
+    if (!username) throw new Error('Choose a username.');
+    if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) throw new Error('Username must be 3-20 characters: letters, numbers, underscores.');
+  }
+  async function signUp(email, password, username) {
     if (!client) throw new Error('Supabase is not configured yet.');
+    validateUsername(username);
     validateCredentials(email, password);
-    const { error } = await client.auth.signUp({ email, password });
-    if (error) throw error;
+    const { error } = await client.auth.signUp({ email, password, options: { data: { username } } });
+    if (error) {
+      if (/duplicate|already exists/i.test(error.message)) throw new Error('That username is taken.');
+      throw error;
+    }
   }
   async function signIn(email, password) {
     if (!client) throw new Error('Supabase is not configured yet.');

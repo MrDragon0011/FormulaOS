@@ -198,6 +198,7 @@ const OS = (() => {
   function onAuthUpdate({ user, profile, ready }) {
     const team = user && profile && profile.favorite_team ? teamById(profile.favorite_team) : null;
     setActiveTeam(team);
+    if (user && profile && profile.username && prefs.username === 'Driver') setUsername(profile.username);
     if (!ready) return;
     if (!gateResolved) {
       gateResolved = true;
@@ -836,11 +837,12 @@ const OS = (() => {
       catch (e) { msg.textContent = e.message || 'Sign in failed.'; }
     };
     document.getElementById('login-signup').onclick = async () => {
+      const username = document.getElementById('login-username').value.trim();
       const email = document.getElementById('login-email').value.trim();
       const password = document.getElementById('login-password').value;
       const msg = document.getElementById('login-msg');
       msg.textContent = '';
-      try { await Auth.signUp(email, password); msg.textContent = 'Check your inbox to confirm, then sign in.'; }
+      try { await Auth.signUp(email, password, username); msg.textContent = 'Check your inbox to confirm, then sign in.'; }
       catch (e) { msg.textContent = e.message || 'Something went wrong.'; }
     };
 
