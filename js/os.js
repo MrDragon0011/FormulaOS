@@ -339,12 +339,26 @@ const OS = (() => {
     const input = document.getElementById('spotlight-input');
     const results = document.getElementById('spotlight-results');
     let sel = 0, matches = [];
+    function activateResult(m) {
+      if (m.kind === 'driver') {
+        const team = teamById(m.driver.team);
+        toast(m.driver.name, `#${m.driver.number} · ${team ? team.name : m.driver.team}`, { icon: 'person' });
+      } else {
+        activateApp(m);
+      }
+    }
     function renderResults(q) {
-      matches = !q ? [] : appList.filter(a => a.label.toLowerCase().includes(q.toLowerCase()));
+      if (!q) { matches = []; }
+      else {
+        const ql = q.toLowerCase();
+        const appMatches = appList.filter(a => a.label.toLowerCase().includes(ql));
+        const driverMatches = DRIVERS.filter(d => d.name.toLowerCase().includes(ql)).map(d => ({ kind: 'driver', label: `${d.name} — #${d.number}`, driver: d }));
+        matches = appMatches.concat(driverMatches);
+      }
       sel = 0;
-      results.innerHTML = matches.map((a, i) => `<div class="sr-item${i === 0 ? ' sel' : ''}" data-i="${i}">${Icons.html(a.id)}<span>${a.label}</span></div>`).join('');
+      results.innerHTML = matches.map((a, i) => `<div class="sr-item${i === 0 ? ' sel' : ''}" data-i="${i}">${Icons.html(a.kind === 'driver' ? 'person' : a.id)}<span>${a.label}</span></div>`).join('');
       results.querySelectorAll('.sr-item').forEach(el => {
-        el.onclick = () => { activateApp(matches[el.dataset.i]); closeSpotlight(); };
+        el.onclick = () => { activateResult(matches[el.dataset.i]); closeSpotlight(); };
       });
     }
     input.value = '';
@@ -356,7 +370,7 @@ const OS = (() => {
       if (e.key === 'Escape') { closeSpotlight(); }
       else if (e.key === 'ArrowDown') { e.preventDefault(); if (matches.length) { sel = (sel + 1) % matches.length; updateSel(); } }
       else if (e.key === 'ArrowUp') { e.preventDefault(); if (matches.length) { sel = (sel - 1 + matches.length) % matches.length; updateSel(); } }
-      else if (e.key === 'Enter') { if (matches[sel]) { activateApp(matches[sel]); closeSpotlight(); } }
+      else if (e.key === 'Enter') { if (matches[sel]) { activateResult(matches[sel]); closeSpotlight(); } }
     };
     function updateSel() {
       results.querySelectorAll('.sr-item').forEach((el, i) => el.classList.toggle('sel', i === sel));

@@ -16,3 +16,28 @@ const TEAMS = [
   { id: 'neutral', name: 'No Preference', palette: 5, accent: '#e10600', accent2: '#ffc300', car: null }
 ];
 function teamById(id) { return TEAMS.find(t => t.id === id) || null; }
+
+/* Current grid, for Spotlight driver lookup — number + team only (no points, so it never goes stale). */
+const DRIVERS = [
+  { name: 'Max Verstappen', number: 1, team: 'redbull' },
+  { name: 'Yuki Tsunoda', number: 22, team: 'redbull' },
+  { name: 'Lewis Hamilton', number: 44, team: 'ferrari' },
+  { name: 'Charles Leclerc', number: 16, team: 'ferrari' },
+  { name: 'Lando Norris', number: 4, team: 'mclaren' },
+  { name: 'Oscar Piastri', number: 81, team: 'mclaren' },
+  { name: 'George Russell', number: 63, team: 'mercedes' },
+  { name: 'Kimi Antonelli', number: 12, team: 'mercedes' },
+  { name: 'Fernando Alonso', number: 14, team: 'astonmartin' },
+  { name: 'Lance Stroll', number: 18, team: 'astonmartin' },
+  { name: 'Pierre Gasly', number: 10, team: 'alpine' },
+  { name: 'Franco Colapinto', number: 43, team: 'alpine' },
+  { name: 'Alex Albon', number: 23, team: 'williams' },
+  { name: 'Carlos Sainz', number: 55, team: 'williams' },
+  { name: 'Isack Hadjar', number: 6, team: 'racingbulls' },
+  { name: 'Liam Lawson', number: 30, team: 'racingbulls' },
+  { name: 'Esteban Ocon', number: 31, team: 'haas' },
+  { name: 'Oliver Bearman', number: 87, team: 'haas' },
+  { name: 'Nico Hulkenberg', number: 27, team: 'audi' },
+  { name: 'Gabriel Bortoleto', number: 5, team: 'audi' }
+];
+function driverByName(q) { return DRIVERS.find(d => d.name.toLowerCase() === q.toLowerCase()) || null; }
