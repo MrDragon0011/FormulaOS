@@ -31,7 +31,7 @@ const OS = (() => {
     { id: 'settings', label: 'Settings', run: () => Apps.settings() },
     { id: 'about', label: 'About', run: () => Apps.about() },
   ];
-  const DEFAULT_DOCK_PINNED = ['explorer', 'notepad', 'terminal', 'browser', 'photos', 'settings'];
+  const DEFAULT_DOCK_PINNED = ['explorer', 'notepad', 'terminal', 'browser', 'photos', 'livetiming', 'settings'];
 
   function loadPrefs() {
     try { return JSON.parse(localStorage.getItem('formulaos_prefs_v1')) || {}; } catch (e) { return {}; }
@@ -46,6 +46,12 @@ const OS = (() => {
     username: 'Driver', iconSize: 'md', brightness: 100, dockPinned: DEFAULT_DOCK_PINNED.slice(),
     teamOrder: null
   }, loadPrefs());
+  if (Array.isArray(prefs.dockPinned) && !prefs.dockPinned.includes('livetiming')) {
+    const settingsIdx = prefs.dockPinned.indexOf('settings');
+    if (settingsIdx === -1) prefs.dockPinned.push('livetiming');
+    else prefs.dockPinned.splice(settingsIdx, 0, 'livetiming');
+    savePrefs(prefs);
+  }
   let activeTeam = null; // set when a signed-in user's favorite team overrides the theme
 
   /* Team tiles in Settings can be drag-reordered; teamOrder is a list of team ids,
