@@ -1,5 +1,7 @@
 /* FormulaOS custom icon set — no emoji */
 const Icons = (() => {
+  let gradSeq = 0;
+
   /* Thin line glyphs — used ONLY inline next to text (menus, sidebars, buttons).
      currentColor stroke so they stay theme-adaptive; never placed on a tile. */
   const glyphs = {
@@ -48,7 +50,8 @@ const Icons = (() => {
     chevronDown: '<path d="M6 9l6 6 6-6"/>',
     fileGeneric: '<path d="M7 3.5h7l4 4V20a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1z"/>',
     trackatlas: '<path d="M4 6.3 10 4.3l4 2 6-2v13.4l-6 2-4-2-6 2z"/><path d="M10 4.3v13.4M14 6.3v13.4"/><circle cx="12" cy="10.5" r="1.6"/>',
-    pitstrategy: '<circle cx="12" cy="13.5" r="7.8"/><path d="M10 2h4M16.3 3.6l1.4 1.4M12 13.5V8.7M12 13.5l3.4 2"/>'
+    pitstrategy: '<circle cx="12" cy="13.5" r="7.8"/><path d="M10 2h4M16.3 3.6l1.4 1.4M12 13.5V8.7M12 13.5l3.4 2"/>',
+    livetiming: '<circle cx="12" cy="17.3" r="1.5" fill="currentColor" stroke="none"/><path d="M8.6 14.6a4.9 4.9 0 0 1 6.8 0M5.9 11.9a8.8 8.8 0 0 1 12.2 0M3.3 9.2a12.6 12.6 0 0 1 17.4 0"/>'
   };
 
   /* Bold filled glyphs — used ONLY on glass tiles (dock, desktop, Launchpad).
@@ -107,21 +110,11 @@ const Icons = (() => {
     trackatlas: family.blue, pitstrategy: family.orange, livetiming: family.red
   };
   function svg(id) {
-    const g = tileGlyphs[id] || tileGlyphs.about;
+    const g = glyphs[id] || tileGlyphs[id] || glyphs.file;
     const [c1, c2] = colors[id] || family.slate;
-    const gid = 'ic-g-' + id, hid = 'ic-h-' + id, sid = 'ic-s-' + id, cid = 'ic-c-' + id;
-    return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">` +
-      `<defs>` +
-        `<linearGradient id="${gid}" x1="0" y1="0" x2="0.85" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient>` +
-        `<linearGradient id="${hid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".3"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>` +
-        `<linearGradient id="${sid}" x1="0" y1="0" x2="0" y2="1"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".14"/></linearGradient>` +
-        `<clipPath id="${cid}"><rect x="1" y="1" width="22" height="22" rx="5.3"/></clipPath>` +
-      `</defs>` +
-      `<g clip-path="url(#${cid})">` +
-        `<rect x="1" y="1" width="22" height="22" fill="url(#${gid})"/>` +
-        `<rect x="1" y="1" width="22" height="22" fill="url(#${sid})"/>` +
-        `<rect x="1" y="1" width="22" height="22" fill="url(#${hid})"/>` +
-      `</g>` +
+    const gid = 'ic-g-' + id + '-' + (++gradSeq);
+    return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="url(#${gid})" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" color="${c2}">` +
+      `<defs><linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs>` +
       g + `</svg>`;
   }
   function html(id, cls) {
