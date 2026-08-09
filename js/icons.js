@@ -134,7 +134,8 @@ const Icons = (() => {
     battery: '<rect x="2.5" y="8" width="16" height="8" rx="1.6"/><path d="M20.5 10.5v3" stroke-linecap="round"/><rect x="4.3" y="9.8" width="10.5" height="4.4" rx=".6" fill="currentColor" stroke="none"/>',
     control: '<path d="M4 7h9M17 7h3M4 12h3M9 12h11M4 17h13M19 17h1"/><circle cx="12" cy="7" r="1.6" fill="currentColor" stroke="currentColor"/><circle cx="6.5" cy="12" r="1.6" fill="currentColor" stroke="currentColor"/><circle cx="16.5" cy="17" r="1.6" fill="currentColor" stroke="currentColor"/>',
     rocket: '<path d="M12 2.5c2.8 1.4 4.6 4.4 4.6 8.3 0 2-.5 3.7-1.2 5l-3.4 3.7-3.4-3.7c-.7-1.3-1.2-3-1.2-5 0-3.9 1.8-6.9 4.6-8.3z"/><circle cx="12" cy="10" r="1.7"/><path d="M8.4 15.6 6 17.3l.6-3.3M15.6 15.6 18 17.3l-.6-3.3M10 19.8l2 2 2-2"/>',
-    grid: '<rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1.5"/><rect x="14" y="3.5" width="6.5" height="6.5" rx="1.5"/><rect x="3.5" y="14" width="6.5" height="6.5" rx="1.5"/><rect x="14" y="14" width="6.5" height="6.5" rx="1.5"/>'
+    grid: '<rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1.5"/><rect x="14" y="3.5" width="6.5" height="6.5" rx="1.5"/><rect x="3.5" y="14" width="6.5" height="6.5" rx="1.5"/><rect x="14" y="14" width="6.5" height="6.5" rx="1.5"/>',
+    trophy: '<path d="M7 4h10v4a5 5 0 0 1-10 0V4z"/><path d="M7 5H4a1 1 0 0 0-1 1v1a3 3 0 0 0 3 3"/><path d="M17 5h3a1 1 0 0 1 1 1v1a3 3 0 0 1-3 3"/><path d="M12 13v3"/><path d="M9 20h6"/><path d="M9.5 16.5h5l.5 3.5h-6z"/>'
   };
   function monoSvg(id) {
     const g = monoGlyphs[id];

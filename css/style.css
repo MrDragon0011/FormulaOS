@@ -270,12 +270,15 @@ button{font-family:inherit;}
 .mb-menu{font-size:13px;cursor:pointer;border-radius:1px;}
 .mb-menu:hover, .mb-logo:hover, .mb-appname:hover, .mb-item.open{background:rgba(255,255,255,.14);}
 .mb-icon{font-size:13px;cursor:pointer;border-radius:1px;opacity:.9;}
+.mb-standings{display:flex;align-items:center;gap:5px;opacity:1;}
+.mb-standings svg{width:14px;height:14px;color:var(--text);}
+.mb-standings span{font-size:12px;font-weight:600;color:var(--text);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .mb-icon:hover{background:rgba(255,255,255,.14);}
 .mb-clock{font-weight:600;cursor:pointer;border-radius:1px;color:var(--text);}
 .mb-clock:hover{background:rgba(255,255,255,.14);}
 
 #mb-dropdown{
-  position:fixed;z-index:601;min-width:220px;background:var(--window-bg);border:1px solid var(--border);
+  position:fixed;z-index:601;min-width:260px;background:var(--window-bg);border:1px solid var(--border);
   border-radius:var(--radius);box-shadow:var(--shadow);padding:5px;backdrop-filter:blur(24px);top:30px;
   animation:winOpen .12s ease;
 }

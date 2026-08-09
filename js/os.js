@@ -482,6 +482,50 @@ const OS = (() => {
     }
   }
 
+  /* ---------------- Championship standings (live, via the Jolpica Ergast-compatible API) ---------------- */
+  const STANDINGS_CACHE_KEY = 'formulaos_standings_v1';
+  const STANDINGS_TTL = 6 * 3600 * 1000;
+  function loadCachedStandings() {
+    try { return JSON.parse(localStorage.getItem(STANDINGS_CACHE_KEY)); } catch (e) { return null; }
+  }
+  async function fetchStandings() {
+    const cached = loadCachedStandings();
+    if (cached && Date.now() - cached.fetchedAt < STANDINGS_TTL) return cached.drivers;
+    try {
+      const res = await fetch('https://api.jolpi.ca/ergast/f1/current/driverStandings.json');
+      const data = await res.json();
+      const list = data.MRData.StandingsTable.StandingsLists[0] || { DriverStandings: [] };
+      const drivers = list.DriverStandings.map(d => ({
+        position: d.position,
+        points: d.points,
+        name: `${d.Driver.givenName} ${d.Driver.familyName}`,
+        shortName: `${d.Driver.givenName.charAt(0)}. ${d.Driver.familyName}`,
+        team: d.Constructors[0] ? d.Constructors[0].name : ''
+      }));
+      localStorage.setItem(STANDINGS_CACHE_KEY, JSON.stringify({ fetchedAt: Date.now(), drivers }));
+      return drivers;
+    } catch (e) {
+      return cached ? cached.drivers : null;
+    }
+  }
+  async function renderStandingsMenuItem() {
+    const iconEl = document.getElementById('mb-standings-icon');
+    const textEl = document.getElementById('mb-standings-text');
+    if (iconEl) iconEl.innerHTML = Icons.monoSvg('trophy');
+    const drivers = await fetchStandings();
+    if (!textEl) return;
+    if (!drivers || !drivers.length) { textEl.textContent = 'Standings unavailable'; return; }
+    const leader = drivers[0];
+    textEl.textContent = `${leader.name.split(' ').pop()} · ${leader.points} pts`;
+    const el = document.getElementById('mb-standings');
+    if (el) el.onclick = (e) => {
+      e.stopPropagation();
+      showMenuDropdown(el, drivers.slice(0, 5).map(d =>
+        ({ label: `${d.position}. ${d.shortName} — ${d.points} pts <span style="color:var(--text-dim);font-weight:400;margin-left:10px;">${d.team}</span>`, action: () => {} })
+      ));
+    };
+  }
+
   function showMenuDropdown(triggerEl, items) {
     const dd = document.getElementById('mb-dropdown');
     dd.innerHTML = items.map((it, i) => it.sep ? '<div class="dd-sep"></div>' : `<div class="dd-item${it.disabled ? ' disabled' : ''}" data-i="${i}">${it.label}</div>`).join('');
@@ -764,6 +808,8 @@ const OS = (() => {
     setInterval(updateRaceCountdown, 1000);
     checkRaceToasts();
     setInterval(checkRaceToasts, 30000);
+    renderStandingsMenuItem();
+    setInterval(renderStandingsMenuItem, 10 * 60 * 1000);
 
     WM.onChange(renderDock);
     WM.onFocus(updateActiveAppName);
