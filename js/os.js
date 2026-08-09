@@ -1,6 +1,7 @@
 /* FormulaOS Core */
 const OS = (() => {
   function wallpaperCss(i) { return Wallpaper.cssValue(i, nextRace().track); }
+  function wallpaperName(i) { return Wallpaper.paletteName(i); }
   const wallpapers = Array.from({ length: Wallpaper.count() }, (_, i) => i);
   function applyBackground(cssValue) {
     document.getElementById('desktop').style.background = cssValue;
@@ -727,7 +728,7 @@ const OS = (() => {
   document.addEventListener('DOMContentLoaded', boot);
 
   return {
-    wallpapers, wallpaperCss, appList, prefs, nextRace,
+    wallpapers, wallpaperCss, wallpaperName, appList, prefs, nextRace,
     raceCalendar: () => RACE_CALENDAR.slice(),
     setTheme, toggleTheme, setAccent, setWallpaper, setCustomWallpaper, setFontSize, setReduceMotion,
     setHighContrast, setClock24h, setUsername, setIconSize, setBrightness,

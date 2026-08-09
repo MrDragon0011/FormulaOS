@@ -405,7 +405,7 @@ Apps.settings = function (openSection) {
             <div class="settings-card">
               <div class="label-title" style="margin-bottom:10px;">Wallpaper</div>
               <div class="wallpaper-row" data-role="wp-row">
-                ${OS.wallpapers.map((_, i) => `<div class="wallpaper-thumb" style="background:${OS.wallpaperCss(i)}" data-wp="${i}"></div>`).join('')}
+                ${OS.wallpapers.map((_, i) => `<div class="wallpaper-thumb" style="background:${OS.wallpaperCss(i)}" data-wp="${i}" title="${OS.wallpaperName(i)}"></div>`).join('')}
                 ${OS.prefs.customWallpaper ? `
                   <div class="wallpaper-thumb wallpaper-thumb-custom active" style="background-image:url(${OS.prefs.customWallpaper})" data-wp-custom="1" title="Your uploaded image">
                     <button class="wallpaper-thumb-remove" data-act="clear-wp" title="Remove custom image">${Icons.inline('close')}</button>
@@ -738,7 +738,7 @@ Apps.photos = function () {
     title: 'Photos', icon: 'photos', appId: 'photos', single: true, width: 520, height: 400,
     onMount(body) {
       const wallpapers = OS.wallpapers;
-      body.innerHTML = `<div class="gallery">${wallpapers.map((_, i) => `<div class="card" style="background:${OS.wallpaperCss(i)}"><span>Wallpaper ${i + 1}</span></div>`).join('')}</div>`;
+      body.innerHTML = `<div class="gallery">${wallpapers.map((_, i) => `<div class="card" style="background:${OS.wallpaperCss(i)}"><span>${OS.wallpaperName(i)}</span></div>`).join('')}</div>`;
       body.querySelectorAll('.card').forEach((c, i) => c.onclick = () => OS.setWallpaper(i));
     }
   });

@@ -85,12 +85,12 @@ const Wallpaper = (() => {
   }
 
   const palettes = [
-    { sky: ['#2b0f14', '#5c1418', '#180608'], sun: '#ffc94d', sunGlow: '#e10600', track: '#e7e2da', kerb: '#e10600', grass: '#2a0d10' },
-    { sky: ['#0c2420', '#123a34', '#081916'], sun: '#c9d6d4', sunGlow: '#3aa89a', track: '#e7e2da', kerb: '#0f6b5c', grass: '#0a2420' },
-    { sky: ['#0d1830', '#152850', '#080f20'], sun: '#ff8700', sunGlow: '#ff9e2c', track: '#e7e2da', kerb: '#ff8700', grass: '#0d1a30' },
-    { sky: ['#0a1130', '#151f4a', '#060a1c'], sun: '#ffd23f', sunGlow: '#c81e1e', track: '#e7e2da', kerb: '#c81e1e', grass: '#0b1030' },
-    { sky: ['#0c1f14', '#183822', '#08140c'], sun: '#f0dcae', sunGlow: '#2f8f52', track: '#e7e2da', kerb: '#2f8f52', grass: '#0c2016' },
-    { sky: ['#201c1a', '#3a2e22', '#141110'], sun: '#f2c879', sunGlow: '#c99a4a', track: '#e7e2da', kerb: '#c99a4a', grass: '#1e1a15' }
+    { name: 'Red', sky: ['#2b0f14', '#5c1418', '#180608'], sun: '#ffc94d', sunGlow: '#e10600', track: '#e7e2da', kerb: '#e10600', grass: '#2a0d10' },
+    { name: 'Teal', sky: ['#0c2420', '#123a34', '#081916'], sun: '#c9d6d4', sunGlow: '#3aa89a', track: '#e7e2da', kerb: '#0f6b5c', grass: '#0a2420' },
+    { name: 'Orange', sky: ['#0d1830', '#152850', '#080f20'], sun: '#ff8700', sunGlow: '#ff9e2c', track: '#e7e2da', kerb: '#ff8700', grass: '#0d1a30' },
+    { name: 'Crimson', sky: ['#0a1130', '#151f4a', '#060a1c'], sun: '#ffd23f', sunGlow: '#c81e1e', track: '#e7e2da', kerb: '#c81e1e', grass: '#0b1030' },
+    { name: 'Green', sky: ['#0c1f14', '#183822', '#08140c'], sun: '#f0dcae', sunGlow: '#2f8f52', track: '#e7e2da', kerb: '#2f8f52', grass: '#0c2016' },
+    { name: 'Gold', sky: ['#201c1a', '#3a2e22', '#141110'], sun: '#f2c879', sunGlow: '#c99a4a', track: '#e7e2da', kerb: '#c99a4a', grass: '#1e1a15' }
   ];
 
   function build(index, trackSlug) {
@@ -155,6 +155,7 @@ const Wallpaper = (() => {
     return `center/cover no-repeat url('data:image/svg+xml,${encoded}')`;
   }
   function count() { return palettes.length; }
+  function paletteName(index) { return palettes[index % palettes.length].name; }
 
   /* Standalone circuit outline (no sky/sun/label) — used by the Track Atlas app */
   function circuitSvg(trackSlug, color) {
@@ -168,5 +169,5 @@ const Wallpaper = (() => {
   }
   function trackLabel(trackSlug) { return (TRACKS[trackSlug] || DEFAULT_TRACK).label; }
 
-  return { cssValue, count, circuitSvg, trackLabel };
+  return { cssValue, count, circuitSvg, trackLabel, paletteName };
 })();
