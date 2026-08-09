@@ -27,6 +27,7 @@ const OS = (() => {
     { id: 'snake', label: 'Track Racer', run: () => Apps.snake() },
     { id: 'trackatlas', label: 'Track Atlas', run: () => Apps.trackAtlas() },
     { id: 'pitstrategy', label: 'Pit Strategy', run: () => Apps.pitStrategy() },
+    { id: 'livetiming', label: 'Live Timing', run: () => Apps.liveTiming() },
     { id: 'settings', label: 'Settings', run: () => Apps.settings() },
     { id: 'about', label: 'About', run: () => Apps.about() },
   ];

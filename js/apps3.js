@@ -205,3 +205,90 @@ Apps.pitStrategy = function () {
     }
   });
 };
+
+/* ---------------- Live Timing (real session data via OpenF1) ---------------- */
+Apps.liveTiming = function () {
+  WM.open({
+    title: 'Live Timing', icon: 'livetiming', appId: 'livetiming', width: 460, height: 560,
+    onMount(body) {
+      body.innerHTML = `
+        <div style="display:flex;flex-direction:column;height:100%;">
+          <div style="padding:12px 14px;border-bottom:1px solid var(--border);flex:none;">
+            <div style="display:flex;align-items:center;gap:7px;">
+              <span data-role="lt-badge"></span>
+              <div style="font-size:14px;font-weight:700;" data-role="lt-title">Loading session…</div>
+            </div>
+            <div style="font-size:11.5px;color:var(--text-dim);margin-top:2px;" data-role="lt-sub"></div>
+          </div>
+          <div style="flex:1;overflow-y:auto;" data-role="lt-list"></div>
+        </div>`;
+      const badgeEl = body.querySelector('[data-role="lt-badge"]');
+      const titleEl = body.querySelector('[data-role="lt-title"]');
+      const subEl = body.querySelector('[data-role="lt-sub"]');
+      const listEl = body.querySelector('[data-role="lt-list"]');
+
+      let timer = null;
+      async function load() {
+        try {
+          const sessions = await fetch('https://api.openf1.org/v1/sessions?session_key=latest').then(r => r.json());
+          const session = sessions && sessions[0];
+          if (!session) { titleEl.textContent = 'No session data available'; return; }
+          const now = new Date();
+          const isLive = now >= new Date(session.date_start) && now <= new Date(session.date_end);
+          badgeEl.innerHTML = isLive
+            ? '<span class="lt-live-dot"></span><span style="color:#ff5c5c;font-weight:700;font-size:11px;letter-spacing:.5px;">LIVE</span>'
+            : '<span style="color:var(--text-dim);font-weight:700;font-size:11px;letter-spacing:.5px;">FINAL</span>';
+          titleEl.textContent = `${session.session_name} — ${session.circuit_short_name}`;
+          subEl.textContent = isLive
+            ? `${session.country_name} · session in progress`
+            : `${session.country_name} · ${new Date(session.date_start).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`;
+
+          const [drivers, positions, intervals] = await Promise.all([
+            fetch(`https://api.openf1.org/v1/drivers?session_key=${session.session_key}`).then(r => r.json()).catch(() => []),
+            fetch(`https://api.openf1.org/v1/position?session_key=${session.session_key}`).then(r => r.json()).catch(() => []),
+            fetch(`https://api.openf1.org/v1/intervals?session_key=${session.session_key}`).then(r => r.json()).catch(() => [])
+          ]);
+          const driverMap = {};
+          drivers.forEach(d => { driverMap[d.driver_number] = d; });
+          const latestPos = {};
+          positions.forEach(p => { if (!latestPos[p.driver_number] || p.date > latestPos[p.driver_number].date) latestPos[p.driver_number] = p; });
+          const latestGap = {};
+          intervals.forEach(iv => { if (!latestGap[iv.driver_number] || iv.date > latestGap[iv.driver_number].date) latestGap[iv.driver_number] = iv; });
+
+          const rows = Object.values(latestPos).sort((a, b) => a.position - b.position);
+          if (!rows.length) {
+            listEl.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-dim);font-size:12.5px;">No timing data for this session.</div>';
+          } else {
+            listEl.innerHTML = rows.map(p => {
+              const d = driverMap[p.driver_number];
+              const gap = latestGap[p.driver_number];
+              const gapText = p.position === 1 ? 'Leader' : (gap && gap.gap_to_leader != null ? gap.gap_to_leader : '—');
+              return `<div class="lt-row">
+                <div class="lt-pos">${p.position}</div>
+                <div class="lt-swatch" style="background:#${d && d.team_colour ? d.team_colour : '888888'};"></div>
+                <div class="lt-info">
+                  <div class="lt-name">${d ? d.full_name : 'Car #' + p.driver_number}</div>
+                  <div class="lt-team">${d ? d.team_name : ''}</div>
+                </div>
+                <div class="lt-gap">${gapText}</div>
+              </div>`;
+            }).join('');
+          }
+
+          if (isLive && !timer) timer = setInterval(load, 8000);
+          if (!isLive && timer) { clearInterval(timer); timer = null; }
+        } catch (e) {
+          titleEl.textContent = 'Live timing unavailable';
+          subEl.textContent = 'Could not reach the timing service.';
+          badgeEl.innerHTML = '';
+        }
+      }
+      load();
+
+      const obs = new MutationObserver(() => {
+        if (!document.body.contains(body)) { if (timer) clearInterval(timer); obs.disconnect(); }
+      });
+      obs.observe(document.getElementById('windows'), { childList: true, subtree: true });
+    }
+  });
+};

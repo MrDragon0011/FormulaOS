@@ -79,7 +79,8 @@ const Icons = (() => {
     'cloud-rain': '<path d="M6.5 15.8a3.8 3.8 0 0 1-.4-7.6 5.2 5.2 0 0 1 9.9-1.6 3.7 3.7 0 0 1-.6 9.2H6.5z" fill="#fff" fill-opacity=".95"/><path d="M8.5 18.6l-.9 1.8M12 18.6l-.9 1.8M15.5 18.6l-.9 1.8" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>',
     snowflake: '<path d="M12 4v16M5.4 7.8l13.2 8.4M18.6 7.8 5.4 16.2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>',
     trackatlas: '<path d="M4.3 6.6 10 4.6l4 2 5.7-2v12.8l-5.7 2-4-2-5.7 2z" fill="#fff" fill-opacity=".95"/><path d="M10 4.6v12.8M14 6.6v12.8" stroke="rgba(0,0,0,.22)" stroke-width="1.1"/><circle cx="12" cy="10.8" r="2" fill="rgba(0,0,0,.32)"/>',
-    pitstrategy: '<circle cx="12" cy="13.3" r="7.6" fill="#fff" fill-opacity=".95"/><rect x="10" y="1.8" width="4" height="2.6" rx="1" fill="#fff"/><rect x="16" y="3.2" width="2.6" height="1.6" rx=".8" fill="#fff" transform="rotate(45 17.3 4)"/><path d="M12 13.3V8.6M12 13.3l3.3 1.9" stroke="rgba(0,0,0,.4)" stroke-width="1.3" stroke-linecap="round"/>'
+    pitstrategy: '<circle cx="12" cy="13.3" r="7.6" fill="#fff" fill-opacity=".95"/><rect x="10" y="1.8" width="4" height="2.6" rx="1" fill="#fff"/><rect x="16" y="3.2" width="2.6" height="1.6" rx=".8" fill="#fff" transform="rotate(45 17.3 4)"/><path d="M12 13.3V8.6M12 13.3l3.3 1.9" stroke="rgba(0,0,0,.4)" stroke-width="1.3" stroke-linecap="round"/>',
+    livetiming: '<circle cx="12" cy="13.3" r="7.6" fill="#fff" fill-opacity=".95"/><rect x="10" y="2.2" width="4" height="2.2" rx="1" fill="#fff"/><rect x="16.3" y="4.4" width="2.2" height="1.4" rx=".7" fill="#fff" transform="rotate(45 17.4 5.1)"/><path d="M12 13.3V9M12 13.3l2.8 1.6" stroke="rgba(0,0,0,.4)" stroke-width="1.3" stroke-linecap="round"/>'
   };
 
   /* Restrained FormulaOS palette — six families, each a soft-to-deep pair.
@@ -103,7 +104,7 @@ const Icons = (() => {
     about: family.red, flag: family.red, launchpad: family.violet,
     search: family.slate, file: family.slate, music: family.violet,
     sun: family.orange, 'cloud-rain': family.cyan, snowflake: family.cyan,
-    trackatlas: family.blue, pitstrategy: family.orange
+    trackatlas: family.blue, pitstrategy: family.orange, livetiming: family.red
   };
   function svg(id) {
     const g = tileGlyphs[id] || tileGlyphs.about;
