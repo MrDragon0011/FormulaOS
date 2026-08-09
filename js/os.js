@@ -41,9 +41,56 @@ const OS = (() => {
   let prefs = Object.assign({
     theme: 'dark', accent: '#e10600', accent2: '#ffc300', wallpaper: 0, customWallpaper: null,
     fontSize: 'md', reduceMotion: false, highContrast: false, clock24h: false,
-    username: 'Driver', iconSize: 'md', brightness: 100, dockPinned: DEFAULT_DOCK_PINNED.slice()
+    username: 'Driver', iconSize: 'md', brightness: 100, dockPinned: DEFAULT_DOCK_PINNED.slice(),
+    teamOrder: null
   }, loadPrefs());
   let activeTeam = null; // set when a signed-in user's favorite team overrides the theme
+
+  /* Team tiles in Settings can be drag-reordered; teamOrder is a list of team ids,
+     any ids missing from it (new teams, or before it's ever been customized) sort to the end. */
+  function orderedTeams() {
+    if (!prefs.teamOrder) return TEAMS.slice();
+    const order = prefs.teamOrder;
+    return TEAMS.slice().sort((a, b) => {
+      const ia = order.indexOf(a.id), ib = order.indexOf(b.id);
+      if (ia === -1 && ib === -1) return 0;
+      if (ia === -1) return 1;
+      if (ib === -1) return -1;
+      return ia - ib;
+    });
+  }
+  function setTeamOrder(order) {
+    prefs.teamOrder = order;
+    savePrefs(prefs);
+  }
+
+  /* Smoothly crossfades the desktop background and morphs --accent instead of an instant
+     snap, when a user actively picks a new favorite team livery. */
+  function morphToTeam(team) {
+    const html = document.documentElement;
+    const desktop = document.getElementById('desktop');
+    const targetAccent = team && team.id !== 'neutral' ? team.accent : prefs.accent;
+    const targetBg = wallpaperCss(team && team.id !== 'neutral' ? team.palette : (prefs.wallpaper || 0));
+
+    let overlay = document.getElementById('bg-morph-overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'bg-morph-overlay';
+      desktop.appendChild(overlay);
+    }
+    overlay.style.background = targetBg;
+    overlay.classList.remove('in');
+    void overlay.offsetWidth; // force reflow so the opacity transition re-triggers on the very next style change
+    html.classList.add('theme-morph');
+    html.style.setProperty('--accent', targetAccent);
+    overlay.classList.add('in');
+    setTimeout(() => {
+      desktop.style.background = targetBg;
+      document.getElementById('lock-screen').style.background = targetBg;
+      overlay.classList.remove('in');
+      html.classList.remove('theme-morph');
+    }, 520);
+  }
 
   function pinToDock(id) {
     if (id === 'trash' || prefs.dockPinned.includes(id)) return;
@@ -821,6 +868,6 @@ const OS = (() => {
     setHighContrast, setClock24h, setUsername, setIconSize, setBrightness,
     showContextMenu, hideContextMenu, lock, unlock, storageUsage, openLaunchpad, openSpotlight,
     pinToDock, unpinFromDock, notifyFSChange, renderDesktopIcons, renderDock,
-    toast, getActiveTeam: () => activeTeam
+    toast, orderedTeams, setTeamOrder, morphToTeam, getActiveTeam: () => activeTeam
   };
 })();

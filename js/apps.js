@@ -570,10 +570,10 @@ Apps.settings = function (openSection) {
               </div>
               <div class="settings-card">
                 <div class="label-title" style="margin-bottom:10px;">Favorite Team</div>
-                <div class="label-sub" style="margin-bottom:10px;">Sets your accent color, wallpaper livery, and the Next Race car.</div>
+                <div class="label-sub" style="margin-bottom:10px;">Sets your accent color, wallpaper livery, and the Next Race car. Drag to reorder.</div>
                 <div class="swatch-row" data-role="team-row" style="flex-wrap:wrap;gap:10px;">
-                  ${TEAMS.map(t => `
-                    <div class="team-pick${t.id === currentTeamId ? ' active' : ''}" data-team="${t.id}" style="display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;width:78px;">
+                  ${OS.orderedTeams().map(t => `
+                    <div class="team-pick${t.id === currentTeamId ? ' active' : ''}" data-team="${t.id}" draggable="true" style="display:flex;flex-direction:column;align-items:center;gap:5px;cursor:grab;width:78px;">
                       <div class="swatch" style="background:${t.accent};width:34px;height:34px;${t.id === currentTeamId ? 'border-color:#fff;' : ''}"></div>
                       <span style="font-size:11px;color:var(--text-dim);text-align:center;">${t.name}</span>
                     </div>`).join('')}
@@ -616,8 +616,26 @@ Apps.settings = function (openSection) {
             };
           } else if (user) {
             content.querySelector('[data-act="signout"]').onclick = async () => { await Auth.signOut(); render('account'); };
+            let dragId = null;
             content.querySelectorAll('.team-pick').forEach(el => {
-              el.onclick = async () => { await Auth.setFavoriteTeam(el.dataset.team); render('account'); };
+              el.onclick = async () => {
+                const team = teamById(el.dataset.team);
+                if (team) OS.morphToTeam(team);
+                await Auth.setFavoriteTeam(el.dataset.team);
+                render('account');
+              };
+              el.addEventListener('dragstart', () => { dragId = el.dataset.team; el.style.opacity = '.4'; });
+              el.addEventListener('dragend', () => { el.style.opacity = ''; });
+              el.addEventListener('dragover', (e) => e.preventDefault());
+              el.addEventListener('drop', (e) => {
+                e.preventDefault();
+                if (!dragId || dragId === el.dataset.team) return;
+                const order = OS.orderedTeams().map(t => t.id);
+                const from = order.indexOf(dragId), to = order.indexOf(el.dataset.team);
+                order.splice(to, 0, order.splice(from, 1)[0]);
+                OS.setTeamOrder(order);
+                render('account');
+              });
             });
           }
         } else if (section === 'apps') {

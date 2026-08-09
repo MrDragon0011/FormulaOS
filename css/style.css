@@ -1,3 +1,10 @@
+/* Registering --accent as an animatable color lets a livery switch morph smoothly
+   through every element that reads var(--accent), instead of an instant color snap. */
+@property --accent{ syntax:'<color>'; inherits:true; initial-value:#e10600; }
+html.theme-morph{ transition:--accent .5s ease; }
+#bg-morph-overlay{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .5s ease;}
+#bg-morph-overlay.in{opacity:1;}
+
 :root{
   --accent:#e10600;
   --accent-2:#ffc300;
