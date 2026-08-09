@@ -559,6 +559,50 @@ const OS = (() => {
       .map(([v, label]) => `<div class="rw-unit"><b>${String(v).padStart(2, '0')}</b><span>${label}</span></div>`).join('');
   }
 
+  /* ---------------- Toast notifications ---------------- */
+  function toast(title, sub, opts) {
+    opts = opts || {};
+    const stack = document.getElementById('toast-stack');
+    if (!stack) return;
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.innerHTML = `
+      <div class="toast-icon">${Icons.inlineSvg(opts.icon || 'flag')}</div>
+      <div class="toast-body">
+        <div class="toast-title">${title}</div>
+        ${sub ? `<div class="toast-sub">${sub}</div>` : ''}
+      </div>
+      <button class="toast-close">&#10005;</button>`;
+    stack.appendChild(el);
+    const dismiss = () => { el.classList.add('leaving'); setTimeout(() => el.remove(), 200); };
+    el.querySelector('.toast-close').onclick = dismiss;
+    setTimeout(dismiss, opts.duration || 7000);
+  }
+
+  /* Race-weekend countdown milestones — fires once per threshold per race, tracked in localStorage */
+  const RACE_TOAST_THRESHOLDS = [
+    { ms: 24 * 3600 * 1000, label: '24 hours' },
+    { ms: 3600 * 1000, label: '1 hour' },
+    { ms: 10 * 60 * 1000, label: '10 minutes' }
+  ];
+  const TOAST_SEEN_KEY = 'formulaos_race_toasts_v1';
+  function loadToastSeen() {
+    try { return JSON.parse(localStorage.getItem(TOAST_SEEN_KEY)) || {}; } catch (e) { return {}; }
+  }
+  function checkRaceToasts() {
+    const race = nextRace();
+    let seen = loadToastSeen();
+    if (seen.race !== race.name) seen = { race: race.name, thresholds: [] };
+    const msLeft = race.date - new Date();
+    RACE_TOAST_THRESHOLDS.forEach(t => {
+      if (msLeft <= t.ms && msLeft > 0 && !seen.thresholds.includes(t.label)) {
+        toast(race.name, `Lights out in about ${t.label} — ${race.circuit}`, { icon: 'flag' });
+        seen.thresholds.push(t.label);
+      }
+    });
+    localStorage.setItem(TOAST_SEEN_KEY, JSON.stringify(seen));
+  }
+
   function lock() {
     hideMenuDropdown();
     document.getElementById('control-center').classList.add('hidden');
@@ -657,6 +701,8 @@ const OS = (() => {
     Auth.init();
     renderRaceWidget();
     setInterval(updateRaceCountdown, 1000);
+    checkRaceToasts();
+    setInterval(checkRaceToasts, 30000);
 
     WM.onChange(renderDock);
     WM.onFocus(updateActiveAppName);
@@ -761,6 +807,6 @@ const OS = (() => {
     setHighContrast, setClock24h, setUsername, setIconSize, setBrightness,
     showContextMenu, hideContextMenu, lock, unlock, storageUsage, openLaunchpad, openSpotlight,
     pinToDock, unpinFromDock, notifyFSChange, renderDesktopIcons, renderDock,
-    getActiveTeam: () => activeTeam
+    toast, getActiveTeam: () => activeTeam
   };
 })();
