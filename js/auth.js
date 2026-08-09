@@ -5,6 +5,10 @@ const Auth = (() => {
   let client = null, user = null, profile = null, ready = false;
   const listeners = [];
 
+  /* Emails that may re-run signup even if an account already exists — for local/testing use.
+     Edit freely; matched case-insensitively. */
+  const DUPLICATE_SIGNUP_EXCEPTIONS = [];
+
   function configured() {
     return !!(SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey);
   }
@@ -52,15 +56,29 @@ const Auth = (() => {
     if (!client) throw new Error('Supabase is not configured yet.');
     validateUsername(username);
     validateCredentials(email, password);
-    const { error } = await client.auth.signUp({ email, password, options: { data: { username } } });
+    const { data, error } = await client.auth.signUp({ email, password, options: { data: { username } } });
     if (error) {
       if (/duplicate|already exists/i.test(error.message)) throw new Error('That username is taken.');
       throw error;
     }
+    // Supabase's email-enumeration protection returns a fake success (no error) for an
+    // already-registered email — it still comes back with an empty identities array, which is
+    // the one reliable signal we get. Exceptions list above lets specific emails bypass this.
+    const isExempt = DUPLICATE_SIGNUP_EXCEPTIONS.some(e => e.toLowerCase() === email.toLowerCase());
+    if (!isExempt && data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+      throw new Error('An account with this email already exists. Try signing in instead.');
+    }
   }
-  async function signIn(email, password) {
+  async function signIn(identifier, password) {
     if (!client) throw new Error('Supabase is not configured yet.');
-    validateCredentials(email, password);
+    if (!identifier) throw new Error('Enter your email or username.');
+    if (!password) throw new Error('Enter a password.');
+    let email = identifier;
+    if (!/^\S+@\S+\.\S+$/.test(identifier)) {
+      const { data, error: rpcError } = await client.rpc('resolve_login_email', { identifier });
+      if (rpcError || !data) throw new Error('Invalid email/username or password.');
+      email = data;
+    }
     const { error } = await client.auth.signInWithPassword({ email, password });
     if (error) throw error;
   }
