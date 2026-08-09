@@ -93,9 +93,20 @@ const Wallpaper = (() => {
     { name: 'Gold', sky: ['#201c1a', '#3a2e22', '#141110'], sun: '#f2c879', sunGlow: '#c99a4a', track: '#e7e2da', kerb: '#c99a4a', grass: '#1e1a15' }
   ];
 
-  function build(index, trackSlug) {
+  /* Buckets a WMO weather code (as returned by Open-Meteo) into a wallpaper overlay style. */
+  function weatherCategory(code) {
+    if (code == null) return 'clear';
+    if ([71, 73, 75, 77, 85, 86].includes(code)) return 'snow';
+    if ([95, 96, 99].includes(code)) return 'storm';
+    if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return 'rain';
+    if ([2, 3, 45, 48].includes(code)) return 'cloudy';
+    return 'clear';
+  }
+
+  function build(index, trackSlug, weatherCode) {
     const p = palettes[index % palettes.length];
     const t = TRACKS[trackSlug] || DEFAULT_TRACK;
+    const weather = weatherCategory(weatherCode);
     const rand = mulberry32(1000 + index * 97);
     const sunX = W * (0.16 + rand() * 0.14), sunY = H * (0.13 + rand() * 0.06);
     const glass = [glassTriangle(rand, 0.03), glassTriangle(rand, 0.025), glassTriangle(rand, 0.02)].join('');
@@ -110,8 +121,34 @@ const Wallpaper = (() => {
     const px = Math.cos(ang + Math.PI / 2), py = Math.sin(ang + Math.PI / 2);
     const fl = `<line x1="${(sx - px * 26).toFixed(1)}" y1="${(sy - py * 26).toFixed(1)}" x2="${(sx + px * 26).toFixed(1)}" y2="${(sy + py * 26).toFixed(1)}" stroke="url(#checker)" stroke-width="10"/>`;
 
+    // Weather overlay — dims the sun and, for rain/storm/snow, layers a repeating particle pattern over the scene.
+    let weatherDefs = '', weatherOverlay = '', sunOpacity = 1, glowOpacity = 1;
+    if (weather === 'cloudy') { sunOpacity = 0.55; glowOpacity = 0.4; weatherOverlay = `<rect width="${W}" height="${H}" fill="#10131a" opacity=".14"/>`; }
+    else if (weather === 'rain') {
+      sunOpacity = 0.3; glowOpacity = 0.2;
+      weatherDefs = `<pattern id="rain" width="34" height="34" patternUnits="userSpaceOnUse" patternTransform="rotate(18)">
+        <line x1="4" y1="0" x2="4" y2="22" stroke="#cfe0ff" stroke-width="2.4" stroke-linecap="round" opacity=".5"/>
+      </pattern>`;
+      weatherOverlay = `<rect width="${W}" height="${H}" fill="#0a0e18" opacity=".22"/><rect width="${W}" height="${H}" fill="url(#rain)"/>`;
+    } else if (weather === 'storm') {
+      sunOpacity = 0.15; glowOpacity = 0.1;
+      weatherDefs = `<pattern id="rain" width="30" height="30" patternUnits="userSpaceOnUse" patternTransform="rotate(20)">
+        <line x1="4" y1="0" x2="4" y2="24" stroke="#cfe0ff" stroke-width="2.8" stroke-linecap="round" opacity=".6"/>
+      </pattern>`;
+      weatherOverlay = `<rect width="${W}" height="${H}" fill="#05070d" opacity=".38"/><rect width="${W}" height="${H}" fill="url(#rain)"/>`;
+    } else if (weather === 'snow') {
+      sunOpacity = 0.5; glowOpacity = 0.35;
+      weatherDefs = `<pattern id="snow" width="46" height="46" patternUnits="userSpaceOnUse">
+        <circle cx="8" cy="10" r="2.2" fill="#ffffff" opacity=".55"/>
+        <circle cx="30" cy="28" r="1.6" fill="#ffffff" opacity=".45"/>
+        <circle cx="20" cy="40" r="2" fill="#ffffff" opacity=".5"/>
+      </pattern>`;
+      weatherOverlay = `<rect width="${W}" height="${H}" fill="#141a24" opacity=".16"/><rect width="${W}" height="${H}" fill="url(#snow)"/>`;
+    }
+
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}">
       <defs>
+        ${weatherDefs}
         <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stop-color="${p.sky[0]}"/>
           <stop offset="0.55" stop-color="${p.sky[1]}"/>
@@ -132,26 +169,27 @@ const Wallpaper = (() => {
         </pattern>
       </defs>
       <rect width="${W}" height="${H}" fill="url(#sky)"/>
-      <rect width="${W}" height="${H}" fill="url(#glow)"/>
+      <rect width="${W}" height="${H}" fill="url(#glow)" opacity="${glowOpacity}"/>
       ${glass}
-      <polygon points="${sunPts}" fill="${p.sun}"/>
+      <polygon points="${sunPts}" fill="${p.sun}" opacity="${sunOpacity}"/>
       <rect width="${W}" height="${H}" fill="url(#spot)"/>
       <path d="${trk.d}" fill="none" stroke="${p.kerb}" stroke-width="26" stroke-linejoin="round" stroke-linecap="round" opacity=".9"/>
       <path d="${trk.d}" fill="none" stroke="${p.track}" stroke-width="18" stroke-linejoin="round" stroke-linecap="round"/>
       ${fl}
+      ${weatherOverlay}
       <text x="${cx}" y="${(cy + scale + 55).toFixed(0)}" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="700" letter-spacing="9" fill="#ffffff" opacity=".5">${t.label}</text>
     </svg>`;
     return svg;
   }
 
   const cache = new Map();
-  function svg(index, trackSlug) {
-    const key = index + ':' + (trackSlug || '');
-    if (!cache.has(key)) cache.set(key, build(index, trackSlug));
+  function svg(index, trackSlug, weatherCode) {
+    const key = index + ':' + (trackSlug || '') + ':' + (weatherCode == null ? '' : weatherCode);
+    if (!cache.has(key)) cache.set(key, build(index, trackSlug, weatherCode));
     return cache.get(key);
   }
-  function cssValue(index, trackSlug) {
-    const encoded = encodeURIComponent(svg(index, trackSlug)).replace(/'/g, '%27').replace(/"/g, '%22');
+  function cssValue(index, trackSlug, weatherCode) {
+    const encoded = encodeURIComponent(svg(index, trackSlug, weatherCode)).replace(/'/g, '%27').replace(/"/g, '%22');
     return `center/cover no-repeat url('data:image/svg+xml,${encoded}')`;
   }
   function count() { return palettes.length; }

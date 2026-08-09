@@ -1,6 +1,7 @@
 /* FormulaOS Core */
 const OS = (() => {
-  function wallpaperCss(i) { return Wallpaper.cssValue(i, nextRace().track); }
+  let currentWeatherCode = null;
+  function wallpaperCss(i) { return Wallpaper.cssValue(i, nextRace().track, currentWeatherCode); }
   function wallpaperName(i) { return Wallpaper.paletteName(i); }
   const wallpapers = Array.from({ length: Wallpaper.count() }, (_, i) => i);
   function applyBackground(cssValue) {
@@ -482,6 +483,45 @@ const OS = (() => {
     }
   }
 
+  /* ---------------- Weather-reactive wallpaper (live, via Open-Meteo) ---------------- */
+  const CIRCUIT_COORDS = {
+    bahrain: [26.0325, 50.5106], jeddah: [21.6319, 39.1044], albertpark: [-37.8497, 144.968],
+    suzuka: [34.8431, 136.541], shanghai: [31.3389, 121.220], miami: [25.9581, -80.2389],
+    imola: [44.3439, 11.7167], monaco: [43.7347, 7.42056], montreal: [45.5, -73.5228],
+    barcelona: [41.57, 2.26111], redbullring: [47.2197, 14.7647], silverstone: [52.0786, -1.01694],
+    spa: [50.4372, 5.97139], hungaroring: [47.5789, 19.2486], zandvoort: [52.3888, 4.54092],
+    monza: [45.6156, 9.28111], baku: [40.3725, 49.8533], singapore: [1.2914, 103.864],
+    cota: [30.1328, -97.6411], mexico: [19.4042, -99.0907], interlagos: [-23.7036, -46.6997],
+    vegas: [36.1147, -115.173], lusail: [25.49, 51.4542], yasmarina: [24.4672, 54.6031]
+  };
+  const WEATHER_CACHE_KEY = 'formulaos_weather_v1';
+  const WEATHER_TTL = 30 * 60 * 1000;
+  async function fetchNextRaceWeather() {
+    const track = nextRace().track;
+    const coords = CIRCUIT_COORDS[track];
+    if (!coords) return null;
+    let cached = null;
+    try { cached = JSON.parse(localStorage.getItem(WEATHER_CACHE_KEY)); } catch (e) { cached = null; }
+    if (cached && cached.track === track && Date.now() - cached.fetchedAt < WEATHER_TTL) return cached.code;
+    try {
+      const [lat, lon] = coords;
+      const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+      const data = await res.json();
+      const code = data.current_weather ? data.current_weather.weathercode : null;
+      localStorage.setItem(WEATHER_CACHE_KEY, JSON.stringify({ track, fetchedAt: Date.now(), code }));
+      return code;
+    } catch (e) {
+      return cached && cached.track === track ? cached.code : null;
+    }
+  }
+  async function refreshWeatherWallpaper() {
+    const code = await fetchNextRaceWeather();
+    if (code === currentWeatherCode) return;
+    currentWeatherCode = code;
+    if (!prefs.customWallpaper && !activeTeam) applyBackground(wallpaperCss(prefs.wallpaper || 0));
+    else if (activeTeam) applyBackground(wallpaperCss(activeTeam.palette));
+  }
+
   /* ---------------- Championship standings (live, via the Jolpica Ergast-compatible API) ---------------- */
   const STANDINGS_CACHE_KEY = 'formulaos_standings_v1';
   const STANDINGS_TTL = 6 * 3600 * 1000;
@@ -810,6 +850,8 @@ const OS = (() => {
     setInterval(checkRaceToasts, 30000);
     renderStandingsMenuItem();
     setInterval(renderStandingsMenuItem, 10 * 60 * 1000);
+    refreshWeatherWallpaper();
+    setInterval(refreshWeatherWallpaper, WEATHER_TTL);
 
     WM.onChange(renderDock);
     WM.onFocus(updateActiveAppName);
