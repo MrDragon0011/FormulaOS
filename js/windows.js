@@ -79,7 +79,8 @@ const WM = (() => {
     else if (content instanceof HTMLElement) body.appendChild(content);
 
     const meta = { title, icon, appId, minimized: false, maximized: false, prevRect: null };
-    registry.set(id, { el, meta });
+    const cleanupFns = [];
+    registry.set(id, { el, meta, cleanupFns });
 
     // Drag (mouse + touch) with edge-snap
     const header = el.querySelector('.window-header');
@@ -130,12 +131,14 @@ const WM = (() => {
       dragging = false; snapZone = null; hidePreview();
       document.body.style.userSelect = '';
     }
+    function track(target, type, fn, opts) { target.addEventListener(type, fn, opts); cleanupFns.push(() => target.removeEventListener(type, fn, opts)); }
+
     header.addEventListener('mousedown', dragStart);
-    window.addEventListener('mousemove', dragMove);
-    window.addEventListener('mouseup', dragEnd);
+    track(window, 'mousemove', dragMove);
+    track(window, 'mouseup', dragEnd);
     header.addEventListener('touchstart', dragStart, { passive: true });
-    window.addEventListener('touchmove', dragMove, { passive: false });
-    window.addEventListener('touchend', dragEnd);
+    track(window, 'touchmove', dragMove, { passive: false });
+    track(window, 'touchend', dragEnd);
 
     // Resize (mouse + touch)
     const handle = el.querySelector('.resize-handle');
@@ -157,11 +160,11 @@ const WM = (() => {
       }
       function rEnd() { resizing = false; }
       handle.addEventListener('mousedown', rStart);
-      window.addEventListener('mousemove', rMove);
-      window.addEventListener('mouseup', rEnd);
+      track(window, 'mousemove', rMove);
+      track(window, 'mouseup', rEnd);
       handle.addEventListener('touchstart', rStart, { passive: true });
-      window.addEventListener('touchmove', rMove, { passive: false });
-      window.addEventListener('touchend', rEnd);
+      track(window, 'touchmove', rMove, { passive: false });
+      track(window, 'touchend', rEnd);
     }
 
     el.addEventListener('mousedown', () => focus(id));
@@ -215,6 +218,7 @@ const WM = (() => {
   function close(id) {
     const w = registry.get(id);
     if (!w) return;
+    if (w.cleanupFns) w.cleanupFns.forEach(fn => fn());
     w.el.remove();
     registry.delete(id);
     emit('change');
