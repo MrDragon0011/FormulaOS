@@ -1,9 +1,6 @@
-/* FormulaOS custom icon set — no emoji */
 const Icons = (() => {
   let gradSeq = 0;
 
-  /* Thin line glyphs — used ONLY inline next to text (menus, sidebars, buttons).
-     currentColor stroke so they stay theme-adaptive; never placed on a tile. */
   const glyphs = {
     explorer: '<path d="M3 7a1 1 0 0 1 1-1h4.5l1.5 1.8H20a1 1 0 0 1 1 1V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7z"/>',
     trash: '<path d="M5 7h14M9.5 7V5.2a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1V7M7 7l.9 11.2a1 1 0 0 0 1 .8h6.2a1 1 0 0 0 1-.8L17 7"/><path d="M10.3 10.5v5M13.7 10.5v5"/>',
@@ -54,8 +51,6 @@ const Icons = (() => {
     livetiming: '<circle cx="12" cy="17.3" r="1.5" fill="currentColor" stroke="none"/><path d="M8.6 14.6a4.9 4.9 0 0 1 6.8 0M5.9 11.9a8.8 8.8 0 0 1 12.2 0M3.3 9.2a12.6 12.6 0 0 1 17.4 0"/>'
   };
 
-  /* Bold filled glyphs — used ONLY on glass tiles (dock, desktop, Launchpad).
-     No glyph draws its own frame; the tile's squircle IS the silhouette. */
   const tileGlyphs = {
     explorer: '<path d="M4 7.3a1 1 0 0 1 1-1h4.3l1.6 1.9h8.1a1 1 0 0 1 1 1v8.4a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z" fill="#fff" fill-opacity=".95"/>',
     trash: '<rect x="6.3" y="6.1" width="11.4" height="1.8" rx=".9" fill="#fff"/><path d="M10 4.5a1 1 0 0 1 1-.9h2a1 1 0 0 1 1 .9v1.6h-4z" fill="#fff"/><path d="M7.3 9 8.2 18.7a1 1 0 0 0 1 .9h5.6a1 1 0 0 0 1-.9L16.7 9z" fill="#fff" fill-opacity=".95"/><path d="M10.3 11.2v6.2M13.7 11.2v6.2" stroke="rgba(0,0,0,.22)" stroke-width="1.1" fill="none"/>',
@@ -86,8 +81,6 @@ const Icons = (() => {
     livetiming: '<circle cx="12" cy="13.3" r="7.6" fill="#fff" fill-opacity=".95"/><rect x="10" y="2.2" width="4" height="2.2" rx="1" fill="#fff"/><rect x="16.3" y="4.4" width="2.2" height="1.4" rx=".7" fill="#fff" transform="rotate(45 17.4 5.1)"/><path d="M12 13.3V9M12 13.3l2.8 1.6" stroke="rgba(0,0,0,.4)" stroke-width="1.3" stroke-linecap="round"/>'
   };
 
-  /* Restrained FormulaOS palette — six families, each a soft-to-deep pair.
-     Every icon is assigned one family; glyph shape (not hue) carries identity. */
   const family = {
     blue: ['#8fc7ff', '#3f7fd9'],
     violet: ['#b9a3f5', '#6c4fd4'],
@@ -121,7 +114,6 @@ const Icons = (() => {
     return `<span class="app-icon${cls ? ' ' + cls : ''}">${svg(id)}</span>`;
   }
 
-  /* Monochrome line glyphs for menu bar / chrome UI (no colored tile) */
   const monoGlyphs = {
     search: '<circle cx="10.2" cy="10.2" r="6.2"/><path d="M19 19l-4.3-4.3"/>',
     wifi: '<path d="M3 8.5a13 13 0 0 1 18 0"/><path d="M6 12a8.5 8.5 0 0 1 12 0"/><path d="M9 15.5a4 4 0 0 1 6 0"/><circle cx="12" cy="19" r="1" fill="currentColor" stroke="none"/>',
@@ -137,7 +129,6 @@ const Icons = (() => {
     return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${g}</svg>`;
   }
 
-  /* Inline glyph (no tile/background), for use next to text in menus, lists, buttons */
   function inlineSvg(id) {
     const g = glyphs[id] || monoGlyphs[id];
     if (!g) return '';
@@ -147,8 +138,6 @@ const Icons = (() => {
     return `<span class="icon-inline${cls ? ' ' + cls : ''}">${inlineSvg(id)}</span>`;
   }
 
-  /* Stylized side-view F1 car — standalone graphic (not a 24x24 tile icon), used by the race widget */
-  /* Neutral livery by default (no team colors) — matte carbon body, silver/white accents */
   function carSvg(body1, body2) {
     body1 = body1 || '#3a3d44'; body2 = body2 || '#121316';
     const dark = '#0a0b0d', rim = '#8a8f99', rimDark = '#3a3d44', tire = '#161719', accent = '#e6e8ec';
@@ -175,7 +164,6 @@ const Icons = (() => {
       </defs>
       <ellipse cx="132" cy="83" rx="118" ry="5" fill="#000" opacity=".32"/>
 
-      <!-- rear wing -->
       <rect x="221" y="15" width="3.4" height="22" fill="${dark}"/>
       <rect x="250" y="15" width="3.4" height="22" fill="${dark}"/>
       <path d="M219 18 254 18 254 22.6 219 22.6Z" fill="${dark}"/>
@@ -184,7 +172,6 @@ const Icons = (() => {
       <rect x="233" y="38" width="3" height="13" fill="${dark}"/>
       <rect x="230" y="49" width="9" height="3" rx="1" fill="${dark}"/>
 
-      <!-- rear wheel -->
       <circle cx="212" cy="65" r="20" fill="url(#rw-car-tire)"/>
       <circle cx="212" cy="65" r="20" fill="none" stroke="#000" stroke-opacity=".4" stroke-width="1.2"/>
       <path d="M197.5 51.5a20 20 0 0 0 0 27" fill="none" stroke="#000" stroke-opacity=".25" stroke-width="1.6"/>
@@ -192,26 +179,21 @@ const Icons = (() => {
       <circle cx="212" cy="65" r="3.6" fill="${dark}"/>
       <path d="M212 55v20M200.5 65h23M203 55.5l18 19M221 55.5l-18 19" stroke="#4a4e57" stroke-width="1.1"/>
 
-      <!-- floor / diffuser -->
       <path d="M160 71 228 71 235 79 152 79Z" fill="${dark}"/>
       <path d="M168 73.5h54M168 76h54" stroke="#000" stroke-opacity=".4" stroke-width=".8"/>
 
-      <!-- sidepod undercut shadow -->
       <path d="M140 40 172 43 178 60 148 60Z" fill="${dark}" opacity=".6"/>
 
-      <!-- body -->
       <path d="M4 57 24 48 60 39 95 36 117 35 144 36 180 42 212 53 212 61 186 61 186 66 60 66 60 61 24 61 4 61Z" fill="url(#rw-car-g)"/>
       <path d="M4 57 24 48 60 39 95 36 117 35 144 36 180 42 212 53 212 61 186 61 186 66 60 66 60 61 24 61 4 61Z" fill="url(#rw-car-weave)"/>
       <path d="M4 57 24 48 60 39 95 36 117 35 144 36 180 42 212 53 212 61 186 61 186 66 60 66 60 61 24 61 4 61Z" fill="url(#rw-car-sheen)"/>
       <path d="M64 61 216 61 216 64 64 64Z" fill="${dark}" opacity=".4"/>
 
-      <!-- livery accent stripe (neutral silver, no team color) -->
       <path d="M62 40 106 36 101 51 58 55Z" fill="${accent}" opacity=".92"/>
       <path d="M108 35.6 143.5 36.5 139 52 103 51.5Z" fill="${accent}" opacity=".22"/>
       <circle cx="90" cy="45.5" r="6.4" fill="#151619"/>
       <circle cx="90" cy="45.5" r="6.4" fill="none" stroke="${accent}" stroke-width=".8" opacity=".7"/>
 
-      <!-- halo + cockpit -->
       <path d="M100 36 Q113 12 136 35" fill="none" stroke="${dark}" stroke-width="4.6" stroke-linecap="round"/>
       <path d="M100 36 Q113 12 136 35" fill="none" stroke="#3a3d44" stroke-width="1.2" stroke-linecap="round" opacity=".6"/>
       <path d="M104 36 Q114 25 132 35Z" fill="#1c1e24"/>
@@ -220,10 +202,8 @@ const Icons = (() => {
       <path d="M78 40 60 39" stroke="${dark}" stroke-width="2.4" stroke-linecap="round"/>
       <rect x="76" y="34" width="7" height="4.5" rx="1.5" fill="${dark}"/>
 
-      <!-- front suspension arms -->
       <path d="M60 55 40 50M60 60 40 63" stroke="#4a4e57" stroke-width="1.4" stroke-linecap="round"/>
 
-      <!-- front wing -->
       <rect x="0" y="53" width="28" height="3.4" rx="1" fill="${dark}"/>
       <rect x="0" y="58" width="28" height="2.6" rx="1" fill="${dark}" opacity=".75"/>
       <rect x="0" y="62" width="24" height="2" rx="1" fill="${dark}" opacity=".55"/>
@@ -231,7 +211,6 @@ const Icons = (() => {
       <rect x="25" y="49" width="3.2" height="16" fill="${dark}"/>
       <path d="M2 49 26 49 26 51 2 51Z" fill="url(#rw-car-sheen)"/>
 
-      <!-- front wheel -->
       <circle cx="40" cy="63" r="15.4" fill="url(#rw-car-tire)"/>
       <circle cx="40" cy="63" r="15.4" fill="none" stroke="#000" stroke-opacity=".4" stroke-width="1"/>
       <circle cx="40" cy="63" r="8.6" fill="url(#rw-car-rim)"/>
@@ -239,7 +218,6 @@ const Icons = (() => {
       <path d="M40 55v16M32 63h16M34.3 57.3l11.4 11.4M45.7 57.3 34.3 68.7" stroke="#4a4e57" stroke-width=".95"/>
     </svg>`;
   }
-  /* Standard multi-color Google "G" mark, required as-is on OAuth buttons */
   function googleSvg() {
     return `<svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
       <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.7-3.88 2.7-6.62z"/>
