@@ -218,6 +218,15 @@ const Icons = (() => {
       <path d="M40 55v16M32 63h16M34.3 57.3l11.4 11.4M45.7 57.3 34.3 68.7" stroke="#4a4e57" stroke-width=".95"/>
     </svg>`;
   }
+  // Filled black-and-white checkered flag (boot screen logo).
+  function checkeredFlagSvg() {
+    return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g transform="rotate(-12 12 12)">
+      <rect x="5.7" y="4.5" width="1.7" height="16" rx=".85" fill="#fff"/>
+      <rect x="7.5" y="6" width="11" height="8" fill="#0c0c0e" stroke="#fff" stroke-width=".6"/>
+      <rect x="7.5" y="6" width="2.75" height="4" fill="#fff"/><rect x="13" y="6" width="2.75" height="4" fill="#fff"/>
+      <rect x="10.25" y="10" width="2.75" height="4" fill="#fff"/><rect x="15.75" y="10" width="2.75" height="4" fill="#fff"/>
+    </g></svg>`;
+  }
   function googleSvg() {
     return `<svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
       <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.7-3.88 2.7-6.62z"/>
@@ -230,5 +239,5 @@ const Icons = (() => {
     return `<span class="icon-google${cls ? ' ' + cls : ''}">${googleSvg()}</span>`;
   }
 
-  return { svg, html, monoSvg, inlineSvg, inline, carSvg, googleSvg, googleButton };
+  return { svg, html, monoSvg, inlineSvg, inline, carSvg, checkeredFlagSvg, googleSvg, googleButton };
 })();

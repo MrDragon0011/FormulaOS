@@ -803,7 +803,7 @@ const OS = (() => {
     if (bootLogo) bootLogo.style.filter = `drop-shadow(0 0 30px ${fc1})`;
     const bootStatus = document.querySelector('.boot-status');
     if (bootStatus) bootStatus.textContent = `Loading ${nextRace().circuit}…`;
-    document.getElementById('boot-logo-icon').innerHTML = Icons.svg('flag');
+    document.getElementById('boot-logo-icon').innerHTML = Icons.checkeredFlagSvg();
     document.getElementById('lock-avatar-icon').innerHTML = Icons.svg('flag');
     document.getElementById('mb-logo-btn').innerHTML = Icons.svg('flag');
     document.getElementById('mb-search').innerHTML = Icons.monoSvg('search');
