@@ -804,7 +804,9 @@ const OS = (() => {
     const bootTitle = document.querySelector('.boot-title');
     if (bootTitle) bootTitle.style.background = `linear-gradient(90deg, ${fc1}, ${fc2})`;
     const bootBarFill = document.querySelector('.boot-bar-fill');
-    if (bootBarFill) bootBarFill.style.background = `linear-gradient(90deg, ${fc1}, ${fc2})`;
+    // Solid fill, not a gradient; skip a near-black flag color so the bar stays visible on the dark boot screen.
+    const isDark = (hex) => { const n = parseInt(hex.slice(1), 16); return ((n >> 16) * 299 + ((n >> 8) & 255) * 587 + (n & 255) * 114) / 1000 < 60; };
+    if (bootBarFill) bootBarFill.style.background = isDark(fc1) ? fc2 : fc1;
     const bootStatus = document.querySelector('.boot-status');
     if (bootStatus) bootStatus.textContent = `Loading ${nextRace().circuit}…`;
     document.getElementById('boot-logo-icon').innerHTML = Icons.svg('flag');
