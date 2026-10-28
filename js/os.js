@@ -798,11 +798,9 @@ const OS = (() => {
   function nextRaceFlagColors() { return COUNTRY_FLAG_COLORS[nextRace().track] || [prefs.accent, prefs.accent2]; }
 
   function boot() {
-    const [fc1, fc2] = nextRaceFlagColors();
+    const [fc1] = nextRaceFlagColors();
     const bootLogo = document.getElementById('boot-logo-icon');
     if (bootLogo) bootLogo.style.filter = `drop-shadow(0 0 30px ${fc1})`;
-    const bootTitle = document.querySelector('.boot-title');
-    if (bootTitle) bootTitle.style.background = `linear-gradient(90deg, ${fc1}, ${fc2})`;
     const bootStatus = document.querySelector('.boot-status');
     if (bootStatus) bootStatus.textContent = `Loading ${nextRace().circuit}…`;
     document.getElementById('boot-logo-icon').innerHTML = Icons.svg('flag');
