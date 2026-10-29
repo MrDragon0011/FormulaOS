@@ -1,6 +1,3 @@
-/* FormulaOS Window Manager */
-
-/* Binds both dblclick (mouse) and double-tap (touch) to open an item */
 function bindOpen(el, handler) {
   el.addEventListener('dblclick', (e) => { e.preventDefault(); handler(e); });
   let lastTap = 0;
@@ -15,7 +12,7 @@ const WM = (() => {
   const windowsEl = () => document.getElementById('windows');
   let zTop = 10;
   let idCounter = 0;
-  const registry = new Map(); // id -> {el, meta}
+  const registry = new Map();
   const listeners = { change: [], focus: [] };
 
   function emit(kind, arg) { listeners[kind].forEach(fn => fn(arg)); }
@@ -82,7 +79,6 @@ const WM = (() => {
     const cleanupFns = [];
     registry.set(id, { el, meta, cleanupFns });
 
-    // Drag (mouse + touch) with edge-snap
     const header = el.querySelector('.window-header');
     const snapPreview = document.getElementById('snap-preview');
     const desktopEl = document.getElementById('desktop');
@@ -140,7 +136,6 @@ const WM = (() => {
     track(window, 'touchmove', dragMove, { passive: false });
     track(window, 'touchend', dragEnd);
 
-    // Resize (mouse + touch)
     const handle = el.querySelector('.resize-handle');
     if (handle) {
       let resizing = false, rsx, rsy, rw, rh;

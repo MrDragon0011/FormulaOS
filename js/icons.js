@@ -218,7 +218,6 @@ const Icons = (() => {
       <path d="M40 55v16M32 63h16M34.3 57.3l11.4 11.4M45.7 57.3 34.3 68.7" stroke="#4a4e57" stroke-width=".95"/>
     </svg>`;
   }
-  // Filled black-and-white checkered flag (boot screen logo).
   function checkeredFlagSvg() {
     return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g transform="rotate(-12 12 12)">
       <rect x="5.7" y="4.5" width="1.7" height="16" rx=".85" fill="#fff"/>

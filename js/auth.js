@@ -1,12 +1,7 @@
-/* FormulaOS accounts — thin wrapper around Supabase Auth + a `profiles` table
-   with a single `favorite_team` column. Degrades to "not configured" cleanly
-   when js/supabase-config.js is left blank. */
 const Auth = (() => {
   let client = null, user = null, profile = null, ready = false;
   const listeners = [];
 
-  /* Emails that may re-run signup even if an account already exists — for local/testing use.
-     Edit freely; matched case-insensitively. */
   const DUPLICATE_SIGNUP_EXCEPTIONS = [];
 
   function configured() {
@@ -61,9 +56,6 @@ const Auth = (() => {
       if (/duplicate|already exists/i.test(error.message)) throw new Error('That username is taken.');
       throw error;
     }
-    // Supabase's email-enumeration protection returns a fake success (no error) for an
-    // already-registered email — it still comes back with an empty identities array, which is
-    // the one reliable signal we get. Exceptions list above lets specific emails bypass this.
     const isExempt = DUPLICATE_SIGNUP_EXCEPTIONS.some(e => e.toLowerCase() === email.toLowerCase());
     if (!isExempt && data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
       throw new Error('An account with this email already exists. Try signing in instead.');
@@ -98,7 +90,6 @@ const Auth = (() => {
       options: { redirectTo: window.location.origin + window.location.pathname }
     });
     if (error) throw error;
-    // On success the browser navigates away to Google, then back — nothing more to do here.
   }
   async function setFavoriteTeam(teamId) {
     if (!client || !user) throw new Error('Sign in first.');

@@ -12,14 +12,12 @@
 </head>
 <body>
 
-<!-- Boot Screen -->
 <div id="boot-screen">
   <div class="boot-logo" id="boot-logo-icon"></div>
   <div class="boot-title">FormulaOS</div>
   <div class="boot-status">Starting up…</div>
 </div>
 
-<!-- Lock Screen -->
 <div id="lock-screen" class="hidden">
   <div class="lock-clock">
     <div id="lock-time">00:00</div>
@@ -32,7 +30,6 @@
   <div class="lock-hint">Click anywhere or press any key to unlock</div>
 </div>
 
-<!-- Login Gate (every boot, unless a session is already active) -->
 <div id="login-gate" class="hidden">
   <div class="welcome-card">
     <div class="welcome-logo" id="login-logo-icon"></div>
@@ -54,7 +51,6 @@
   </div>
 </div>
 
-<!-- Welcome Screen (first run) -->
 <div id="welcome-screen" class="hidden">
   <div class="welcome-card">
     <div class="welcome-logo" id="welcome-logo-icon"></div>
@@ -69,7 +65,6 @@
   </div>
 </div>
 
-<!-- Menu Bar (top, macOS-style) -->
 <div id="menubar">
   <div class="mb-left">
     <div class="mb-item mb-logo" id="mb-logo-btn"></div>
@@ -93,7 +88,6 @@
 </div>
 <div id="mb-dropdown" class="hidden"></div>
 
-<!-- Desktop -->
 <div id="desktop">
   <div id="icons"></div>
   <div id="windows"></div>
@@ -101,7 +95,6 @@
 </div>
 <div id="context-menu" class="hidden"></div>
 
-<!-- Spotlight Search -->
 <div id="spotlight" class="hidden">
   <div class="spotlight-box">
     <span class="spotlight-icon" id="spotlight-icon"></span>
@@ -110,24 +103,19 @@
   <div id="spotlight-results"></div>
 </div>
 
-<!-- Launchpad -->
 <div id="launchpad" class="hidden">
   <input id="launchpad-search" placeholder="Search" autocomplete="off" />
   <div id="launchpad-grid"></div>
 </div>
 
-<!-- Next race countdown widget -->
 <div id="race-widget"></div>
 
-<!-- Toast notifications -->
 <div id="toast-stack"></div>
 
-<!-- Dock (bottom, macOS-style) -->
 <div id="dock-wrap">
   <div id="dock"></div>
 </div>
 
-<!-- Control Center popover -->
 <div id="control-center" class="hidden"></div>
 
 <script src="js/icons.js"></script>
@@ -139,8 +127,6 @@
 <script src="js/fs.js"></script>
 <script src="js/windows.js"></script>
 <script src="js/apps.js"></script>
-<script src="js/apps2.js"></script>
-<script src="js/apps3.js"></script>
 <script src="js/os.js"></script>
 </body>
 </html>

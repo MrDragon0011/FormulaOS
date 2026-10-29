@@ -1,4 +1,3 @@
-/* FormulaOS Core */
 const OS = (() => {
   let currentWeatherCode = null;
   function wallpaperCss(i) { return Wallpaper.cssValue(i, nextRace().track, currentWeatherCode); }
@@ -52,10 +51,8 @@ const OS = (() => {
     else prefs.dockPinned.splice(settingsIdx, 0, 'livetiming');
     savePrefs(prefs);
   }
-  let activeTeam = null; // set when a signed-in user's favorite team overrides the theme
+  let activeTeam = null;
 
-  /* Team tiles in Settings can be drag-reordered; teamOrder is a list of team ids,
-     any ids missing from it (new teams, or before it's ever been customized) sort to the end. */
   function orderedTeams() {
     if (!prefs.teamOrder) return TEAMS.slice();
     const order = prefs.teamOrder;
@@ -72,8 +69,6 @@ const OS = (() => {
     savePrefs(prefs);
   }
 
-  /* Smoothly crossfades the desktop background and morphs --accent instead of an instant
-     snap, when a user actively picks a new favorite team livery. */
   function morphToTeam(team) {
     const html = document.documentElement;
     const desktop = document.getElementById('desktop');
@@ -88,7 +83,7 @@ const OS = (() => {
     }
     overlay.style.background = targetBg;
     overlay.classList.remove('in');
-    void overlay.offsetWidth; // force reflow so the opacity transition re-triggers on the very next style change
+    void overlay.offsetWidth;
     html.classList.add('theme-morph');
     html.style.setProperty('--accent', targetAccent);
     overlay.classList.add('in');
@@ -188,7 +183,6 @@ const OS = (() => {
     const lu = document.getElementById('lock-username'); if (lu) lu.textContent = prefs.username;
   }
 
-  /* Applies (or clears) the signed-in user's favorite-team livery across accent, wallpaper, and the race widget's car */
   function setActiveTeam(team) {
     activeTeam = team && team.id !== 'neutral' ? team : null;
     applyPrefs();
@@ -221,7 +215,6 @@ const OS = (() => {
     return { total, items };
   }
 
-  /* ---------------- Desktop icons (mirrors the real /Desktop folder) ---------------- */
   function fileIconId(name, isDir) {
     if (isDir) return 'explorer';
     if (/\.(txt|md)$/i.test(name)) return 'notepad';
@@ -263,7 +256,6 @@ const OS = (() => {
   }
   document.addEventListener('formulaos:fschange', renderDesktopIcons);
 
-  /* ---------------- Dock ---------------- */
   function findWindowByAppId(appId) {
     let found = null;
     WM.registry.forEach((w, id) => { if (w.meta.appId === appId) found = id; });
@@ -358,7 +350,6 @@ const OS = (() => {
     nameEl.textContent = focused ? focused.meta.title : 'Finder';
   }
 
-  /* ---------------- Launchpad ---------------- */
   function openLaunchpad() {
     const lp = document.getElementById('launchpad');
     const grid = document.getElementById('launchpad-grid');
@@ -389,7 +380,6 @@ const OS = (() => {
   }
   function closeLaunchpad() { document.getElementById('launchpad').classList.add('hidden'); }
 
-  /* ---------------- Spotlight ---------------- */
   function openSpotlight() {
     const sp = document.getElementById('spotlight');
     const input = document.getElementById('spotlight-input');
@@ -434,7 +424,6 @@ const OS = (() => {
   }
   function closeSpotlight() { document.getElementById('spotlight').classList.add('hidden'); }
 
-  /* ---------------- Menu bar dropdowns ---------------- */
   function buildMenu(kind) {
     const focusedId = [...WM.registry.entries()].find(([id, w]) => w.el.classList.contains('focused') && !w.el.classList.contains('hidden'));
     switch (kind) {
@@ -491,7 +480,6 @@ const OS = (() => {
     }
   }
 
-  /* ---------------- Weather-reactive wallpaper (live, via Open-Meteo) ---------------- */
   const CIRCUIT_COORDS = {
     bahrain: [26.0325, 50.5106], jeddah: [21.6319, 39.1044], albertpark: [-37.8497, 144.968],
     suzuka: [34.8431, 136.541], shanghai: [31.3389, 121.220], miami: [25.9581, -80.2389],
@@ -530,7 +518,6 @@ const OS = (() => {
     else if (activeTeam) applyBackground(wallpaperCss(activeTeam.palette));
   }
 
-  /* ---------------- Championship standings (live, via the Jolpica Ergast-compatible API) ---------------- */
   const STANDINGS_CACHE_KEY = 'formulaos_standings_v1';
   const STANDINGS_TTL = 6 * 3600 * 1000;
   function loadCachedStandings() {
@@ -591,7 +578,6 @@ const OS = (() => {
     document.querySelectorAll('.mb-item').forEach(x => x.classList.remove('open'));
   }
 
-  /* ---------------- Control Center ---------------- */
   function toggleControlCenter() {
     const cc = document.getElementById('control-center');
     if (!cc.classList.contains('hidden')) { cc.classList.add('hidden'); return; }
@@ -641,7 +627,6 @@ const OS = (() => {
     const ld = document.getElementById('lock-date'); if (ld) ld.textContent = date;
   }
 
-  /* ---------------- Next Race widget ---------------- */
   const RACE_CALENDAR = [
     { name: 'Bahrain Grand Prix', circuit: 'Bahrain International Circuit', track: 'bahrain', month: 3, day: 2 },
     { name: 'Saudi Arabian Grand Prix', circuit: 'Jeddah Corniche Circuit', track: 'jeddah', month: 3, day: 16 },
@@ -712,7 +697,6 @@ const OS = (() => {
       .map(([v, label]) => `<div class="rw-unit"><b>${String(v).padStart(2, '0')}</b><span>${label}</span></div>`).join('');
   }
 
-  /* ---------------- Toast notifications ---------------- */
   function toast(title, sub, opts) {
     opts = opts || {};
     const stack = document.getElementById('toast-stack');
@@ -732,7 +716,6 @@ const OS = (() => {
     setTimeout(dismiss, opts.duration || 7000);
   }
 
-  /* Race-weekend countdown milestones — fires once per threshold per race, tracked in localStorage */
   const RACE_TOAST_THRESHOLDS = [
     { ms: 24 * 3600 * 1000, label: '24 hours' },
     { ms: 3600 * 1000, label: '1 hour' },
@@ -779,8 +762,6 @@ const OS = (() => {
     if (!localStorage.getItem(WELCOME_SEEN_KEY)) showWelcome();
   }
 
-  /* Flag colors for the next Grand Prix's host country — recolors the boot screen so
-     the very first thing you see ties into the live race calendar, not a static logo. */
   const COUNTRY_FLAG_COLORS = {
     bahrain: ['#ce1126', '#ffffff'], jeddah: ['#006c35', '#ffffff'],
     albertpark: ['#00008b', '#ffffff'], suzuka: ['#bc002d', '#ffffff'],
@@ -861,7 +842,6 @@ const OS = (() => {
     WM.onChange(renderDock);
     WM.onFocus(updateActiveAppName);
 
-    // Menu bar interactions
     document.querySelectorAll('.mb-menu, .mb-logo, .mb-appname').forEach(el => {
       el.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -884,7 +864,6 @@ const OS = (() => {
       if (!e.target.closest('#control-center') && !e.target.closest('#mb-control')) document.getElementById('control-center').classList.add('hidden');
     });
 
-    // Spotlight / Launchpad close on backdrop click
     document.getElementById('spotlight').addEventListener('click', (e) => { if (e.target.id === 'spotlight') closeSpotlight(); });
     document.getElementById('launchpad').addEventListener('click', (e) => { if (e.target.id === 'launchpad') closeLaunchpad(); });
 
@@ -919,7 +898,6 @@ const OS = (() => {
       }
     });
 
-    // Lock screen interactions
     const lockScreen = document.getElementById('lock-screen');
     const unlockHandler = () => unlock();
     lockScreen.addEventListener('click', unlockHandler);
@@ -927,7 +905,6 @@ const OS = (() => {
       if (!lockScreen.classList.contains('hidden')) unlockHandler();
     });
 
-    // Boot sequence
     setTimeout(() => {
       document.getElementById('boot-screen').style.opacity = '0';
       setTimeout(() => {
@@ -935,7 +912,6 @@ const OS = (() => {
       }, 600);
     }, 1600);
 
-    // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
       if ((e.metaKey || e.ctrlKey) && e.code === 'Space') { e.preventDefault(); openSpotlight(); return; }
       if (e.key === 'Escape') { closeSpotlight(); closeLaunchpad(); hideMenuDropdown(); }

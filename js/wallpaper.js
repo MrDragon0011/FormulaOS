@@ -1,6 +1,3 @@
-/* FormulaOS wallpapers — a top-down circuit map of the next Grand Prix, F1-team-inspired palettes.
-   Track outlines are real circuit geometry (public OSM-derived data, github.com/bacinger/f1-circuits),
-   simplified to ~80 points and normalized to fit the scene — not hand-drawn approximations. */
 const Wallpaper = (() => {
   const W = 1600, H = 900;
 
@@ -31,8 +28,6 @@ const Wallpaper = (() => {
     return `<polygon points="${x1.toFixed(0)},${y1.toFixed(0)} ${x2.toFixed(0)},${y2.toFixed(0)} ${x3.toFixed(0)},${y3.toFixed(0)}" fill="#ffffff" opacity="${opacity}" transform="rotate(${rot.toFixed(1)} ${x1.toFixed(0)} ${y1.toFixed(0)})"/>`;
   }
 
-  /* Real circuit outlines, each as a flat [x0,y0,x1,y1,...] point list normalized to
-     roughly a -100..100 box (longest dimension), decimated to ~80 points per track. */
   const TRACKS = {
     bahrain: { label: 'BAHRAIN', pts: [-63.1,-5.2,-61.6,-61.3,-60.1,-98.1,-59.4,-99.7,-57.9,-100.0,-56.3,-99.6,-47.6,-91.0,-45.5,-90.2,-43.2,-90.4,-30.1,-94.7,-26.9,-95.0,-24.0,-94.8,65.5,-77.2,67.1,-75.6,67.5,-73.5,67.2,-71.5,66.2,-69.2,64.3,-66.9,59.2,-62.8,48.8,-55.0,40.4,-46.3,38.3,-44.3,36.6,-41.4,31.6,-31.1,29.6,-29.8,27.7,-28.8,24.5,-28.4,15.1,-30.0,12.5,-29.9,7.7,-28.2,5.0,-25.8,-14.2,-1.4,-16.1,0.2,-18.7,0.6,-20.4,-0.7,-20.9,-7.3,-16.2,-34.9,-13.6,-52.2,-13.2,-55.6,-13.7,-58.7,-14.4,-61.1,-23.6,-70.2,-24.7,-70.8,-25.9,-70.4,-26.6,-69.2,-29.4,-47.9,-31.6,-8.1,-32.6,18.6,-33.6,43.0,-33.2,47.0,-31.6,49.4,-29.1,50.7,-22.2,51.1,-17.7,50.2,-13.2,48.0,-9.4,45.4,-5.6,41.5,-3.3,37.8,3.2,22.1,5.5,19.4,8.5,17.0,12.0,14.8,16.9,13.6,26.2,14.4,31.3,16.8,44.8,23.5,47.6,25.5,50.0,27.9,51.1,30.1,52.6,34.7,51.4,37.0,49.0,39.2,45.8,41.7,-56.4,98.9,-58.3,99.9,-62.5,98.8,-67.1,89.2,-67.5,85.3,-67.4,78.1,-66.1,38.4,-63.1,-5.2] },
     jeddah: { label: 'JEDDAH', pts: [10.3,54.0,0.1,24.1,-1.0,23.6,-4.0,24.2,-5.0,23.3,-4.8,20.1,-2.9,14.0,-3.5,8.2,-6.0,-7.9,-8.9,-9.8,-10.9,-11.2,-12.1,-13.1,-12.8,-17.3,-12.0,-20.2,-9.8,-24.0,-9.7,-27.6,-11.5,-32.9,-13.8,-34.5,-15.1,-35.7,-15.4,-44.4,-15.2,-45.9,-12.5,-48.7,-8.9,-50.1,-7.4,-54.8,-5.8,-60.8,-4.4,-66.6,-4.3,-71.8,-5.5,-96.7,-6.6,-98.7,-9.3,-100.0,-10.9,-99.8,-13.0,-98.5,-14.3,-94.5,-13.8,-90.7,-10.1,-84.5,-8.7,-79.8,-8.4,-75.3,-9.5,-70.6,-11.7,-66.1,-13.2,-61.2,-13.1,-58.1,-13.6,-57.0,-15.5,-55.5,-19.8,-53.3,-20.9,-50.8,-21.4,-45.9,-21.2,-42.2,-20.0,-37.5,-16.2,-28.9,-15.1,-23.0,-15.4,-18.6,-15.3,-15.1,-14.9,-12.4,-13.1,-7.6,-10.0,-2.6,-7.8,2.1,-6.4,8.6,-6.3,14.4,-7.3,20.4,-8.0,22.7,-7.6,24.6,-6.9,25.7,-4.2,28.0,-2.4,30.8,-1.1,38.1,-2.9,42.2,-7.9,52.6,-9.0,57.4,-8.8,63.4,-7.0,70.0,-5.4,75.4,-4.0,78.6,-0.5,84.4,3.8,89.7,10.2,94.7,18.5,100.0,20.7,99.0,21.3,96.7,16.4,73.4,13.1,62.5] },
@@ -62,7 +57,6 @@ const Wallpaper = (() => {
 
   const DEFAULT_TRACK = { label: 'GRAND PRIX', pts: [-90,-60,90,-60,90,60,-90,60] };
 
-  /* Build a closed SVG path from a track's real point list, fitted into (cx,cy) at the given scale */
   function trackPath(t, cx, cy, scale) {
     const raw = t.pts;
     const n = raw.length / 2;
@@ -93,7 +87,6 @@ const Wallpaper = (() => {
     { name: 'Gold', sky: ['#201c1a', '#3a2e22', '#141110'], sun: '#f2c879', sunGlow: '#c99a4a', track: '#e7e2da', kerb: '#c99a4a', grass: '#1e1a15' }
   ];
 
-  /* Buckets a WMO weather code (as returned by Open-Meteo) into a wallpaper overlay style. */
   function weatherCategory(code) {
     if (code == null) return 'clear';
     if ([71, 73, 75, 77, 85, 86].includes(code)) return 'snow';
@@ -115,13 +108,11 @@ const Wallpaper = (() => {
     const cx = W * 0.56, cy = H * 0.44, scale = Math.min(W, H) * 0.25;
     const trk = trackPath(t, cx, cy, scale);
 
-    // start/finish marker: short perpendicular tick + checker swatch at the loop seam
     const [sx, sy] = trk.start, [sx2, sy2] = trk.second;
     const ang = Math.atan2(sy2 - sy, sx2 - sx);
     const px = Math.cos(ang + Math.PI / 2), py = Math.sin(ang + Math.PI / 2);
     const fl = `<line x1="${(sx - px * 26).toFixed(1)}" y1="${(sy - py * 26).toFixed(1)}" x2="${(sx + px * 26).toFixed(1)}" y2="${(sy + py * 26).toFixed(1)}" stroke="url(#checker)" stroke-width="10"/>`;
 
-    // Weather overlay — dims the sun and, for rain/storm/snow, layers a repeating particle pattern over the scene.
     let weatherDefs = '', weatherOverlay = '', sunOpacity = 1, glowOpacity = 1;
     if (weather === 'cloudy') { sunOpacity = 0.55; glowOpacity = 0.4; weatherOverlay = `<rect width="${W}" height="${H}" fill="#10131a" opacity=".14"/>`; }
     else if (weather === 'rain') {
@@ -195,7 +186,6 @@ const Wallpaper = (() => {
   function count() { return palettes.length; }
   function paletteName(index) { return palettes[index % palettes.length].name; }
 
-  /* Standalone circuit outline (no sky/sun/label) — used by the Track Atlas app */
   function circuitSvg(trackSlug, color) {
     const t = TRACKS[trackSlug] || DEFAULT_TRACK;
     const trk = trackPath(t, 120, 120, 95);

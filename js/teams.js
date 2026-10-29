@@ -1,6 +1,3 @@
-/* FormulaOS team liveries — applied when a signed-in user picks a favorite team.
-   `palette` reuses the closest-matching wallpaper color family (only 6 exist);
-   `accent`/`car` carry each team's real distinct identity regardless. */
 const TEAMS = [
   { id: 'ferrari', name: 'Ferrari', palette: 0, accent: '#e8002d', accent2: '#fff200', car: ['#ff6b5e', '#a81414'] },
   { id: 'mercedes', name: 'Mercedes', palette: 1, accent: '#27f4d2', accent2: '#0a0a0a', car: ['#4fe4cd', '#0a3b37'] },
@@ -17,7 +14,6 @@ const TEAMS = [
 ];
 function teamById(id) { return TEAMS.find(t => t.id === id) || null; }
 
-/* Current grid, for Spotlight driver lookup — number + team only (no points, so it never goes stale). */
 const DRIVERS = [
   { name: 'Max Verstappen', number: 1, team: 'redbull' },
   { name: 'Yuki Tsunoda', number: 22, team: 'redbull' },

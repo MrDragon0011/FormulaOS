@@ -1,4 +1,3 @@
-/* FormulaOS Virtual File System — persisted to localStorage */
 const FormulaFS = (() => {
   const KEY = 'formulaos_fs_v1';
 
@@ -26,7 +25,6 @@ const FormulaFS = (() => {
       const raw = localStorage.getItem(KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
-        // migration: ensure /Trash exists for filesystems created before Recycle Bin was added
         if (!parsed['/Trash']) {
           parsed['/Trash'] = { type: 'dir', children: [] };
           if (parsed['/'] && !parsed['/'].children.includes('Trash')) parsed['/'].children.push('Trash');
@@ -135,7 +133,6 @@ const FormulaFS = (() => {
     fs[parent].children = fs[parent].children.filter(c => c !== nameOf(path));
     fs[parent].children.push(newName);
     if (fs[newPath].type === 'dir') {
-      // recursively fix children paths
       const fixChildren = (oldBase, newBase) => {
         Object.keys(fs).forEach(k => {
           if (k.startsWith(oldBase + '/')) {
@@ -159,7 +156,6 @@ const FormulaFS = (() => {
     save();
   }
 
-  // Move a node (and its subtree) to a new parent directory, keeping/renaming its own name.
   function move(path, destParent, forcedName) {
     path = normalize(path);
     destParent = normalize(destParent);
@@ -167,7 +163,6 @@ const FormulaFS = (() => {
     const parent = parentOf(path);
     let name = forcedName || nameOf(path);
     let destPath = destParent === '/' ? '/' + name : destParent + '/' + name;
-    // avoid collisions in the destination
     let i = 1;
     const base = name.replace(/(\.[^.]*)?$/, '');
     const ext = name.slice(base.length);
@@ -197,7 +192,6 @@ const FormulaFS = (() => {
     return destPath;
   }
 
-  // Recycle Bin
   function trash(path) {
     path = normalize(path);
     if (path === '/' || path === '/Trash' || !fs[path]) return false;

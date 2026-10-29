@@ -1,40 +1,31 @@
-# 🏁 FormulaOS
+# FormulaOS
 
-A full web-based operating system with a Formula 1 theme — window manager, taskbar, start menu, virtual file system, and built-in apps — running entirely in the browser with zero build step.
+F1 themed desktop OS that runs in the browser. Plain html/css/js, no build step.
 
-## Apps
-- File Explorer (virtual FS persisted to `localStorage`)
-- Notepad (save/open files)
-- Terminal (`ls`, `cd`, `cat`, `mkdir`, `touch`, `rm`, `neofetch`, `open <app>`, ...)
-- Browser (iframe-based)
-- Calculator
-- Sticky Notes
-- Photos / wallpaper picker
-- Settings (theme, accent color, wallpaper)
+Has a dock, menu bar, windows you can drag around, spotlight, launchpad, a fake file system (saved in localStorage) and a bunch of apps:
 
-## Run locally
-No build step — just serve the static files:
+- Finder, Notepad, Terminal, Browser, Calculator, Sticky Notes
+- Photos, Paint, Media Player, Calendar, Weather, Task Manager
+- Track Racer (snake)
+- Track Atlas, Pit Strategy, Live Timing (pulls real data from OpenF1)
+- Settings, lets you pick a favorite team and the whole thing reskins to their livery
 
-```bash
-npx serve .
-# or
+Wallpaper and boot screen follow whatever the next race on the calendar is.
+
+Accounts go through Supabase, the url + anon key are in js/supabase-config.js. Leave them blank and it just runs without logins.
+
+## running it
+
+```
 python3 -m http.server 8080
 ```
 
-Then open http://localhost:8080 (or the port shown).
+then go to localhost:8080. `npx serve .` works too
 
-## Deploy
+## deploying
 
-### Netlify
-```bash
+netlify config is in netlify.toml
+
+```
 npx netlify-cli deploy --prod
 ```
-(config already in `netlify.toml` — publish directory is `.`)
-
-### Vercel
-```bash
-npx vercel --prod
-```
-(config already in `vercel.json`)
-
-Both are zero-config static deployments — no build command needed.

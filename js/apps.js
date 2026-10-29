@@ -1,7 +1,5 @@
-/* FormulaOS Applications */
 const Apps = {};
 
-/* ---------------- File Explorer ---------------- */
 Apps.explorer = function (startPath) {
   WM.open({
     title: 'File Explorer', icon: 'explorer', appId: 'explorer', width: 640, height: 440,
@@ -102,7 +100,6 @@ Apps.explorer = function (startPath) {
       emptyTrashBtn.onclick = () => { if (confirm('Permanently delete everything in the Recycle Bin?')) { FormulaFS.emptyTrash(); render(); OS.renderDock(); } };
       document.addEventListener('formulaos:fschange', render);
 
-      // Drag & drop upload from the OS file system
       ['dragover', 'dragenter'].forEach(ev => grid.addEventListener(ev, (e) => { e.preventDefault(); grid.style.background = 'rgba(255,95,69,.08)'; }));
       ['dragleave', 'drop'].forEach(ev => grid.addEventListener(ev, () => { grid.style.background = ''; }));
       grid.addEventListener('drop', (e) => {
@@ -123,7 +120,6 @@ Apps.explorer = function (startPath) {
   });
 };
 
-/* ---------------- Text Editor ---------------- */
 Apps.textEditor = function (path) {
   WM.open({
     title: path ? FormulaFS.nameOf(path) : 'Untitled — Notepad', icon: 'notepad', appId: 'notepad', width: 560, height: 440,
@@ -162,7 +158,6 @@ Apps.textEditor = function (path) {
   });
 };
 
-/* ---------------- Terminal ---------------- */
 Apps.terminal = function () {
   WM.open({
     title: 'Terminal', icon: 'terminal', appId: 'terminal', single: true, width: 560, height: 380,
@@ -242,7 +237,6 @@ Apps.terminal = function () {
   });
 };
 
-/* ---------------- Browser ---------------- */
 Apps.browser = function () {
   const HOME = 'https://en.wikipedia.org/wiki/Special:Random';
   WM.open({
@@ -273,8 +267,6 @@ Apps.browser = function () {
       const blockedEl = body.querySelector('[data-role="blocked"]');
       let history = [], historyIndex = -1, slowTimer = null;
 
-      // Sites known to send X-Frame-Options/CSP frame-ancestors that block embedding —
-      // showing this list upfront avoids a silent blank/broken-image iframe.
       const KNOWN_BLOCKED = [
         'google.com', 'youtube.com', 'facebook.com', 'instagram.com', 'twitter.com', 'x.com',
         'amazon.com', 'netflix.com', 'linkedin.com', 'reddit.com', 'github.com', 'twitch.tv',
@@ -344,7 +336,6 @@ Apps.browser = function () {
   });
 };
 
-/* ---------------- Settings ---------------- */
 Apps.settings = function (openSection) {
   WM.open({
     title: 'Settings', icon: 'settings', appId: 'settings', single: true, width: 620, height: 500,
@@ -701,7 +692,6 @@ Apps.settings = function (openSection) {
   });
 };
 
-/* ---------------- Calculator ---------------- */
 Apps.calculator = function () {
   WM.open({
     title: 'Calculator', icon: 'calculator', appId: 'calculator', single: true, width: 300, height: 420, resizable: false,
@@ -740,7 +730,6 @@ Apps.calculator = function () {
   });
 };
 
-/* ---------------- About ---------------- */
 Apps.about = function () {
   WM.open({
     title: 'About FormulaOS', icon: 'flag', appId: 'about', single: true, width: 380, height: 420, resizable: false,
@@ -763,7 +752,6 @@ Apps.about = function () {
   });
 };
 
-/* ---------------- Photos / Gallery ---------------- */
 Apps.photos = function () {
   WM.open({
     title: 'Photos', icon: 'photos', appId: 'photos', single: true, width: 520, height: 400,
@@ -775,7 +763,6 @@ Apps.photos = function () {
   });
 };
 
-/* ---------------- Sticky Notes ---------------- */
 Apps.notes = function () {
   WM.open({
     title: 'Sticky Notes', icon: 'notes', appId: 'notes', single: true, width: 340, height: 440,
@@ -798,6 +785,562 @@ Apps.notes = function () {
       }
       body.querySelector('[data-act="add"]').onclick = () => { notes.push('New note...'); save(); render(); };
       render();
+    }
+  });
+};
+
+Apps.imageViewer = function (path) {
+  WM.open({
+    title: path ? FormulaFS.nameOf(path) : 'Image Viewer', icon: 'photos', width: 520, height: 420,
+    onMount(body) {
+      const data = path ? FormulaFS.read(path) : null;
+      body.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:repeating-conic-gradient(#00000022 0% 25%, transparent 0% 50%) 50%/24px 24px;overflow:auto;">
+        ${data ? `<img src="${data}" style="max-width:100%;max-height:100%;object-fit:contain;box-shadow:0 10px 30px rgba(0,0,0,.4);" />` : '<div style="color:var(--text-dim)">No image</div>'}
+      </div>`;
+    }
+  });
+};
+
+Apps.paint = function () {
+  WM.open({
+    title: 'Paint', icon: 'paint', appId: 'paint', width: 620, height: 480,
+    onMount(body) {
+      body.innerHTML = `
+        <div class="app-toolbar">
+          <input type="color" value="#ff5f45" data-role="color" style="width:34px;height:30px;padding:0;border:none;background:none;cursor:pointer;" />
+          <select data-role="size"><option value="2">Thin</option><option value="5" selected>Medium</option><option value="12">Thick</option></select>
+          <button data-act="clear">${Icons.inline('trash')}<span>Clear</span></button>
+          <button data-act="save">${Icons.inline('save')}<span>Save to Pictures</span></button>
+        </div>
+        <canvas style="width:100%;height:calc(100% - 46px);touch-action:none;cursor:crosshair;background:#fff;"></canvas>`;
+      const canvas = body.querySelector('canvas');
+      const ctx = canvas.getContext('2d');
+      function fit() {
+        const rect = canvas.getBoundingClientRect();
+        const prev = canvas.width ? canvas.toDataURL() : null;
+        canvas.width = rect.width; canvas.height = rect.height;
+        ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        if (prev) { const img = new Image(); img.onload = () => ctx.drawImage(img, 0, 0); img.src = prev; }
+      }
+      requestAnimationFrame(fit);
+      window.addEventListener('resize', fit);
+
+      const colorInput = body.querySelector('[data-role="color"]');
+      const sizeSelect = body.querySelector('[data-role="size"]');
+      let drawing = false, lastX = 0, lastY = 0;
+
+      function pos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const t = e.touches ? e.touches[0] : e;
+        return { x: t.clientX - rect.left, y: t.clientY - rect.top };
+      }
+      function start(e) { e.preventDefault(); drawing = true; const p = pos(e); lastX = p.x; lastY = p.y; }
+      function move(e) {
+        if (!drawing) return;
+        e.preventDefault();
+        const p = pos(e);
+        ctx.strokeStyle = colorInput.value;
+        ctx.lineWidth = parseInt(sizeSelect.value);
+        ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(p.x, p.y); ctx.stroke();
+        lastX = p.x; lastY = p.y;
+      }
+      function end() { drawing = false; }
+      canvas.addEventListener('mousedown', start);
+      canvas.addEventListener('mousemove', move);
+      window.addEventListener('mouseup', end);
+      canvas.addEventListener('touchstart', start, { passive: false });
+      canvas.addEventListener('touchmove', move, { passive: false });
+      canvas.addEventListener('touchend', end);
+
+      body.querySelector('[data-act="clear"]').onclick = () => { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height); };
+      body.querySelector('[data-act="save"]').onclick = () => {
+        const name = prompt('Save as (in /Pictures):', 'painting.png');
+        if (name) { FormulaFS.write('/Pictures/' + name.replace(/[^\w.\-]/g, '_'), canvas.toDataURL()); alert('Saved to /Pictures'); }
+      };
+    }
+  });
+};
+
+Apps.mediaPlayer = function (path) {
+  WM.open({
+    title: 'Media Player', icon: 'media', width: 480, height: 380,
+    onMount(body) {
+      body.innerHTML = `
+        <div class="app-toolbar"><button data-act="open">${Icons.inline('folder-open')}<span>Open file…</span></button><input type="file" accept="audio/*,video/*" style="display:none" /></div>
+        <div style="height:calc(100% - 46px);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;padding:14px;">
+          <video style="max-width:100%;max-height:100%;display:none;border-radius:8px;" controls></video>
+          <div class="audio-art" style="width:60px;height:60px;display:none;">${Icons.svg('music')}</div>
+          <audio style="width:100%;display:none;" controls></audio>
+          <div class="mp-empty" style="color:var(--text-dim);font-size:13px;">No media loaded — open a local audio or video file.</div>
+        </div>`;
+      const fileInput = body.querySelector('input[type=file]');
+      const video = body.querySelector('video');
+      const audio = body.querySelector('audio');
+      const art = body.querySelector('.audio-art');
+      const empty = body.querySelector('.mp-empty');
+      body.querySelector('[data-act="open"]').onclick = () => fileInput.click();
+      fileInput.addEventListener('change', () => {
+        const f = fileInput.files[0];
+        if (!f) return;
+        const url = URL.createObjectURL(f);
+        empty.style.display = 'none';
+        if (f.type.startsWith('video')) {
+          video.src = url; video.style.display = 'block'; audio.style.display = 'none'; art.style.display = 'none';
+          video.play();
+        } else {
+          audio.src = url; audio.style.display = 'block'; art.style.display = 'block'; video.style.display = 'none';
+          audio.play();
+        }
+      });
+    }
+  });
+};
+
+Apps.calendar = function () {
+  WM.open({
+    title: 'Calendar', icon: 'calendar', appId: 'calendar', single: true, width: 400, height: 420,
+    onMount(body) {
+      let view = new Date();
+      body.innerHTML = `
+        <div class="app-toolbar">
+          <button data-act="prev">◀</button>
+          <span style="flex:1;text-align:center;font-weight:600;" class="cal-title"></span>
+          <button data-act="next">▶</button>
+        </div>
+        <div class="app-pad cal-grid-wrap"></div>`;
+      const wrap = body.querySelector('.cal-grid-wrap');
+      const title = body.querySelector('.cal-title');
+      function render() {
+        const y = view.getFullYear(), m = view.getMonth();
+        title.textContent = view.toLocaleDateString([], { month: 'long', year: 'numeric' });
+        const first = new Date(y, m, 1);
+        const startDay = first.getDay();
+        const daysInMonth = new Date(y, m + 1, 0).getDate();
+        const today = new Date();
+        let html = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;font-size:11px;">';
+        ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach(d => html += `<div style="text-align:center;color:var(--text-dim);font-weight:700;">${d}</div>`);
+        for (let i = 0; i < startDay; i++) html += '<div></div>';
+        for (let d = 1; d <= daysInMonth; d++) {
+          const isToday = d === today.getDate() && m === today.getMonth() && y === today.getFullYear();
+          html += `<div style="text-align:center;padding:8px 0;border-radius:8px;${isToday ? 'background:var(--accent);color:#fff;font-weight:700;' : ''}">${d}</div>`;
+        }
+        html += '</div>';
+        wrap.innerHTML = html;
+      }
+      body.querySelector('[data-act="prev"]').onclick = () => { view.setMonth(view.getMonth() - 1); render(); };
+      body.querySelector('[data-act="next"]').onclick = () => { view.setMonth(view.getMonth() + 1); render(); };
+      render();
+    }
+  });
+};
+
+Apps.weather = function () {
+  WM.open({
+    title: 'Weather', icon: 'weather', appId: 'weather', single: true, width: 320, height: 380, resizable: false,
+    onMount(body) {
+      const conditions = [
+        { icon: 'sun', label: 'Sunny', temp: 78 },
+        { icon: 'weather', label: 'Partly Cloudy', temp: 68 },
+        { icon: 'cloud-rain', label: 'Rainy', temp: 58 },
+        { icon: 'snowflake', label: 'Snowy', temp: 29 },
+      ];
+      const c = conditions[Math.floor((new Date().getDate()) % conditions.length)];
+      body.innerHTML = `
+        <div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:linear-gradient(160deg,#2a6ba8,#7ec8e3);color:#fff;text-align:center;">
+          <div style="width:72px;height:72px;">${Icons.svg(c.icon)}</div>
+          <div style="font-size:44px;font-weight:200;">${c.temp}°F</div>
+          <div style="font-size:14px;opacity:.85;">${c.label} · Monaco</div>
+          <div style="font-size:11px;opacity:.6;margin-top:12px;">Demo data — no live network calls</div>
+        </div>`;
+    }
+  });
+};
+
+Apps.taskManager = function () {
+  WM.open({
+    title: 'Task Manager', icon: 'taskmgr', appId: 'taskmgr', single: true, width: 380, height: 400,
+    onMount(body) {
+      body.innerHTML = `<div class="app-toolbar"><button data-act="refresh">${Icons.inline('refresh')}<span>Refresh</span></button></div><div class="tm-list app-pad"></div>`;
+      const list = body.querySelector('.tm-list');
+      function render() {
+        list.innerHTML = '';
+        if (WM.registry.size === 0) { list.innerHTML = '<div style="color:var(--text-dim);font-size:13px;">No running apps.</div>'; return; }
+        WM.registry.forEach((w, id) => {
+          const row = document.createElement('div');
+          row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px;border-bottom:1px solid var(--border);font-size:13px;';
+          row.innerHTML = `${Icons.inline(w.meta.icon || 'file', 'tm-icon')}<span style="flex:1">${w.meta.title}</span><button data-id="${id}" style="background:#ff5f57;border:none;color:#fff;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:11px;">End Task</button>`;
+          row.querySelector('button').onclick = () => { WM.close(id); render(); };
+          list.appendChild(row);
+        });
+      }
+      body.querySelector('[data-act="refresh"]').onclick = render;
+      render();
+    }
+  });
+};
+
+Apps.snake = function () {
+  WM.open({
+    title: 'Track Racer', icon: 'snake', width: 360, height: 420, resizable: false,
+    onMount(body) {
+      body.innerHTML = `
+        <div class="app-toolbar"><span style="align-self:center;font-size:12px;">Score: <b class="score">0</b></span><span style="flex:1"></span><button data-act="restart">${Icons.inline('refresh')}<span>Restart</span></button></div>
+        <div style="display:flex;align-items:center;justify-content:center;height:calc(100% - 46px);background:#0c0714;">
+          <canvas width="300" height="300" style="touch-action:none;"></canvas>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,44px);grid-template-rows:repeat(2,40px);gap:4px;justify-content:center;padding:8px 0;">
+          <div></div><button data-dir="up" style="grid-column:2;">${Icons.inline('chevronUp')}</button><div></div>
+          <button data-dir="left">${Icons.inline('chevronLeft')}</button><button data-dir="down">${Icons.inline('chevronDown')}</button><button data-dir="right">${Icons.inline('chevronRight')}</button>
+        </div>`;
+      const canvas = body.querySelector('canvas');
+      const ctx = canvas.getContext('2d');
+      const scoreEl = body.querySelector('.score');
+      const cell = 15, cols = 20;
+      let snake, dir, food, score, timer, alive;
+
+      function reset() {
+        snake = [{ x: 10, y: 10 }];
+        dir = { x: 1, y: 0 };
+        placeFood();
+        score = 0; alive = true;
+        scoreEl.textContent = 0;
+        clearInterval(timer);
+        timer = setInterval(tick, 130);
+      }
+      function placeFood() { food = { x: Math.floor(Math.random() * cols), y: Math.floor(Math.random() * cols) }; }
+      function tick() {
+        if (!alive) return;
+        const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+        if (head.x < 0 || head.y < 0 || head.x >= cols || head.y >= cols || snake.some(s => s.x === head.x && s.y === head.y)) {
+          alive = false; clearInterval(timer); draw(); return;
+        }
+        snake.unshift(head);
+        if (head.x === food.x && head.y === food.y) { score++; scoreEl.textContent = score; placeFood(); }
+        else snake.pop();
+        draw();
+      }
+      function draw() {
+        ctx.fillStyle = '#0c0714'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#ff5f45';
+        ctx.fillRect(food.x * cell, food.y * cell, cell - 1, cell - 1);
+        snake.forEach((s, i) => {
+          ctx.fillStyle = i === 0 ? '#ffd36e' : '#7ee08a';
+          ctx.fillRect(s.x * cell, s.y * cell, cell - 1, cell - 1);
+        });
+        if (!alive) {
+          ctx.fillStyle = 'rgba(0,0,0,.6)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = '#fff'; ctx.font = '20px sans-serif'; ctx.textAlign = 'center';
+          ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2);
+        }
+      }
+      function setDir(x, y) { if (dir.x !== -x || dir.y !== -y) dir = { x, y }; }
+      body.querySelectorAll('[data-dir]').forEach(btn => btn.onclick = () => {
+        const d = btn.dataset.dir;
+        if (d === 'up') setDir(0, -1); if (d === 'down') setDir(0, 1); if (d === 'left') setDir(-1, 0); if (d === 'right') setDir(1, 0);
+      });
+      const keyHandler = (e) => {
+        if (e.key === 'ArrowUp') setDir(0, -1);
+        if (e.key === 'ArrowDown') setDir(0, 1);
+        if (e.key === 'ArrowLeft') setDir(-1, 0);
+        if (e.key === 'ArrowRight') setDir(1, 0);
+      };
+      document.addEventListener('keydown', keyHandler);
+      body.querySelector('[data-act="restart"]').onclick = reset;
+      reset();
+
+      const obs = new MutationObserver(() => { if (!document.body.contains(canvas)) { clearInterval(timer); document.removeEventListener('keydown', keyHandler); obs.disconnect(); } });
+      obs.observe(document.body, { childList: true, subtree: true });
+    }
+  });
+};
+
+Apps.trackAtlas = function () {
+  WM.open({
+    title: 'Track Atlas', icon: 'trackatlas', appId: 'trackatlas', width: 720, height: 520,
+    onMount(body) {
+      const MONTHS = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const races = OS.raceCalendar();
+      const next = OS.nextRace();
+
+      body.innerHTML = `
+        <div class="explorer">
+          <div class="explorer-sidebar" style="width:200px;display:flex;flex-direction:column;">
+            <input type="text" data-role="ta-search" placeholder="Search circuits…"
+              style="width:100%;margin-bottom:8px;padding:7px 9px;border-radius:7px;background:rgba(255,255,255,.08);border:1px solid var(--border);color:var(--text);font-size:12px;box-sizing:border-box;" />
+            <div data-role="ta-list" style="overflow-y:auto;flex:1;"></div>
+          </div>
+          <div class="explorer-main app-pad" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;">
+            <div data-role="ta-track" style="width:260px;height:260px;"></div>
+            <div style="text-align:center;">
+              <div style="font-size:17px;font-weight:800;" data-role="ta-name"></div>
+              <div style="font-size:12.5px;color:var(--text-dim);margin-top:2px;" data-role="ta-circuit"></div>
+              <div style="font-size:11.5px;color:var(--text-dim);margin-top:8px;display:flex;align-items:center;justify-content:center;gap:5px;" data-role="ta-date"></div>
+            </div>
+          </div>
+        </div>`;
+
+      const listEl = body.querySelector('[data-role="ta-list"]');
+      const trackEl = body.querySelector('[data-role="ta-track"]');
+      const nameEl = body.querySelector('[data-role="ta-name"]');
+      const circuitEl = body.querySelector('[data-role="ta-circuit"]');
+      const dateEl = body.querySelector('[data-role="ta-date"]');
+
+      function select(race) {
+        trackEl.innerHTML = Wallpaper.circuitSvg(race.track, 'var(--accent)');
+        nameEl.textContent = race.name;
+        circuitEl.textContent = race.circuit;
+        dateEl.innerHTML = race.track === next.track
+          ? `${Icons.inline('flag')}<span>Next race on the calendar</span>`
+          : `<span>${MONTHS[race.month]} ${race.day}</span>`;
+        listEl.querySelectorAll('.item').forEach(it => it.classList.toggle('active', it.dataset.track === race.track));
+      }
+
+      function renderList(filter) {
+        const filtered = races.filter(r => !filter || r.name.toLowerCase().includes(filter.toLowerCase()) || r.circuit.toLowerCase().includes(filter.toLowerCase()));
+        listEl.innerHTML = filtered.map(r => `<div class="item" data-track="${r.track}">${r.name.replace(' Grand Prix', '')}</div>`).join('')
+          || '<div style="padding:10px;font-size:12px;color:var(--text-dim);">No circuits match.</div>';
+        listEl.querySelectorAll('.item').forEach(it => it.onclick = () => select(races.find(r => r.track === it.dataset.track)));
+      }
+
+      renderList('');
+      select(next);
+      body.querySelector('[data-role="ta-search"]').addEventListener('input', (e) => renderList(e.target.value));
+    }
+  });
+};
+
+Apps.pitStrategy = function () {
+  WM.open({
+    title: 'Pit Strategy', icon: 'pitstrategy', appId: 'pitstrategy', width: 660, height: 580,
+    onMount(body) {
+      const COMPOUNDS = {
+        soft: { label: 'Soft', color: '#e10600', base: 90.0, deg: 0.090 },
+        medium: { label: 'Medium', color: '#ffd23f', base: 91.0, deg: 0.055 },
+        hard: { label: 'Hard', color: '#e7e2da', base: 92.2, deg: 0.030 }
+      };
+      const PIT_LOSS = 22;
+      let totalLaps = 56;
+      let stints = [{ compound: 'medium', laps: 28 }, { compound: 'hard', laps: 28 }];
+
+      body.innerHTML = `
+        <div class="app-pad" style="display:flex;flex-direction:column;gap:12px;height:100%;box-sizing:border-box;overflow-y:auto;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <label style="font-size:12.5px;color:var(--text-dim);">Race Distance</label>
+            <input type="number" data-role="ps-laps" min="10" max="80" value="${totalLaps}"
+              style="width:64px;padding:6px 8px;border-radius:6px;background:rgba(255,255,255,.08);border:1px solid var(--border);color:var(--text);" />
+            <span style="font-size:12.5px;color:var(--text-dim);">laps</span>
+            <span style="flex:1"></span>
+            <span data-role="ps-remaining" style="font-size:12px;color:var(--text-dim);font-variant-numeric:tabular-nums;"></span>
+          </div>
+
+          <div data-role="ps-stints" style="display:flex;flex-direction:column;gap:7px;"></div>
+
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <select data-role="ps-add-compound" style="padding:7px 8px;border-radius:6px;background:rgba(255,255,255,.08);border:1px solid var(--border);color:var(--text);">
+              ${Object.entries(COMPOUNDS).map(([k, c]) => `<option value="${k}">${c.label}</option>`).join('')}
+            </select>
+            <input type="number" data-role="ps-add-laps" min="1" value="10"
+              style="width:64px;padding:7px 8px;border-radius:6px;background:rgba(255,255,255,.08);border:1px solid var(--border);color:var(--text);" />
+            <button data-act="ps-add">${Icons.inline('edit')}<span>Add Stint</span></button>
+            <span style="flex:1"></span>
+            <button data-act="ps-run" style="background:var(--accent);color:#fff;border:none;">${Icons.inline('refresh')}<span>Simulate</span></button>
+          </div>
+
+          <canvas data-role="ps-canvas" width="600" height="140" style="width:100%;height:140px;background:rgba(255,255,255,.04);border-radius:8px;"></canvas>
+
+          <div style="font-size:11px;color:var(--text-dim);display:flex;gap:14px;">
+            ${Object.entries(COMPOUNDS).map(([k, c]) => `<span style="display:flex;align-items:center;gap:5px;"><span style="width:9px;height:9px;border-radius:50%;background:${c.color};display:inline-block;"></span>${c.label}</span>`).join('')}
+          </div>
+
+          <div data-role="ps-results" style="display:flex;flex-direction:column;gap:6px;"></div>
+        </div>`;
+
+      const stintsEl = body.querySelector('[data-role="ps-stints"]');
+      const remainingEl = body.querySelector('[data-role="ps-remaining"]');
+      const lapsInput = body.querySelector('[data-role="ps-laps"]');
+      const canvas = body.querySelector('[data-role="ps-canvas"]');
+      const ctx = canvas.getContext('2d');
+      const resultsEl = body.querySelector('[data-role="ps-results"]');
+
+      function simulate(strategy) {
+        let time = 0;
+        const lapTimes = [];
+        strategy.forEach((stint, si) => {
+          for (let i = 0; i < stint.laps; i++) {
+            const lt = COMPOUNDS[stint.compound].base + COMPOUNDS[stint.compound].deg * i;
+            time += lt;
+            lapTimes.push({ t: lt, compound: stint.compound });
+          }
+          if (si < strategy.length - 1) time += PIT_LOSS;
+        });
+        return { time, lapTimes, stops: strategy.length - 1 };
+      }
+
+      function fmt(sec) {
+        const m = Math.floor(sec / 60);
+        return `${m}:${(sec - m * 60).toFixed(1).padStart(4, '0')}`;
+      }
+
+      function renderStints() {
+        const used = stints.reduce((s, x) => s + x.laps, 0);
+        remainingEl.textContent = `${used} / ${totalLaps} laps assigned` + (used === totalLaps ? ' ✓' : '');
+        remainingEl.style.color = used === totalLaps ? 'var(--text-dim)' : 'var(--accent)';
+        stintsEl.innerHTML = stints.map((s, i) => `
+          <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;padding:7px 10px;">
+            <span style="width:10px;height:10px;border-radius:50%;background:${COMPOUNDS[s.compound].color};flex:none;"></span>
+            <span style="width:64px;font-size:12.5px;">${COMPOUNDS[s.compound].label}</span>
+            <input type="number" min="1" data-i="${i}" data-role="ps-stint-laps" value="${s.laps}"
+              style="width:56px;padding:4px 6px;border-radius:6px;background:rgba(255,255,255,.08);border:1px solid var(--border);color:var(--text);" />
+            <span style="font-size:11.5px;color:var(--text-dim);">laps</span>
+            <span style="flex:1"></span>
+            <button data-act="ps-remove" data-i="${i}" style="background:none;border:none;color:var(--text-dim);cursor:pointer;padding:4px;">${Icons.inline('close')}</button>
+          </div>`).join('') || '<div style="font-size:12px;color:var(--text-dim);">No stints yet — add one below.</div>';
+        stintsEl.querySelectorAll('[data-role="ps-stint-laps"]').forEach(inp => {
+          inp.onchange = () => { stints[+inp.dataset.i].laps = Math.max(1, parseInt(inp.value) || 1); renderStints(); };
+        });
+        stintsEl.querySelectorAll('[data-act="ps-remove"]').forEach(btn => {
+          btn.onclick = () => { stints.splice(+btn.dataset.i, 1); renderStints(); };
+        });
+      }
+
+      function draw(result) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const w = canvas.width, h = canvas.height, pad = 12;
+        const times = result.lapTimes.map(l => l.t);
+        const maxT = Math.max(...times), minT = Math.min(...times);
+        const n = times.length;
+        if (n < 2) return;
+        result.lapTimes.forEach((l, i) => {
+          const x = pad + (w - pad * 2) * (i / (n - 1));
+          const y = h - pad - (h - pad * 2) * ((l.t - minT) / ((maxT - minT) || 1));
+          ctx.fillStyle = COMPOUNDS[l.compound].color;
+          ctx.fillRect(x - 1.5, y - 1.5, 3, 3);
+        });
+      }
+
+      function run() {
+        const used = stints.reduce((s, x) => s + x.laps, 0);
+        if (used !== totalLaps || stints.length === 0) {
+          resultsEl.innerHTML = `<div style="font-size:12.5px;color:var(--accent);">Stints must add up to exactly ${totalLaps} laps (currently ${used}).</div>`;
+          return;
+        }
+        const half = Math.ceil(totalLaps / 2);
+        const third = Math.floor(totalLaps / 3);
+        const candidates = [
+          { name: 'Your Strategy', strategy: stints },
+          { name: '1-Stop (Medium → Hard)', strategy: [{ compound: 'medium', laps: half }, { compound: 'hard', laps: totalLaps - half }] },
+          { name: '2-Stop (Soft → Medium → Soft)', strategy: [{ compound: 'soft', laps: third }, { compound: 'medium', laps: third }, { compound: 'soft', laps: totalLaps - third * 2 }] }
+        ].map(c => ({ ...c, result: simulate(c.strategy) }));
+        candidates.sort((a, b) => a.result.time - b.result.time);
+        const fastest = candidates[0];
+
+        resultsEl.innerHTML = candidates.map(c => `
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:${c.name === 'Your Strategy' ? 'rgba(255,255,255,.07)' : 'transparent'};border:1px solid var(--border);">
+            ${c === fastest ? Icons.inline('flag') : '<span style="width:14px;display:inline-block;"></span>'}
+            <span style="flex:1;font-size:12.5px;">${c.name} <span style="color:var(--text-dim);">(${c.result.stops} stop${c.result.stops === 1 ? '' : 's'})</span></span>
+            <span style="font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;">${fmt(c.result.time)}</span>
+          </div>`).join('');
+        draw(simulate(stints));
+      }
+
+      lapsInput.addEventListener('change', () => { totalLaps = Math.max(10, Math.min(80, parseInt(lapsInput.value) || 56)); renderStints(); });
+      body.querySelector('[data-act="ps-add"]').onclick = () => {
+        const compound = body.querySelector('[data-role="ps-add-compound"]').value;
+        const laps = Math.max(1, parseInt(body.querySelector('[data-role="ps-add-laps"]').value) || 1);
+        stints.push({ compound, laps });
+        renderStints();
+      };
+      body.querySelector('[data-act="ps-run"]').onclick = run;
+
+      renderStints();
+      run();
+    }
+  });
+};
+
+Apps.liveTiming = function () {
+  WM.open({
+    title: 'Live Timing', icon: 'livetiming', appId: 'livetiming', width: 460, height: 560,
+    onMount(body) {
+      body.innerHTML = `
+        <div style="display:flex;flex-direction:column;height:100%;">
+          <div style="padding:12px 14px;border-bottom:1px solid var(--border);flex:none;">
+            <div style="display:flex;align-items:center;gap:7px;">
+              <span data-role="lt-badge"></span>
+              <div style="font-size:14px;font-weight:700;" data-role="lt-title">Loading session…</div>
+            </div>
+            <div style="font-size:11.5px;color:var(--text-dim);margin-top:2px;" data-role="lt-sub"></div>
+          </div>
+          <div style="flex:1;overflow-y:auto;" data-role="lt-list"></div>
+        </div>`;
+      const badgeEl = body.querySelector('[data-role="lt-badge"]');
+      const titleEl = body.querySelector('[data-role="lt-title"]');
+      const subEl = body.querySelector('[data-role="lt-sub"]');
+      const listEl = body.querySelector('[data-role="lt-list"]');
+
+      let timer = null;
+      async function load() {
+        try {
+          const sessions = await fetch('https://api.openf1.org/v1/sessions?session_key=latest').then(r => r.json());
+          const session = sessions && sessions[0];
+          if (!session) { titleEl.textContent = 'No session data available'; return; }
+          const now = new Date();
+          const isLive = now >= new Date(session.date_start) && now <= new Date(session.date_end);
+          badgeEl.innerHTML = isLive
+            ? '<span class="lt-live-dot"></span><span style="color:#ff5c5c;font-weight:700;font-size:11px;letter-spacing:.5px;">LIVE</span>'
+            : '<span style="color:var(--text-dim);font-weight:700;font-size:11px;letter-spacing:.5px;">FINAL</span>';
+          titleEl.textContent = `${session.session_name} — ${session.circuit_short_name}`;
+          subEl.textContent = isLive
+            ? `${session.country_name} · session in progress`
+            : `${session.country_name} · ${new Date(session.date_start).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`;
+
+          const [drivers, positions, intervals] = await Promise.all([
+            fetch(`https://api.openf1.org/v1/drivers?session_key=${session.session_key}`).then(r => r.json()).catch(() => []),
+            fetch(`https://api.openf1.org/v1/position?session_key=${session.session_key}`).then(r => r.json()).catch(() => []),
+            fetch(`https://api.openf1.org/v1/intervals?session_key=${session.session_key}`).then(r => r.json()).catch(() => [])
+          ]);
+          const driverMap = {};
+          drivers.forEach(d => { driverMap[d.driver_number] = d; });
+          const latestPos = {};
+          positions.forEach(p => { if (!latestPos[p.driver_number] || p.date > latestPos[p.driver_number].date) latestPos[p.driver_number] = p; });
+          const latestGap = {};
+          intervals.forEach(iv => { if (!latestGap[iv.driver_number] || iv.date > latestGap[iv.driver_number].date) latestGap[iv.driver_number] = iv; });
+
+          const rows = Object.values(latestPos).sort((a, b) => a.position - b.position);
+          if (!rows.length) {
+            listEl.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-dim);font-size:12.5px;">No timing data for this session.</div>';
+          } else {
+            listEl.innerHTML = rows.map(p => {
+              const d = driverMap[p.driver_number];
+              const gap = latestGap[p.driver_number];
+              const gapText = p.position === 1 ? 'Leader' : (gap && gap.gap_to_leader != null ? gap.gap_to_leader : '—');
+              return `<div class="lt-row">
+                <div class="lt-pos">${p.position}</div>
+                <div class="lt-swatch" style="background:#${d && d.team_colour ? d.team_colour : '888888'};"></div>
+                <div class="lt-info">
+                  <div class="lt-name">${d ? d.full_name : 'Car #' + p.driver_number}</div>
+                  <div class="lt-team">${d ? d.team_name : ''}</div>
+                </div>
+                <div class="lt-gap">${gapText}</div>
+              </div>`;
+            }).join('');
+          }
+
+          if (isLive && !timer) timer = setInterval(load, 8000);
+          if (!isLive && timer) { clearInterval(timer); timer = null; }
+        } catch (e) {
+          titleEl.textContent = 'Live timing unavailable';
+          subEl.textContent = 'Could not reach the timing service.';
+          badgeEl.innerHTML = '';
+        }
+      }
+      load();
+
+      const obs = new MutationObserver(() => {
+        if (!document.body.contains(body)) { if (timer) clearInterval(timer); obs.disconnect(); }
+      });
+      obs.observe(document.getElementById('windows'), { childList: true, subtree: true });
     }
   });
 };
