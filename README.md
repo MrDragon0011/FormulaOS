@@ -29,3 +29,9 @@ netlify config is in netlify.toml
 ```
 npx netlify-cli deploy --prod
 ```
+## AI declaration
+While AI was used in the creation and writing of code, all planning, design, and direction was done by myself, as well as testing and reviewing.
+
+## License
+
+MIT
